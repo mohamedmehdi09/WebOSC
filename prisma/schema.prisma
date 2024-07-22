@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  org_id        Int            @id @default(autoincrement())
+  name          String
+  parent_org    Organization?  @relation("SubOrgs", fields: [parent_org_id], references: [org_id])
+  parent_org_id Int?
+  sub_orgs      Organization[] @relation("SubOrgs")
+  tags          Tag[]
+  editors       Editor[]
+  announcements Announcement[]
+  subscriptions Subscription[]
+}
+
+model User {
+  user_id       Int            @id @default(autoincrement())
+  name          String
+  lastname      String
+  isMale        Boolean
+  email         String         @unique
+  password      String
+  editors       Editor[]
+  subscriptions Subscription[]
+}
+
+model Editor {
+  editor_id    Int            @id @default(autoincrement())
+  user         User           @relation(fields: [user_id], references: [user_id])
+  user_id      Int
+  org          Organization   @relation(fields: [org_id], references: [org_id])
+  org_id       Int
+  Announcement Announcement[]
+
+  @@unique([user_id, org_id])
+}
+
+model Subscription {
+  subscription_id Int          @id @default(autoincrement())
+  user            User         @relation(fields: [user_id], references: [user_id])
+  user_id         Int
+  org             Organization @relation(fields: [org_id], references: [org_id])
+  org_id          Int
+}
+
+model Tag {
+  tag_id   Int          @id @default(autoincrement())
+  org      Organization @relation(fields: [org_id], references: [org_id])
+  org_id   Int
+  tag_name String
+}
+
+model Announcement {
+  announcement_id Int          @id @default(autoincrement())
+  title           String
+  body            String
+  editor          Editor       @relation(fields: [editor_id], references: [editor_id])
+  editor_id       Int
+  org             Organization @relation(fields: [org_id], references: [org_id])
+  org_id          Int
+  links           Link[]
+}
+
+model Link {
+  link_id         Int          @id @default(autoincrement())
+  announcement    Announcement @relation(fields: [announcement_id], references: [announcement_id])
+  announcement_id Int
+  url             String
+  name            String
+}
