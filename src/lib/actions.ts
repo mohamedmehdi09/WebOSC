@@ -1,9 +1,27 @@
 "use server";
 import { prisma } from "@/lib/prisma";
-import { PrismaClientUnknownRequestError } from "@prisma/client/runtime/react-native.js";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import jwt from "jsonwebtoken";
 
-export async function authenticate(state: unknown, formData: FormData) {
-  return "username or password wrong!";
+export async function authenticate(state: any, formData: FormData) {
+  let token = "";
+  try {
+    const email = formData.get("email")?.valueOf();
+    const password = formData.get("password")?.valueOf();
+    const user = await prisma.user.findFirst({ where: { email: email } });
+    if (!user || user?.password !== password)
+      return "username or password wrong";
+    token = jwt.sign(user, "password", {
+      expiresIn: Date.now() + Date.now() + 60 * 60 * 24 * 1000,
+    });
+  } catch {}
+  cookies().set({
+    name: "token",
+    value: token,
+    secure: process.env.NODE_ENV !== "development",
+  });
+  redirect("/");
 }
 
 export async function createUser(state: unknown, formData: FormData) {
@@ -24,9 +42,9 @@ export async function createUser(state: unknown, formData: FormData) {
     });
     return " hello";
   } catch (error: any) {
-    if (error.code === 'P2002') {
-      return 'email already in use'
+    if (error.code === "P2002") {
+      return error.message;
     }
-    return 'errrrr'
+    return "errrrr";
   }
 }

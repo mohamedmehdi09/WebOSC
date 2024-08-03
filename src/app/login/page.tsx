@@ -2,26 +2,27 @@
 import { authenticate } from "@/lib/actions";
 import { FormEvent } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+
 export default function Home() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [state, formAction] = useFormState(authenticate, "");
   return (
     <main className="min-h-screen flex items-center justify-center">
       <form
-        action={dispatch}
+        action={formAction}
         className="bg-white p-8 rounded shadow-md w-96 flex gap-4 flex-col"
       >
         <h1 className="text-2xl font-bold text-center">Login</h1>
         <div>
           <label
             className="block text-gray-700 font-medium mb-2"
-            htmlFor="username"
+            htmlFor="email"
           >
-            Username
+            Email
           </label>
           <input
-            type="text"
-            name="username"
-            placeholder="Username"
+            type="email"
+            name="email"
+            placeholder="Email..."
             required
             className="w-full p-3 border border-gray-300 rounded"
           />
@@ -36,14 +37,12 @@ export default function Home() {
           <input
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="Password..."
             required
             className="w-full p-3 border border-gray-300 rounded"
           />
         </div>
-        {errorMessage && (
-          <p className="text-red-500 text-xl text-center">{errorMessage}</p>
-        )}
+        {state && <p className="text-red-500 text-xl text-center">{state}</p>}
         <LoginButton />
       </form>
     </main>
