@@ -14,7 +14,8 @@ export async function isAuthenticated(request: NextRequest) {
     const { payload } = await jwtVerify(token.value, secret);
 
     return true;
-  } catch {
+  } catch (error) {
+    console.log(error);
     return false;
   }
 }
@@ -25,7 +26,7 @@ export async function signToken(payload: any) {
       alg: "HS256",
     })
     .setIssuedAt()
-    .setExpirationTime(60 * 60 * 24 * 1000)
+    .setExpirationTime("1 day")
     .sign(secret);
   return token;
 }

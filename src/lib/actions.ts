@@ -15,7 +15,13 @@ export async function authenticate(state: any, formData: FormData) {
     if (!user || user?.password !== password)
       return "username or password wrong";
 
-    token = await signToken(user);
+    token = await signToken({
+      user_id: user.user_id,
+      name: user.name,
+      lastname: user.lastname,
+      isMale: user.isMale,
+      email: user.email,
+    });
   } catch {
     console.log("what happend");
   }
