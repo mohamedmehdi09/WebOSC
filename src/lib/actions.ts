@@ -2,20 +2,23 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import jwt from "jsonwebtoken";
+import { signToken } from "./jwt";
 
 export async function authenticate(state: any, formData: FormData) {
   let token = "";
   try {
     const email = formData.get("email")?.valueOf();
     const password = formData.get("password")?.valueOf();
+
     const user = await prisma.user.findFirst({ where: { email: email } });
+
     if (!user || user?.password !== password)
       return "username or password wrong";
-    token = jwt.sign(user, "password", {
-      expiresIn: Date.now() + Date.now() + 60 * 60 * 24 * 1000,
-    });
-  } catch {}
+
+    token = await signToken(user);
+  } catch {
+    console.log("what happend");
+  }
   cookies().set({
     name: "token",
     value: token,
