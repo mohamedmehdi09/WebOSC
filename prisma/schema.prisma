@@ -11,11 +11,12 @@ datasource db {
 }
 
 model Organization {
-  org_id        Int            @id @default(autoincrement())
-  name          String
-  parent_org    Organization?  @relation("SubOrgs", fields: [parent_org_id], references: [org_id])
-  parent_org_id Int?
-  sub_orgs      Organization[] @relation("SubOrgs")
+  id            String         @id
+  nameEn        String
+  nameAr        String
+  parent_org    Organization?  @relation("orgs", fields: [parent_org_id], references: [id])
+  parent_org_id String?
+  sub_orgs      Organization[] @relation("orgs")
   tags          Tag[]
   editors       Editor[]
   announcements Announcement[]
@@ -23,7 +24,7 @@ model Organization {
 }
 
 model User {
-  user_id       Int            @id @default(autoincrement())
+  user_id       String         @id @default(uuid())
   name          String
   lastname      String
   isMale        Boolean?
@@ -34,28 +35,28 @@ model User {
 }
 
 model Editor {
-  editor_id    Int            @id @default(autoincrement())
+  editor_id    String         @id @default(uuid())
   user         User           @relation(fields: [user_id], references: [user_id])
-  user_id      Int
-  org          Organization   @relation(fields: [org_id], references: [org_id])
-  org_id       Int
+  user_id      String
+  org          Organization   @relation(fields: [org_id], references: [id])
+  org_id       String
   Announcement Announcement[]
 
   @@unique([user_id, org_id])
 }
 
 model Subscription {
-  subscription_id Int          @id @default(autoincrement())
+  subscription_id String       @id @default(uuid())
   user            User         @relation(fields: [user_id], references: [user_id])
-  user_id         Int
-  org             Organization @relation(fields: [org_id], references: [org_id])
-  org_id          Int
+  user_id         String
+  org             Organization @relation(fields: [org_id], references: [id])
+  org_id          String
 }
 
 model Tag {
-  tag_id   Int          @id @default(autoincrement())
-  org      Organization @relation(fields: [org_id], references: [org_id])
-  org_id   Int
+  tag_id   String       @id @default(uuid())
+  org      Organization @relation(fields: [org_id], references: [id])
+  org_id   String
   tag_name String
 }
 
@@ -64,9 +65,9 @@ model Announcement {
   title           String
   body            String
   editor          Editor       @relation(fields: [editor_id], references: [editor_id])
-  editor_id       Int
-  org             Organization @relation(fields: [org_id], references: [org_id])
-  org_id          Int
+  editor_id       String
+  org             Organization @relation(fields: [org_id], references: [id])
+  org_id          String
   links           Link[]
 }
 

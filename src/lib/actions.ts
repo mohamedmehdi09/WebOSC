@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { signToken } from "./jwt";
 
-export async function authenticate(state: any, formData: FormData) {
+export async function authenticate(state: string, formData: FormData) {
   let token = "";
   try {
     const email = formData.get("email")?.valueOf();
@@ -33,7 +33,7 @@ export async function authenticate(state: any, formData: FormData) {
   redirect("/");
 }
 
-export async function createUser(state: unknown, formData: FormData) {
+export async function createUser(state: string, formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const lastname = formData.get("lastname") as string;
@@ -49,11 +49,32 @@ export async function createUser(state: unknown, formData: FormData) {
         password,
       },
     });
-    return " hello";
   } catch (error: any) {
     if (error.code === "P2002") {
       return error.message;
     }
     return "errrrr";
   }
+  redirect("/login");
+}
+
+export async function CreateOrg(formData: FormData) {
+  try {
+    const id = formData.get("id") as string;
+    const nameEn = formData.get("nameEn") as string;
+    const nameAr = formData.get("nameAr") as string;
+    const parent_org_id = formData.get("parent_org_id") as string;
+    const org = await prisma.organization.create({
+      data: {
+        id,
+        nameEn,
+        nameAr,
+        parent_org_id: parent_org_id === "null" ? null : parent_org_id,
+      },
+    });
+  } catch (error: any) {
+    console.log(error);
+    throw Error("Error while Creating Org");
+  }
+  redirect("/org");
 }
