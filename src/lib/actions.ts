@@ -51,9 +51,9 @@ export async function createUser(state: string, formData: FormData) {
     });
   } catch (error: any) {
     if (error.code === "P2002") {
-      return error.message;
+      return "email already in use";
     }
-    return "errrrr";
+    throw Error("faild to create user");
   }
   redirect("/login");
 }
