@@ -12,7 +12,7 @@ async function getOrgs() {
 export default async function Home() {
   const orgs = await getOrgs();
   return (
-    <main className="min-h-screen flex flex-col gap-3 w-full p-2 items-center">
+    <div className="flex flex-col gap-3 w-full p-2 items-center">
       <div className="text-3xl">Manage Organizations:</div>
       {orgs.length == 0 ? (
         <>
@@ -37,6 +37,6 @@ export default async function Home() {
       >
         Create an Organization
       </Link>
-    </main>
+    </div>
   );
 }

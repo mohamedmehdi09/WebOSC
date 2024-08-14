@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
+import ChangeFormInput from "@/components/UpdateOrgForm";
 
 async function getOrg(org_id: string) {
   try {
@@ -14,22 +14,11 @@ async function getOrg(org_id: string) {
   }
 }
 
-export default async function OrgPage({
+export default async function ManageOrgPage({
   params,
 }: {
   params: { org_id: string };
 }) {
   const org = await getOrg(params.org_id);
-  return (
-    <div className="flex flex-col gap-2">
-      <div>english name : {org.nameEn}</div>
-      <div>arabic name : {org.nameAr}</div>
-      <Link
-        href={`./${org.id}/manage`}
-        className="bg-blue-500 text-white rounded p-4"
-      >
-        manage Organization
-      </Link>
-    </div>
-  );
+  return <ChangeFormInput org={org} />;
 }
