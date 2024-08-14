@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Reddit_Mono } from "next/font/google";
+const font = Reddit_Mono({ subsets: ["latin"] });
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,8 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <main className="min-h-screen p-5 flex justify-center">{children}</main>
+      <body className={font.className}>
+        <main className="min-h-screen">{children}</main>
       </body>
     </html>
   );
