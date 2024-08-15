@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 
 async function getOrg(org_id: string) {
   try {
-    console.log(org_id);
     const org = await prisma.organization.findUniqueOrThrow({
       where: { id: org_id },
     });

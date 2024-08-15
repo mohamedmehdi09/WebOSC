@@ -83,7 +83,6 @@ export async function upadateOrg(formData: FormData) {
   const nameEn = (formData.get("nameEn") as string) || undefined;
   const nameAr = (formData.get("nameAr") as string) || undefined;
   const id = formData.get("id") as string;
-  console.log(id);
   try {
     const org = await prisma.organization.update({
       where: { id: id },

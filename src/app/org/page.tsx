@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 
 async function getOrgs() {
   const orgs = await prisma.organization.findMany();
-  console.log(orgs);
   return orgs;
 }
 

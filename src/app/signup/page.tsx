@@ -4,7 +4,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { createUser } from "@/lib/actions";
 
 export default function Signup() {
-  const [errorMessage, dispatch] = useFormState(createUser, undefined);
+  const [errorMessage, dispatch] = useFormState(createUser, "");
   return (
     <main className="min-h-screen flex items-center justify-center">
       <form

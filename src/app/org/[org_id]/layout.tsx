@@ -59,7 +59,7 @@ export default function OrgLayout({
           ))}
         </div>
       </nav>
-      <main className="p-4 text-white bg-gray-900 flex flex-grow">
+      <main className="p-4 text-white bg-gray-900 flex flex-1 flex-grow">
         {children}
       </main>
     </>

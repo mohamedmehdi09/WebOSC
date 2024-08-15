@@ -3,13 +3,11 @@ import ChangeFormInput from "@/components/UpdateOrgForm";
 
 async function getOrg(org_id: string) {
   try {
-    console.log(org_id);
     const org = await prisma.organization.findUniqueOrThrow({
       where: { id: org_id },
     });
     return org;
   } catch (error) {
-    console.log(error);
     throw Error("org not found");
   }
 }

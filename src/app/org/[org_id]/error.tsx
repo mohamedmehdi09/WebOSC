@@ -1,4 +1,8 @@
 "use client";
-export default function OrgError() {
-  return <>Organization not found</>;
+export default function OrgError({
+  error,
+}: {
+  error: Error & { digest?: string };
+}) {
+  return <>{"Organization not found!"}</>;
 }
