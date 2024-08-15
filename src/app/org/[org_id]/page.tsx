@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 
 async function getOrg(org_id: string) {
   try {
@@ -24,12 +23,6 @@ export default async function OrgPage({
     <div className="flex flex-col gap-2">
       <div>english name : {org.nameEn}</div>
       <div>arabic name : {org.nameAr}</div>
-      <Link
-        href={`./${org.id}/manage`}
-        className="bg-blue-500 text-white rounded p-4"
-      >
-        manage Organization
-      </Link>
     </div>
   );
 }

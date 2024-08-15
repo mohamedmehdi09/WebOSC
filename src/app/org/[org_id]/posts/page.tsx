@@ -18,7 +18,7 @@ export default async function Posts({
   const announcements = await getOrgAnnouncements(params.org_id);
   return announcements.length == 0 ? (
     <>
-      <div>no announcements created</div>
+      <div className="flex flex-1">no announcements created</div>
     </>
   ) : (
     <>
