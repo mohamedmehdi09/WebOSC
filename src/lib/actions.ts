@@ -107,3 +107,8 @@ export async function addEditorToOrg(formData: FormData) {
     return "error occured";
   }
 }
+
+export async function logout() {
+  cookies().delete("token");
+  redirect("/");
+}
