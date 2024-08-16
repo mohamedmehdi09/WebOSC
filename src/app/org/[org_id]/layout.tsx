@@ -4,7 +4,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-const linkList = ["posts", "editors", "manage"];
+const linkList = ["posts", "editors", "settings"];
 
 export default function OrgLayout({
   children,
@@ -59,7 +59,7 @@ export default function OrgLayout({
           ))}
         </div>
       </nav>
-      <main className="p-4 text-white bg-gray-900 flex flex-1 flex-grow">
+      <main className="p-4 text-white bg-gray-900 flex items-center justify-center flex-1 flex-col px-32">
         {children}
       </main>
     </>

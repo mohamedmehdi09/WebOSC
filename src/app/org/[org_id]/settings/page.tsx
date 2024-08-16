@@ -12,11 +12,11 @@ async function getOrg(org_id: string) {
   }
 }
 
-export default async function ManageOrgPage({
+export default async function OegSettingsPage({
   params,
 }: {
   params: { org_id: string };
 }) {
   const org = await getOrg(params.org_id);
-  return <ChangeFormInput org={org} />;
+  return <></>;
 }

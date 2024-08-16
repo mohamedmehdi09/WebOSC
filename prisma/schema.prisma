@@ -17,21 +17,17 @@ model Organization {
   parent_org    Organization?  @relation("orgs", fields: [parent_org_id], references: [id])
   parent_org_id String?
   sub_orgs      Organization[] @relation("orgs")
-  tags          Tag[]
   editors       Editor[]
-  announcements Announcement[]
-  subscriptions Subscription[]
 }
 
 model User {
-  user_id       String         @id @default(uuid())
-  name          String
-  lastname      String
-  isMale        Boolean?
-  email         String         @unique
-  password      String
-  editors       Editor[]
-  subscriptions Subscription[]
+  user_id  String   @id @default(uuid())
+  name     String
+  lastname String
+  isMale   Boolean?
+  email    String   @unique
+  password String
+  editors  Editor[]
 }
 
 model Editor {
@@ -45,36 +41,10 @@ model Editor {
   @@unique([user_id, org_id])
 }
 
-model Subscription {
-  subscription_id String       @id @default(uuid())
-  user            User         @relation(fields: [user_id], references: [user_id])
-  user_id         String
-  org             Organization @relation(fields: [org_id], references: [id])
-  org_id          String
-}
-
-model Tag {
-  tag_id   String       @id @default(uuid())
-  org      Organization @relation(fields: [org_id], references: [id])
-  org_id   String
-  tag_name String
-}
-
 model Announcement {
-  announcement_id Int          @id @default(autoincrement())
+  announcement_id Int    @id @default(autoincrement())
   title           String
   body            String
-  editor          Editor       @relation(fields: [editor_id], references: [editor_id])
+  editor          Editor @relation(fields: [editor_id], references: [editor_id])
   editor_id       String
-  org             Organization @relation(fields: [org_id], references: [id])
-  org_id          String
-  links           Link[]
-}
-
-model Link {
-  link_id         Int          @id @default(autoincrement())
-  announcement    Announcement @relation(fields: [announcement_id], references: [announcement_id])
-  announcement_id Int
-  url             String
-  name            String
 }

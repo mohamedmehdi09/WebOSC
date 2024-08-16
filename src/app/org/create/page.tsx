@@ -12,7 +12,7 @@ async function getOrgs() {
   }
 }
 
-export default async function CreateOrgForm() {
+export default async function CreateOrgPage() {
   const orgs = await getOrgs();
   return (
     <form

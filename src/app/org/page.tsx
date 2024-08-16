@@ -8,7 +8,7 @@ async function getOrgs() {
   return orgs;
 }
 
-export default async function Home() {
+export default async function OrgsPage() {
   const orgs = await getOrgs();
   return (
     <div className="flex flex-col gap-3 w-full p-2 items-center">

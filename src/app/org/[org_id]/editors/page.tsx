@@ -10,7 +10,7 @@ const getOrgEditors = async (org_id: string) => {
   return editors;
 };
 
-export default async function Editors({
+export default async function OrgEditorsPage({
   params,
 }: {
   params: { org_id: string };

@@ -4,22 +4,25 @@ import Link from "next/link";
 const getOrgAnnouncements = async (org_id: string) => {
   const announcements = await prisma.announcement.findMany({
     where: {
-      org_id: org_id,
+      editor: {
+        org_id: org_id,
+      },
+    },
+    include: {
+      editor: true,
     },
   });
   return announcements;
 };
 
-export default async function Posts({
+export default async function OrgPostsPage({
   params,
 }: {
   params: { org_id: string };
 }) {
   const announcements = await getOrgAnnouncements(params.org_id);
   return announcements.length == 0 ? (
-    <>
-      <div className="flex flex-1">no announcements created</div>
-    </>
+    <>no announcements created</>
   ) : (
     <>
       {announcements.map((announcement) => (

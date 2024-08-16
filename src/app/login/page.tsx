@@ -3,7 +3,7 @@ import { authenticate } from "@/lib/actions";
 import { FormEvent } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
-export default function Home() {
+export default function LoginPage() {
   const [state, formAction] = useFormState(authenticate, "");
   return (
     <main className="min-h-screen flex items-center justify-center">

@@ -1,4 +1,4 @@
 "use client";
-export default function OrgError() {
+export default function CreateOrgError() {
   return <>Organization not Created</>;
 }
