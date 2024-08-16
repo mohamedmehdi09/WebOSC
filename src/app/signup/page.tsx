@@ -2,6 +2,7 @@
 import { FormEvent } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createUser } from "@/lib/actions";
+import Link from "next/link";
 
 export default function SignupPage() {
   const [errorMessage, dispatch] = useFormState(createUser, "");
@@ -91,6 +92,9 @@ export default function SignupPage() {
           <p className="text-red-500 text-xl text-center">{errorMessage}</p>
         )}
         <SignupButton />
+        <Link className="font-normal underline text-blue-500" href={"/login"}>
+          already have an account?
+        </Link>
       </form>
     </main>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { authenticate } from "@/lib/actions";
+import Link from "next/link";
 import { FormEvent } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
@@ -44,6 +45,9 @@ export default function LoginPage() {
         </div>
         {state && <p className="text-red-500 text-xl text-center">{state}</p>}
         <LoginButton />
+        <Link className="font-normal underline text-blue-500" href={"/signup"}>
+          create an account
+        </Link>
       </form>
     </main>
   );
