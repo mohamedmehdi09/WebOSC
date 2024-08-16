@@ -21,7 +21,7 @@ export default function OrgSettingsLayout({
           editors
         </Link>
       </div>
-      <div className="flex flex-1 p-2">{children}</div>
+      <div className="flex flex-1 p-2 relative">{children}</div>
     </div>
   );
 }

@@ -92,3 +92,18 @@ export async function upadateOrg(formData: FormData) {
     console.log("err");
   }
 }
+
+export async function addEditorToOrg(formData: FormData) {
+  const user_id = formData.get("user_id") as string;
+  const org_id = formData.get("org_id") as string;
+  console.log(org_id);
+  console.log(user_id);
+  try {
+    const editor = await prisma.editor.create({
+      data: { org_id: org_id, user_id: user_id },
+    });
+  } catch (error) {
+    console.log(error);
+    return "error occured";
+  }
+}

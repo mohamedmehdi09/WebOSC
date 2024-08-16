@@ -1,3 +1,4 @@
+import AddEditorModal from "@/components/AddEditorModal";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -6,8 +7,14 @@ const getOrgEditors = async (org_id: string) => {
     where: {
       org_id: org_id,
     },
+    include: { user: true },
   });
   return editors;
+};
+
+const getUsers = async () => {
+  const users = await prisma.user.findMany();
+  return users;
 };
 
 export default async function OrgSettingsEditorsPage({
@@ -16,15 +23,14 @@ export default async function OrgSettingsEditorsPage({
   params: { org_id: string };
 }) {
   const editors = await getOrgEditors(params.org_id);
+  const users = await getUsers();
   return (
     <>
       <div className="bg-gray-900 p-6 w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-white text-2xl font-semibold">Manage access</h1>
-          <div className="flex space-x-4">
-            <button className="bg-green-600 text-white px-4 py-2 rounded-md">
-              Add people
-            </button>
+          <div className="flex">
+            <AddEditorModal org_id={params.org_id} users={users} />
           </div>
         </div>
 
@@ -43,23 +49,19 @@ export default async function OrgSettingsEditorsPage({
             />
           </div>
           <div className="mt-4">
-            {[
-              { name: "Oxyborg", role: "admin" },
-              { name: "khalil", role: "admin" },
-              { name: "sabrinahz", role: "write" },
-            ].map((user, index) => (
+            {editors.map((editor, index) => (
               <div
-                key={index}
+                key={editor.editor_id}
                 className="flex justify-between items-center bg-gray-700 p-4 rounded-lg mb-4"
               >
                 <div className="flex items-center">
                   <span className="ml-4 text-blue-400 font-bold">
-                    {user.name}
+                    {editor.user.name}
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="bg-gray-600 text-white px-4 py-2 rounded-md">
-                    Role: {user.role}
+                    Role: unknown
                   </span>
                 </div>
               </div>

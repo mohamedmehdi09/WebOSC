@@ -6,6 +6,9 @@ const getOrgEditors = async (org_id: string) => {
     where: {
       org_id: org_id,
     },
+    include: {
+      user: true,
+    },
   });
   return editors;
 };
@@ -28,7 +31,7 @@ export default async function OrgEditorsPage({
           key={editor.editor_id}
           className="bg-red-200 rounded p-5 shadow-lg w-1/2 text-center"
         >
-          {editor.user_id}
+          {editor.user.name} {editor.user.lastname}
         </Link>
       ))}
     </>
