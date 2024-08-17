@@ -1,39 +1,43 @@
-"use client";
+"server only";
 
-import Link from "next/link";
+import SettingsSideBar from "@/components/SettingsSideBar";
 import { ReactNode } from "react";
-import { usePathname } from "next/navigation";
-import { CogIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { prisma } from "@/lib/prisma";
+import ChangeFormInput from "@/components/UpdateOrgForm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { decode, verify } from "jsonwebtoken";
+import { User } from "@prisma/client";
 
-export default function OrgSettingsLayout({
+const isAuth = async (org_id: string) => {
+  const token = cookies().get("token")?.value;
+  if (!token) return false;
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return false;
+  const user = verify(token, secret) as User;
+  if (!user) return false;
+
+  const editor = await prisma.editor.findMany({
+    where: { user_id: user.user_id, org_id: org_id },
+  });
+  console.log(editor);
+  return editor.length > 0;
+};
+
+export default async function OrgSettingsLayout({
   children,
   params,
 }: {
   children: ReactNode;
   params: { org_id: string };
 }) {
-  const path = usePathname();
-  return (
-    <div className="flex flex-1 w-full rounded-md">
-      <div className="flex flex-col gap-2 w-1/4 p-2">
-        <Link
-          data-current={path == `/org/${params.org_id}/settings`}
-          href={`/org/${params.org_id}/settings`}
-          className="w-full hover:bg-green-700/25 data-[current=true]:bg-green-700 rounded-md p-2 flex gap-2"
-        >
-          <CogIcon className="w-6" />
-          general
-        </Link>
-        <Link
-          data-current={path == `/org/${params.org_id}/settings/editors`}
-          href={`/org/${params.org_id}/settings/editors`}
-          className="w-full hover:bg-green-700/25 data-[current=true]:bg-green-700 rounded-md p-2 flex gap-2"
-        >
-          <UserGroupIcon className="w-6" />
-          editors
-        </Link>
+  const isAutherized = await isAuth(params.org_id);
+  if (isAutherized)
+    return (
+      <div className="flex flex-1 w-full rounded-md">
+        <SettingsSideBar org_id={params.org_id} />
+        <div className="flex flex-1 p-2 relative">{children}</div>
       </div>
-      <div className="flex flex-1 p-2 relative">{children}</div>
-    </div>
-  );
+    );
+  else return "not allowed";
 }
