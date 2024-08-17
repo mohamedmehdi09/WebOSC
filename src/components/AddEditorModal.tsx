@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import {
-  Button,
-  Description,
   Dialog,
   DialogPanel,
   DialogTitle,
@@ -13,7 +11,11 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 
 import clsx from "clsx";
 import { Editor, User } from "@prisma/client";
@@ -48,9 +50,10 @@ export default function AddEditorModal({
     <>
       <button
         onClick={open}
-        className="rounded-md bg-green-600 py-2 px-4 text-sm font-medium text-white hover:bg-green-800"
+        className="rounded-md bg-green-700 py-2 px-4 text-sm font-medium text-white hover:bg-green-800 flex gap-2 items-center"
       >
-        Open dialog
+        <UserPlusIcon className="w-6" />
+        Add An Editor
       </button>
 
       <Dialog
@@ -62,7 +65,7 @@ export default function AddEditorModal({
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 bg-black/75">
             <DialogPanel className="flex flex-col gap-6 w-full max-w-md rounded-md bg-gray-900 p-6 backdrop-blur-2xl">
-              <DialogTitle as="h3" className="font-medium text-white">
+              <DialogTitle as="h3" className="font-bold text-lg text-white">
                 Add Editor
               </DialogTitle>
               <Combobox
@@ -129,19 +132,19 @@ export default function AddEditorModal({
                   form.append("org_id", org_id);
                   addEditorToOrg(form);
                 }}
-                className="flex gap-2"
+                className="flex justify-end gap-2"
               >
                 <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 rounded-md bg-green-600 py-1.5 px-5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:outline-none hover:bg-green-800"
-                >
-                  Add
-                </button>
-                <button
                   onClick={close}
-                  className="inline-flex items-center gap-2 rounded-md bg-red-600 py-1.5 px-5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:outline-none hover:bg-red-800"
+                  className="inline-flex items-center gap-2 rounded-md bg-red-700 py-1.5 px-5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:outline-none hover:bg-red-800"
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-md bg-green-700 py-1.5 px-5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:outline-none hover:bg-green-800"
+                >
+                  Add
                 </button>
               </form>
             </DialogPanel>
