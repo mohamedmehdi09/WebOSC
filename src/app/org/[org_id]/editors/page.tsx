@@ -31,7 +31,12 @@ export default async function OrgEditorsPage({
     <>
       <div className="flex flex-1 flex-col gap-4 w-full">
         <ul className="flex space-x-6 text-white border-b border-gray-700">
-          <li className="pb-2 border-b-2 border-blue-500">Editors</li>
+          <li className="pb-2 border-b-2 border-blue-500 flex gap-2">
+            <span>Editors</span>
+            <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
+              {editors.length}
+            </span>
+          </li>
         </ul>
         {editors.map((editor, index) => (
           <div

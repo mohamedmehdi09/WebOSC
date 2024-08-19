@@ -14,6 +14,5 @@ export async function checkOrgPrivilage(org_id: string) {
   const editor = await prisma.editor.findMany({
     where: { user_id: user.user_id, org_id: org_id },
   });
-  console.log(editor);
   return editor.length > 0;
 }

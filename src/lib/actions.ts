@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { signToken } from "./jwt";
+import { verify } from "jsonwebtoken";
+import { User } from "@prisma/client";
+
+const secret = process.env.JWT_SECRET;
 
 export async function authenticate(state: string, formData: FormData) {
   let token = "";
@@ -101,6 +105,36 @@ export async function addEditorToOrg(formData: FormData) {
   try {
     const editor = await prisma.editor.create({
       data: { org_id: org_id, user_id: user_id },
+    });
+  } catch (error) {
+    console.log(error);
+    return "error occured";
+  }
+}
+
+export async function addAnnouncement(formData: FormData) {
+  const org_id = formData.get("org_id") as string;
+  console.log(org_id);
+  const title = formData.get("title") as string;
+  const body = formData.get("body") as string;
+  const token = cookies().get("token")?.value;
+  if (!token) return "no token";
+  if (!secret) return "no secret";
+  const user = verify(token, secret) as User;
+  try {
+    // make sure user is editor in the target org
+    const editor = await prisma.editor.findMany({
+      where: { org_id: org_id, user_id: user.user_id },
+    });
+
+    if (editor.length == 0) {
+      console.log("user not authed");
+      return "you are not editor in the target org";
+    }
+
+    // create announcement
+    const announcement = await prisma.announcement.create({
+      data: { title: title, body: body, editor_id: editor[0].editor_id },
     });
   } catch (error) {
     console.log(error);
