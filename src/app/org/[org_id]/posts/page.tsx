@@ -1,3 +1,4 @@
+import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { Announcement, Editor, User } from "@prisma/client";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default async function OrgPostsPage({
   params: { org_id: string };
 }) {
   const announcements = await getOrgAnnouncements(params.org_id);
+  const isEditor = await checkOrgPrivilage(params.org_id);
   return (
     <div className="flex flex-col flex-1 gap-3 w-full p-2 items-center">
       {announcements.length == 0 ? (
@@ -37,12 +39,14 @@ export default async function OrgPostsPage({
           ))}
         </>
       )}
-      <Link
-        href={"/org/" + params.org_id + "/posts/create"}
-        className="bg-blue-500 text-white rounded p-4"
-      >
-        add announcement
-      </Link>
+      {isEditor && (
+        <Link
+          href={"/org/" + params.org_id + "/posts/create"}
+          className="bg-blue-500 text-white rounded p-4"
+        >
+          add announcement
+        </Link>
+      )}
     </div>
   );
 }
