@@ -19,9 +19,13 @@ export default async function OrgPage({
 }) {
   const org = await getOrg(params.org_id);
   return (
-    <div className="flex flex-col gap-2">
-      <div>english name : {org.nameEn}</div>
-      <div>arabic name : {org.nameAr}</div>
+    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8 lg:p-12 max-w-4xl mx-auto">
+      <div className="text-xl font-semibold text-gray-300">
+        English Name: <span className="font-normal">{org.nameEn}</span>
+      </div>
+      <div className="text-xl font-semibold text-gray-300">
+        Arabic Name: <span className="font-normal">{org.nameAr}</span>
+      </div>
     </div>
   );
 }
