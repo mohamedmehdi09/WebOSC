@@ -40,12 +40,16 @@ export async function authenticate(state: string, formData: FormData) {
 export async function createUser(state: string, formData: FormData) {
   try {
     const name = formData.get("name") as string;
+    const middlename = formData.get("middlename") as string;
+    const userame = formData.get("username") as string;
     const lastname = formData.get("lastname") as string;
     const isMale = formData.get("isMale") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const user = await prisma.user.create({
       data: {
+        user_id: userame,
+        middlename: middlename || null,
         name,
         lastname,
         isMale: isMale === "true",
@@ -57,6 +61,7 @@ export async function createUser(state: string, formData: FormData) {
     if (error.code === "P2002") {
       return "email already in use";
     }
+    console.log(error);
     throw Error("faild to create user");
   }
   redirect("/login");

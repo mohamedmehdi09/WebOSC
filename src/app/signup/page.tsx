@@ -8,9 +8,12 @@ import Link from "next/link";
 export default function SignupPage() {
   const [errorMessage, dispatch] = useFormState(createUser, "");
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [middlename, setMiddlename] = useState("");
 
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-1 p-5 items-center justify-center">
       <form
         action={dispatch}
         className="bg-slate-800 p-8 rounded-md w-96 flex flex-col items-center gap-4"
@@ -23,9 +26,28 @@ export default function SignupPage() {
           <input
             type="text"
             name="name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
             placeholder="First Name..."
             required
             autoFocus
+            className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none"
+          />
+        </div>
+        <div className="w-full flex flex-col gap-2">
+          <label className="font-medium" htmlFor="name">
+            Middle Name
+          </label>
+          <input
+            type="text"
+            name="middlename"
+            value={middlename}
+            onChange={(e) => {
+              setMiddlename(e.target.value);
+            }}
+            placeholder="Middle Name..."
             className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none"
           />
         </div>
@@ -36,7 +58,25 @@ export default function SignupPage() {
           <input
             type="text"
             name="lastname"
+            value={lastname}
+            onChange={(e) => {
+              setLastname(e.target.value);
+            }}
             placeholder="Last Name..."
+            required
+            className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none"
+          />
+        </div>
+        <div className="w-full flex flex-col gap-2">
+          <label className="font-medium" htmlFor="name">
+            Username
+          </label>
+          <input
+            type="text"
+            name="username"
+            value={`${name}${middlename && `-${middlename[0]}`}${lastname && `-${lastname}`}`}
+            placeholder="username (auto generated)"
+            readOnly
             required
             className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none"
           />

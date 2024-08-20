@@ -21,13 +21,14 @@ model Organization {
 }
 
 model User {
-  user_id  String   @id @default(uuid())
-  name     String
-  lastname String
-  isMale   Boolean?
-  email    String   @unique
-  password String
-  editors  Editor[]
+  user_id    String   @id @default(uuid())
+  name       String
+  middlename String?
+  lastname   String
+  isMale     Boolean?
+  email      String   @unique
+  password   String
+  editors    Editor[]
 }
 
 model Editor {
