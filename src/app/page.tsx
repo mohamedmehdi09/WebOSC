@@ -1,5 +1,3 @@
-"use server";
-
 import { logout } from "@/lib/actions";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -61,7 +59,7 @@ export default async function RootPage() {
             <li className="pb-2 border-b-2 border-blue-500 px-4">Posts</li>
           </ul>
           {announcements.length == 0 ? (
-            <>no announcements created</>
+            <>no announcements for you!</>
           ) : (
             <>
               {announcements.map((announcement) => (
@@ -89,7 +87,8 @@ const AnnouncementCard = ({
   };
 }) => {
   return (
-    <div
+    <Link
+      href={`/announcement/${announcement.announcement_id}`}
       key={announcement.announcement_id}
       className="bg-slate-800 rounded-md p-5 shadow-lg w-full flex flex-col gap-4 items-start"
     >
@@ -106,6 +105,6 @@ const AnnouncementCard = ({
         </Link>
         <span className="hover:underline">@{announcement.editor.user_id}</span>
       </div>
-    </div>
+    </Link>
   );
 };
