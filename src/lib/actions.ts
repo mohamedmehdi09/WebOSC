@@ -67,6 +67,7 @@ export async function CreateOrg(formData: FormData) {
     const id = formData.get("id") as string;
     const nameEn = formData.get("nameEn") as string;
     const nameAr = formData.get("nameAr") as string;
+    const user_id = formData.get("user_id") as string;
     const parent_org_id = formData.get("parent_org_id") as string;
     const org = await prisma.organization.create({
       data: {
@@ -74,6 +75,9 @@ export async function CreateOrg(formData: FormData) {
         nameEn,
         nameAr,
         parent_org_id: parent_org_id === "null" ? null : parent_org_id,
+        editors: {
+          create: { user: { connect: { user_id: user_id } } },
+        },
       },
     });
   } catch (error: any) {

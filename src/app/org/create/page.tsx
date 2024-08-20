@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { CreateOrg } from "@/lib/actions";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import SelectUserCombobox from "@/components/SelectUserCombobox";
 async function getOrgs() {
   try {
     const orgs = await prisma.organization.findMany();
@@ -11,8 +12,19 @@ async function getOrgs() {
   }
 }
 
+async function getUsers() {
+  try {
+    const users = await prisma.user.findMany();
+    return users;
+  } catch (error) {
+    console.log("operation faild");
+    throw Error("could not connect  to prisma");
+  }
+}
+
 export default async function CreateOrgPage() {
   const orgs = await getOrgs();
+  const users = await getUsers();
   return (
     <div className="flex flex-1 items-center justify-center">
       <form
@@ -82,6 +94,7 @@ export default async function CreateOrgPage() {
             ))}
           </select>
         </div>
+        <SelectUserCombobox users={users} />
         <button
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors duration-200"

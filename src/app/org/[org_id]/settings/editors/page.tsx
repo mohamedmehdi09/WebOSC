@@ -30,9 +30,9 @@ export default async function OrgSettingsEditorsPage({
   const users = await getUsers(params.org_id);
   return (
     <>
-      <div className="bg-gray-900 p-6 w-full flex flex-col gap-4">
+      <div className="bg-gray-800 p-6 w-full flex flex-col gap-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-white text-2xl font-semibold">Manage access</h1>
+          <h1 className="text-2xl font-semibold">Manage access</h1>
           <AddEditorModal org_id={params.org_id} users={users} />
         </div>
 
