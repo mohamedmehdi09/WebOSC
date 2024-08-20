@@ -26,8 +26,8 @@ export async function authenticate(state: string, formData: FormData) {
       isMale: user.isMale,
       email: user.email,
     });
-  } catch {
-    console.log("what happend");
+  } catch (error) {
+    console.log(error);
   }
   cookies().set({
     name: "token",
@@ -102,15 +102,13 @@ export async function upadateOrg(formData: FormData) {
       data: { nameAr: nameAr, nameEn: nameEn },
     });
   } catch (error) {
-    console.log("err");
+    console.log(error);
   }
 }
 
 export async function addEditorToOrg(formData: FormData) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
-  console.log(org_id);
-  console.log(user_id);
   try {
     const editor = await prisma.editor.create({
       data: { org_id: org_id, user_id: user_id },
@@ -123,7 +121,6 @@ export async function addEditorToOrg(formData: FormData) {
 
 export async function addAnnouncement(formData: FormData) {
   const org_id = formData.get("org_id") as string;
-  console.log(org_id);
   const title = formData.get("title") as string;
   const body = formData.get("body") as string;
   const token = cookies().get("token")?.value;

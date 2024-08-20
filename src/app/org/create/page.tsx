@@ -7,7 +7,7 @@ async function getOrgs() {
     const orgs = await prisma.organization.findMany();
     return orgs;
   } catch (error) {
-    console.log("operation faild");
+    console.log(error);
     throw Error("could not connect  to prisma");
   }
 }
@@ -17,7 +17,7 @@ async function getUsers() {
     const users = await prisma.user.findMany();
     return users;
   } catch (error) {
-    console.log("operation faild");
+    console.log(error);
     throw Error("could not connect  to prisma");
   }
 }

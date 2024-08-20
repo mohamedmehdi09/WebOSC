@@ -13,9 +13,7 @@ export default function CreatePostPage({
     <>
       <form
         action={(form) => {
-          console.log("create post");
           form.append("org_id", params.org_id);
-          console.log(form);
           addAnnouncement(form);
         }}
         className="rounded w-full flex flex-col flex-1 text-white relative"
