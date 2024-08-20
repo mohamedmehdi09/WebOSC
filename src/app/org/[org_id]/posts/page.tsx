@@ -1,5 +1,6 @@
 import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
+import { EyeIcon } from "@heroicons/react/20/solid";
 import { Announcement, Editor, User } from "@prisma/client";
 import Link from "next/link";
 
@@ -64,15 +65,23 @@ const AnnouncementCard = ({
     <div
       // href={`/org/${org_id}/posts/${announcement.announcement_id}`}
       key={announcement.announcement_id}
-      className="bg-gray-700 rounded p-5 shadow-lg w-full flex flex-col items-start"
+      className="bg-gray-700 rounded p-5 shadow-lg w-full flex justify-between items-center"
     >
-      <h3 className="text-2xl">{announcement.title}</h3>
-      <p className="flex gap-2">
-        <span className="">By</span>
-        <span className="text-gray-400 hover:underline">
-          @{announcement.editor.user_id}
-        </span>
-      </p>
+      <div>
+        <h3 className="text-2xl">{announcement.title}</h3>
+        <p className="flex gap-2">
+          <span className="">By</span>
+          <span className="text-gray-400 hover:underline">
+            @{announcement.editor.user_id}
+          </span>
+        </p>
+      </div>
+      <Link
+        href={`/announcement/${announcement.announcement_id}`}
+        className="p-2 bg-gray-800 rounded-md"
+      >
+        <EyeIcon className="w-6" />
+      </Link>
     </div>
   );
 };

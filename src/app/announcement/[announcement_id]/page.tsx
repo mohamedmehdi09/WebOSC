@@ -52,7 +52,7 @@ export default async function PostPage({
           </Link>
         </div>
       </div>
-      <div className="flex-1 rounded-md text-2xl font-semibold">
+      <div className="flex-1 rounded-md px-5 text-2xl font-semibold">
         {announcement.body}
       </div>
       <div className="absolute top-3 right-3 flex gap-2">
