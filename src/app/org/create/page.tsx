@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { CreateOrg } from "@/lib/actions";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import SelectUserCombobox from "@/components/SelectUserCombobox";
+
+export const dynamic = "force-dynamic";
+
 async function getOrgs() {
   try {
     const orgs = await prisma.organization.findMany();
