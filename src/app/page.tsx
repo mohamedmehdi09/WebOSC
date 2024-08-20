@@ -97,13 +97,10 @@ const AnnouncementCard = ({
         <span>{announcement.title}</span>
       </h3>
       <div className="flex flex-col px-8 text-gray-400">
-        <Link
-          href={`/org/${announcement.editor.org_id}/posts`}
-          className="hover:underline hover:text-gray-200 font-semibold text-lg"
-        >
+        <div className="font-semibold text-lg">
           {announcement.editor.org.nameEn}
-        </Link>
-        <span className="hover:underline">@{announcement.editor.user_id}</span>
+        </div>
+        <span>@{announcement.editor.user_id}</span>
       </div>
     </Link>
   );

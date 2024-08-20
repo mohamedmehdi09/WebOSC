@@ -21,16 +21,3 @@ export default async function OrgLayout({
     </>
   );
 }
-
-// const toastButton = toast.custom((t) => (
-//   <button
-//     className="bg-green-300 p-4 text-font-thin rounded-xl flex flex-col gap-2 border-[3px] border-green-700"
-//     onClick={() => toast.dismiss(t.id)}
-//   >
-//     <div className="flex items-center gap-2 font-bold text-green-900 text-lg">
-//       <CheckIcon className="w-4" />
-//       Success
-//     </div>
-//     user Created Successfully
-//   </button>
-// ));

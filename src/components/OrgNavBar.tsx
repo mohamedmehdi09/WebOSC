@@ -4,7 +4,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Toaster, toast } from "react-hot-toast";
 
 export default function OrgNavBar({
   org_id,
@@ -16,7 +15,6 @@ export default function OrgNavBar({
   const path = usePathname();
   return (
     <>
-      <Toaster position="top-right" />
       <nav className="bg-black h-28 w-full border-b border-gray-500">
         <div className="text-gray-300 text-md h-1/2 flex px-5 py-2 items-end gap-2">
           <Link className="h-full p-1 hover:bg-gray-900 rounded-md" href={"/"}>
