@@ -43,7 +43,7 @@ export default async function CreateOrgPage() {
             type="text"
             name="nameAr"
             id="nameAr"
-            className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none"
+            className="w-full p-3 border border-gray-300 text-right rounded-md bg-gray-800 outline-none"
             required
           />
         </div>
