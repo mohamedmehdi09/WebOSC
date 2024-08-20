@@ -14,7 +14,16 @@ async function getOrgs() {
 
 async function getUsers() {
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      select: {
+        name: true,
+        lastname: true,
+        user_id: true,
+        middlename: true,
+        email: true,
+        isMale: true,
+      },
+    });
     return users;
   } catch (error) {
     console.log(error);

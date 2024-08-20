@@ -8,13 +8,17 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 import clsx from "clsx";
 import { User } from "@prisma/client";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
-export default function SelectUserCombobox({ users }: { users: User[] }) {
+export default function SelectUserCombobox({
+  users,
+}: {
+  users: Omit<User, "password">[];
+}) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<User | null>(null);
   const filteredUsers =

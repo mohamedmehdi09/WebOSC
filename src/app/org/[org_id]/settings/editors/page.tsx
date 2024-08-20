@@ -14,9 +14,16 @@ const getOrgEditors = async (org_id: string) => {
   return editors;
 };
 
-const getUsers = async (org_id: string) => {
+const getUsers = async () => {
   const users = await prisma.user.findMany({
-    include: { editors: { where: { org_id: org_id } } },
+    select: {
+      name: true,
+      lastname: true,
+      user_id: true,
+      middlename: true,
+      email: true,
+      isMale: true,
+    },
   });
   return users;
 };
@@ -27,7 +34,7 @@ export default async function OrgSettingsEditorsPage({
   params: { org_id: string };
 }) {
   const editors = await getOrgEditors(params.org_id);
-  const users = await getUsers(params.org_id);
+  const users = await getUsers();
   return (
     <>
       <div className="bg-gray-800 p-6 w-full flex flex-col gap-4">

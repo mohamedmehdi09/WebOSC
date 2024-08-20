@@ -11,7 +11,7 @@ export default function AddEditorModal({
   users,
   org_id,
 }: {
-  users: ({ editors: Editor[] } & User)[];
+  users: Omit<User, "password">[];
   org_id: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
