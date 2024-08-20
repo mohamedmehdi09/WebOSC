@@ -25,32 +25,55 @@ export default async function RootPage() {
   const announcements = await getOrgAnnouncements();
   return (
     <>
-      <div className="flex flex-col flex-1 gap-3 w-full p-2 items-center">
-        {announcements.length == 0 ? (
-          <>no announcements created</>
-        ) : (
-          <>
-            {announcements.map((announcement) => (
-              <AnnouncementCard
-                key={announcement.announcement_id}
-                announcement={announcement}
-              />
-            ))}
-          </>
-        )}
-      </div>
-      {cookies().get("token") && (
-        <div>
-          <Link href={"/org"} className="bg-blue-500 rounded-md p-4">
-            Organizations
+      <div className="flex flex-1 w-full">
+        <nav className="bg-black w-1/5 flex border-r border-gray-500 relative text-center font-semibold p-2">
+          <Link
+            href={"/org"}
+            className="bg-blue-700 hover:bg-blue-500 rounded-md px-4 py-3 w-full h-fit"
+          >
+            Browse Orgainzations
           </Link>
-          <form action={logout}>
-            <button type="submit" className="bg-blue-500 rounded-md p-4">
-              logout
-            </button>
-          </form>
+          {cookies().get("token") ? (
+            <>
+              <form
+                className="absolute bottom-2 right-2 left-2"
+                action={logout}
+              >
+                <button
+                  type="submit"
+                  className="bg-red-700 hover:bg-red-800 w-full rounded-md px-4 py-3"
+                >
+                  logout
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href={"/login"}
+              className="absolute bottom-2 right-2 left-2 p-2 rounded-md bg-green-700 hover:bg-green-800"
+            >
+              Log In
+            </Link>
+          )}
+        </nav>
+        <div className="flex flex-col flex-1 gap-3 w-full p-2 items-center">
+          <ul className="flex w-full border-b border-gray-700 font-bold text-2xl">
+            <li className="pb-2 border-b-2 border-blue-500 px-4">Posts</li>
+          </ul>
+          {announcements.length == 0 ? (
+            <>no announcements created</>
+          ) : (
+            <>
+              {announcements.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.announcement_id}
+                  announcement={announcement}
+                />
+              ))}
+            </>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }
