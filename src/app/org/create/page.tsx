@@ -11,7 +11,7 @@ async function getOrgs() {
     return orgs;
   } catch (error) {
     console.log(error);
-    throw Error("could not connect  to prisma");
+    throw Error("could not connect to prisma");
   }
 }
 
@@ -30,7 +30,7 @@ async function getUsers() {
     return users;
   } catch (error) {
     console.log(error);
-    throw Error("could not connect  to prisma");
+    throw Error("could not connect to prisma");
   }
 }
 
@@ -38,12 +38,12 @@ export default async function CreateOrgPage() {
   const orgs = await getOrgs();
   const users = await getUsers();
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-black text-white">
       <form
         action={CreateOrg}
-        className="bg-slate-800 p-8 rounded-md w-96 flex flex-col items-center gap-4"
+        className="bg-slate-800 p-6 sm:p-8 md:p-10 rounded-md w-full max-w-md flex flex-col items-center gap-4 border border-gray-300"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 text-center">
           Create Organization
         </h1>
         <div className="w-full flex flex-col gap-2">
@@ -60,7 +60,7 @@ export default async function CreateOrgPage() {
           />
         </div>
         <div className="w-full flex flex-col gap-2">
-          <label htmlFor="nameEn" className="font-medium">
+          <label htmlFor="nameAr" className="font-medium">
             Arabic Name
           </label>
           <input
@@ -72,11 +72,11 @@ export default async function CreateOrgPage() {
           />
         </div>
         <div className="w-full flex flex-col gap-2">
-          <label htmlFor="nameEn" className="font-medium">
-            identifier
+          <label htmlFor="id" className="font-medium">
+            Identifier
             <QuestionMarkCircleIcon
-              className="h-5"
-              title="a unique identifier for the created orgnaization"
+              className="h-5 inline ml-1"
+              title="A unique identifier for the created organization"
             />
           </label>
           <input
@@ -88,7 +88,7 @@ export default async function CreateOrgPage() {
           />
         </div>
         <div className="w-full flex flex-col gap-2">
-          <label htmlFor="nameEn" className="font-medium">
+          <label htmlFor="parent_org_id" className="font-medium">
             Select Parent
           </label>
           <select

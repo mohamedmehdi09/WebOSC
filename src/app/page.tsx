@@ -27,7 +27,7 @@ export default async function RootPage() {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-black text-white">
       {/* Sidebar navigation */}
-      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-gray-900">
+      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black">
         <Link
           href="/org"
           className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 my-2 w-full text-center transition-colors"
@@ -43,7 +43,7 @@ export default async function RootPage() {
               type="submit"
               className="bg-red-700 hover:bg-red-600 rounded-md px-4 py-2 w-full transition-colors"
             >
-              Logout
+              Log Out
             </button>
           </form>
         ) : (
