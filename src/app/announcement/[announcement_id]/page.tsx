@@ -32,11 +32,12 @@ export default async function PostPage({
 }) {
   const announcement_id = Number(params.announcement_id);
   const announcement = await getAnnouncement(announcement_id);
+
   return (
-    <div className="flex flex-col flex-1 gap-4 rounded-md m-24 p-5 bg-gradient-to-b from-slate-700 to-slate-800 relative">
-      <div className="flex flex-col gap-4">
-        <span className="text-4xl font-bold">{announcement.title}</span>
-        <div className="flex gap-4 text-gray-400">
+    <div className="flex flex-col flex-1 gap-4 rounded-md m-4 md:m-12 p-4 md:p-8 bg-gradient-to-b from-slate-700 to-slate-800 relative">
+      <div className="flex flex-col gap-2 md:gap-4">
+        <span className="text-2xl md:text-4xl font-bold">{announcement.title}</span>
+        <div className="flex flex-wrap gap-2 md:gap-4 text-gray-400">
           <Link
             href={`/org/${announcement.editor.org_id}/posts`}
             className="hover:underline hover:text-gray-100"
@@ -52,7 +53,7 @@ export default async function PostPage({
           </Link>
         </div>
       </div>
-      <div className="flex-1 rounded-md px-5 text-2xl font-semibold">
+      <div className="flex-1 rounded-md px-3 md:px-5 text-lg md:text-2xl font-semibold">
         {announcement.body}
       </div>
       <div className="absolute top-3 right-3 flex gap-2">
@@ -61,7 +62,7 @@ export default async function PostPage({
           title="go back home"
           className="p-2 rounded-md bg-gray-800 group"
         >
-          <ArrowLeftIcon className="w-6 group-hover:-translate-x-1 transition-transform duration-200" />
+          <ArrowLeftIcon className="w-5 md:w-6 group-hover:-translate-x-1 transition-transform duration-200" />
         </Link>
         <CopyToClipboardButton text={`/announcement/${announcement_id}`} />
       </div>

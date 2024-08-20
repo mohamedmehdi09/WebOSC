@@ -27,18 +27,18 @@ export default function OrgNavBar({
           <Link
             data-current={path === `/org/${org_id}`}
             href={`/org/${org_id}`}
-            className="flex items-center justify-center p-1 hover:bg-slate-900 rounded-md data-[current=true]:font-bold data-[current=true]:text-white"
+            className="flex items-center justify-center pb-2 pl-1 hover:bg-slate-900 rounded-md data-[current=true]:font-bold data-[current=true]:text-white"
           >
             {org_id}
           </Link>
           {path !== `/org/${org_id}` && (
             <>
-              <span className="text-gray-300 flex items-center justify-center p-1">
+              <span className="text-gray-300 flex items-center justify-center pb-2">
                 /
               </span>
               <Link
                 href={path}
-                className="flex items-center justify-center  p-1 hover:bg-gray-900 rounded-md font-bold text-white"
+                className="flex items-center justify-center pb-2 hover:bg-gray-900 rounded-md font-bold text-white"
               >
                 {path.split("/")[3]}
               </Link>

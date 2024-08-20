@@ -25,7 +25,7 @@ export default async function OrgEditorsPage({
   const editors = await getOrgEditors(params.org_id);
   return editors.length === 0 ? (
     <div className="flex justify-center items-center h-screen text-gray-500">
-      <div>No Editors in this Organization</div>
+      <div>No Editors In This Organization</div>
     </div>
   ) : (
     <div className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8 w-full max-w-4xl mx-auto">
