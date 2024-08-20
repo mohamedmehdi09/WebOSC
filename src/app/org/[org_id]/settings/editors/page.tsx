@@ -1,4 +1,5 @@
 import AddEditorModal from "@/components/AddEditorModal";
+import RemoveEditor from "@/components/RemoveEditor";
 import { prisma } from "@/lib/prisma";
 import { UserCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
@@ -62,10 +63,8 @@ export default async function OrgSettingsEditorsPage({
                     {editor.user.name} {editor.user.lastname}
                   </span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="bg-gray-600 text-white px-4 py-2 rounded-md">
-                    Role
-                  </span>
+                <div className="flex items-center">
+                  <RemoveEditor editor_id={editor.editor_id} />
                 </div>
               </div>
             ))}
