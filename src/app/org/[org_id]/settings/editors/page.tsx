@@ -37,40 +37,44 @@ export default async function OrgSettingsEditorsPage({
   const users = await getUsers();
   return (
     <>
-      <div className="bg-gray-800 p-6 w-full flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Manage access</h1>
-          <AddEditorModal org_id={params.org_id} users={users} />
+      <div className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <h1 className="text-xl md:text-2xl font-semibold">Manage access</h1>
+          <div className="mt-4 md:mt-0">
+            <AddEditorModal org_id={params.org_id} users={users} />
+          </div>
         </div>
 
-        <div>
-          <ul className="flex space-x-6 text-white border-b border-gray-700">
+        <div className="mt-4">
+          <ul className="flex space-x-4 md:space-x-6 text-white border-b border-gray-700">
             <li className="pb-2 border-b-2 border-blue-500">Editors</li>
             <li className="pb-2">Invitations</li>
           </ul>
         </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <div className="flex gap-4 pb-4 border-b border-gray-700">
-            <MagnifyingGlassIcon className="w-6" />
+        
+        <div className="bg-gray-800 p-4 rounded-lg mt-4">
+          <div className="flex gap-2 md:gap-4 pb-4 border-b border-gray-700">
+            <MagnifyingGlassIcon className="w-5 md:w-6" />
             <input
               type="text"
               placeholder="Find Editors..."
               className="bg-inherit focus:outline-none text-white py-2 rounded-md w-full"
             />
           </div>
+          
           <div className="flex flex-col gap-2 p-2">
-            {editors.map((editor, index) => (
+            {editors.map((editor) => (
               <div
                 key={editor.editor_id}
-                className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
+                className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-700 p-4 rounded-lg"
               >
                 <div className="flex items-center">
-                  <UserCircleIcon className="w-8" />
+                  <UserCircleIcon className="w-6 md:w-8" />
                   <span className="ml-4 text-blue-400 font-bold">
                     {editor.user.name} {editor.user.lastname}
                   </span>
                 </div>
-                <div className="flex items-center">
+                <div className="mt-2 md:mt-0">
                   <RemoveEditor editor_id={editor.editor_id} />
                 </div>
               </div>

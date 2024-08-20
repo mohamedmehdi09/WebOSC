@@ -8,5 +8,5 @@ export default async function CreatePostLayout({
   params: { org_id: string };
 }) {
   const isAuthed = await checkOrgPrivilage(params.org_id);
-  return <>{isAuthed ? children : "not allowed"}</>;
+  return <>{isAuthed ? children : "Not Allowed!"}</>;
 }
