@@ -30,7 +30,7 @@ export default async function RootPage() {
       <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black">
         <Link
           href="/org"
-          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 my-2 w-full text-center transition-colors"
+          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 my-2 w-full text-center transition-colors break-words whitespace-normal"
         >
           Browse Organizations
         </Link>
@@ -57,7 +57,7 @@ export default async function RootPage() {
       </nav>
 
       {/* Main content */}
-      <div className="flex-1 p-4 md:p-8">
+      <div className="flex-1 pl-4 pr-4 md:p-8">
         <ul className="flex w-full border-b border-gray-700 font-bold text-lg md:text-2xl mb-4">
           <li className="pb-2 border-b-2 border-blue-500 px-4">Posts</li>
         </ul>

@@ -37,7 +37,7 @@ export default async function OrgSettingsEditorsPage({
   const users = await getUsers();
   return (
     <>
-      <div className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4">
+      <div className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4 border border-gray-700">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
           <h1 className="text-xl md:text-2xl font-semibold">Manage access</h1>
           <div className="mt-4 md:mt-0">
