@@ -3,39 +3,52 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { signToken } from "./jwt";
-import { verify } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
 import { User } from "@prisma/client";
 
 const secret = process.env.JWT_SECRET;
 
-export async function authenticate(state: string, formData: FormData) {
-  let token = "";
+export async function authenticate(
+  state: { error: boolean | null; message: string },
+  formData: FormData
+) {
   try {
     const email = formData.get("email")?.valueOf();
     const password = formData.get("password")?.valueOf();
 
-    const user = await prisma.user.findFirst({ where: { email: email } });
-
-    if (!user || user?.password !== password)
-      return "username or password wrong";
-
-    token = await signToken({
-      user_id: user.user_id,
-      name: user.name,
-      lastname: user.lastname,
-      isMale: user.isMale,
-      email: user.email,
+    const user = await prisma.user.findFirst({
+      where: { email: email },
     });
-  } catch (error) {
-    console.log(error);
+
+    if (!user || user?.password !== password) {
+      throw Error("username or password wrong");
+    }
+
+    if (!secret) throw Error("Unexpected Error");
+
+    const token = sign(
+      {
+        user_id: user.user_id,
+        name: user.name,
+        lastname: user.lastname,
+        isMale: user.isMale,
+        email: user.email,
+      },
+      secret
+    );
+
+    cookies().set({
+      name: "token",
+      value: token,
+      secure: process.env.NODE_ENV !== "development",
+    });
+    state.error = false;
+    state.message = "logged in successfully";
+  } catch (error: any) {
+    state.error = true;
+    state.message = error.message;
   }
-  cookies().set({
-    name: "token",
-    value: token,
-    secure: process.env.NODE_ENV !== "development",
-  });
-  redirect("/");
+  return state;
 }
 
 export async function createUser(

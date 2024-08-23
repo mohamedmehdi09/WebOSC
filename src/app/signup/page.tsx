@@ -11,6 +11,8 @@ export default function SignupPage() {
     error: null,
     message: "",
   });
+  const { pending } = useFormStatus();
+
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
@@ -21,8 +23,8 @@ export default function SignupPage() {
     if (formState.error) toast.error(formState.message);
     else {
       toast.success(formState.message);
+      setTimeout(() => window.location.replace("/login"), 3000);
     }
-    window.location.replace("/login");
   }, [formState]);
 
   return (
@@ -138,32 +140,22 @@ export default function SignupPage() {
             <option value="female">Female</option>
           </select>
         </div>
-        <SignupButton />
+        <button
+          disabled={pending || formState.error === false}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
+          type="submit"
+          onClick={(event: FormEvent) => {
+            if (pending) {
+              event.preventDefault();
+            }
+          }}
+        >
+          Sign Up
+        </button>
         <Link href="/login" className="font-normal underline text-blue-400">
           Already have an account?
         </Link>
       </form>
     </div>
-  );
-}
-
-function SignupButton() {
-  const { pending } = useFormStatus();
-
-  const handleClick = (event: FormEvent) => {
-    if (pending) {
-      event.preventDefault();
-    }
-  };
-
-  return (
-    <button
-      disabled={pending}
-      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
-      type="submit"
-      onClick={handleClick}
-    >
-      Sign Up
-    </button>
   );
 }

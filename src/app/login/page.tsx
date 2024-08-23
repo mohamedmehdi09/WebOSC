@@ -1,13 +1,29 @@
 "use client";
+
 import { authenticate } from "@/lib/actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(authenticate, "");
+  const [formState, formAction] = useFormState(authenticate, {
+    error: null,
+    message: "",
+  });
+  const { pending } = useFormStatus();
+
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (formState.error == null) return;
+    if (formState.error) toast.error(formState.message);
+    else {
+      toast.success(formState.message);
+      setTimeout(() => window.location.replace("/"), 3000);
+    }
+  }, [formState]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black p-4">
@@ -55,33 +71,22 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-        {state && <p className="text-red-400 text-lg text-center">{state}</p>}
-        <LoginButton />
+        <button
+          disabled={pending || formState.error === false}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
+          type="submit"
+          onClick={(event: FormEvent) => {
+            if (pending) {
+              event.preventDefault();
+            }
+          }}
+        >
+          Login
+        </button>
         <Link href="/signup" className="font-normal underline text-blue-400">
           Create an account
         </Link>
       </form>
     </div>
-  );
-}
-
-function LoginButton() {
-  const { pending } = useFormStatus();
-
-  const handleClick = (event: FormEvent) => {
-    if (pending) {
-      event.preventDefault();
-    }
-  };
-
-  return (
-    <button
-      disabled={pending}
-      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
-      type="submit"
-      onClick={handleClick}
-    >
-      Login
-    </button>
   );
 }
