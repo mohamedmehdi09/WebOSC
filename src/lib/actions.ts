@@ -73,10 +73,9 @@ export async function createUser(
         state.message = "email already in use!";
       else state.message = "username already in use!";
     }
-
-    return state;
   }
-  redirect("/login");
+
+  return state;
 }
 
 export async function CreateOrg(formData: FormData) {

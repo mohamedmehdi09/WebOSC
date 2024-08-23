@@ -19,6 +19,10 @@ export default function SignupPage() {
   useEffect(() => {
     if (formState.error == null) return;
     if (formState.error) toast.error(formState.message);
+    else {
+      toast.success(formState.message);
+    }
+    window.location.replace("/login");
   }, [formState]);
 
   return (
