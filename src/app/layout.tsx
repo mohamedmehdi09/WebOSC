@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Reddit_Mono } from "next/font/google";
 const font = Reddit_Mono({ subsets: ["latin"] });
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "univ",
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={font.className}>
+        <Toaster position="top-right" />
         <main className="flex flex-col min-h-screen bg-gray-900 text-white">
           {children}
         </main>

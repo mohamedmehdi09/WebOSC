@@ -1,21 +1,30 @@
 "use client";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createUser } from "@/lib/actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function SignupPage() {
-  const [errorMessage, dispatch] = useFormState(createUser, "");
+  const [formState, formAction] = useFormState(createUser, {
+    error: null,
+    message: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [middlename, setMiddlename] = useState("");
 
+  useEffect(() => {
+    if (formState.error == null) return;
+    if (formState.error) toast.error(formState.message);
+  }, [formState]);
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-black p-4">
       <form
-        action={dispatch}
+        action={formAction}
         className="bg-gray-800 p-8 rounded-lg w-full max-w-md flex flex-col items-center gap-6 border border-gray-600"
       >
         <h1 className="text-3xl font-bold text-white">Sign Up</h1>
@@ -125,9 +134,6 @@ export default function SignupPage() {
             <option value="female">Female</option>
           </select>
         </div>
-        {errorMessage && (
-          <p className="text-red-400 text-lg text-center">{errorMessage}</p>
-        )}
         <SignupButton />
         <Link href="/login" className="font-normal underline text-blue-400">
           Already have an account?

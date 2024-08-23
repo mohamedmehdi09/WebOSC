@@ -1,4 +1,5 @@
 "use server";
+
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -37,7 +38,10 @@ export async function authenticate(state: string, formData: FormData) {
   redirect("/");
 }
 
-export async function createUser(state: string, formData: FormData) {
+export async function createUser(
+  state: { error: boolean | null; message: string },
+  formData: FormData
+) {
   try {
     const name = formData.get("name") as string;
     const middlename = formData.get("middlename") as string;
@@ -57,12 +61,20 @@ export async function createUser(state: string, formData: FormData) {
         password,
       },
     });
+
+    state.error = false;
+    state.message = "user created successfully!";
   } catch (error: any) {
+    state.error = true;
+    state.message = "unexpected error!";
+
     if (error.code === "P2002") {
-      return "email already in use";
+      if (error.meta.target.includes("email"))
+        state.message = "email already in use!";
+      else state.message = "username already in use!";
     }
-    console.log(error);
-    throw Error("faild to create user");
+
+    return state;
   }
   redirect("/login");
 }
