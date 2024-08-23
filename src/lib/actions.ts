@@ -10,7 +10,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function authenticate(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const email = formData.get("email")?.valueOf();
@@ -34,7 +34,7 @@ export async function authenticate(
         isMale: user.isMale,
         email: user.email,
       },
-      secret
+      secret,
     );
 
     cookies().set({
@@ -53,7 +53,7 @@ export async function authenticate(
 
 export async function createUser(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const name = formData.get("name") as string;
@@ -143,13 +143,22 @@ export async function addEditorToOrg(formData: FormData) {
   }
 }
 
-export async function addAnnouncement(formData: FormData) {
+export async function addAnnouncement(
+  state: { error: boolean | null; message: string; announcement_id: number },
+  formData: FormData,
+) {
   const org_id = formData.get("org_id") as string;
   const title = formData.get("title") as string;
   const body = formData.get("body") as string;
   const token = cookies().get("token")?.value;
-  if (!token) return "no token";
-  if (!secret) return "no secret";
+
+  if (!token) {
+    throw Error("not authenticated");
+  }
+  if (!secret) {
+    throw Error("Unexpecte Error");
+  }
+
   const user = verify(token, secret) as User;
   try {
     // make sure user is editor in the target org
@@ -158,18 +167,21 @@ export async function addAnnouncement(formData: FormData) {
     });
 
     if (editor.length == 0) {
-      console.log("user not authed");
-      return "you are not editor in the target org";
+      throw Error("action not allowed!");
     }
 
     // create announcement
     const announcement = await prisma.announcement.create({
       data: { title: title, body: body, editor_id: editor[0].editor_id },
     });
-  } catch (error) {
-    console.log(error);
-    return "error occured";
+    state.error = false;
+    state.announcement_id = announcement.announcement_id;
+    state.message = "post created successfully";
+  } catch (error: any) {
+    state.error = true;
+    state.message = error.message;
   }
+  return state;
 }
 
 export async function logout() {
