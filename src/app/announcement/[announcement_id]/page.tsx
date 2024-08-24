@@ -35,6 +35,16 @@ export default async function PostPage({
 
   return (
     <div className="flex flex-col flex-1 gap-4 rounded-md m-4 md:m-12 p-4 md:p-8 bg-gradient-to-b from-slate-700 to-slate-800 relative">
+      <div className="md:absolute top-3 right-3 w-full md:w-fit flex justify-end gap-2">
+        <Link
+          href={"/"}
+          title="go back home"
+          className="p-2 rounded-md bg-gray-800 group"
+        >
+          <ArrowLeftIcon className="w-5 md:w-6 group-hover:-translate-x-1 transition-transform duration-200" />
+        </Link>
+        <CopyToClipboardButton />
+      </div>
       <div className="flex flex-col gap-2 md:gap-4">
         <span className="text-2xl md:text-4xl font-bold">
           {announcement.title}
@@ -55,18 +65,8 @@ export default async function PostPage({
           </Link>
         </div>
       </div>
-      <div className="flex-1 rounded-md px-3 md:px-5 text-lg md:text-2xl font-semibold">
+      <div className="flex-1 rounded-md px-3 md:px-5 text-lg md:text-2xl">
         {announcement.body}
-      </div>
-      <div className="absolute top-3 right-3 flex gap-2">
-        <Link
-          href={"/"}
-          title="go back home"
-          className="p-2 rounded-md bg-gray-800 group"
-        >
-          <ArrowLeftIcon className="w-5 md:w-6 group-hover:-translate-x-1 transition-transform duration-200" />
-        </Link>
-        <CopyToClipboardButton />
       </div>
     </div>
   );
