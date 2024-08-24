@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sign, verify } from "jsonwebtoken";
 import { User } from "@prisma/client";
-import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 
 const secret = process.env.JWT_SECRET;
 
@@ -196,7 +195,15 @@ export async function addAnnouncement(
   return state;
 }
 
-export async function logout() {
+export async function logout(
+  state: {
+    error: boolean | null;
+    message: string;
+  },
+  formData: FormData
+) {
   cookies().delete("token");
-  redirect("/");
+  state.error = false;
+  state.message = "loggged out successfully";
+  return state;
 }

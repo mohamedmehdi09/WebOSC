@@ -1,9 +1,11 @@
-import { logout } from "@/lib/actions";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Announcement, Editor, Organization } from "@prisma/client";
+import { Announcement, Editor, Organization, User } from "@prisma/client";
 import { cookies } from "next/headers";
 import { BellIcon } from "@heroicons/react/20/solid";
+import { decode } from "jsonwebtoken";
+import { GlobeEuropeAfricaIcon } from "@heroicons/react/24/solid";
+import LogOutForm from "@/components/LogoutForm";
 
 // Fetch announcements from the database
 const getOrgAnnouncements = async () => {
@@ -20,39 +22,69 @@ const getOrgAnnouncements = async () => {
   return announcements;
 };
 
+const getEditorOrgs = async () => {
+  const token = cookies().get("token")?.value;
+  if (!token) return [];
+  const user = decode(token) as Omit<User, "password">;
+  const editors = await prisma.editor.findMany({
+    where: { user_id: user.user_id },
+    include: { org: true },
+  });
+  return editors;
+};
+
 // Main page component
 export default async function RootPage() {
   const announcements = await getOrgAnnouncements();
+  const editors = await getEditorOrgs();
 
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-black text-white">
       {/* Sidebar navigation */}
-      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black">
+      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col gap-6 items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black relative">
         <Link
           href="/org"
-          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 my-2 w-full text-center transition-colors break-words whitespace-normal"
+          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 w-full text-center transition-colors break-words whitespace-normal"
         >
           Browse Organizations
         </Link>
         {cookies().get("token") ? (
-          <form
-            className="w-full flex justify-center mt-2"
-            action={logout}
-          >
-            <button
-              type="submit"
-              className="bg-red-700 hover:bg-red-600 rounded-md px-4 py-2 w-full transition-colors"
-            >
-              Log Out
-            </button>
-          </form>
+          <LogOutForm />
         ) : (
           <Link
             href="/login"
-            className="bg-green-700 hover:bg-green-600 rounded-md px-4 py-2 w-full text-center mt-2 transition-colors"
+            className="bg-green-700 hover:bg-green-600 rounded-md px-4 py-2 transition-colors w-full"
           >
             Log In
           </Link>
+        )}
+        {cookies().get("token") && (
+          <>
+            {editors.length > 0 && (
+              <div className="font-normal flex flex-col gap-1 w-full">
+                <ul className="flex w-full border-b border-gray-700 md:text-xl mb-4 font-normal">
+                  <li className="pb-2">My Organizations</li>
+                </ul>
+                {editors.map((editor) => (
+                  <Link
+                    href={`/org/${editor.org.id}/posts`}
+                    className="bg-slate-800 p-2 text-sm rounded-md flex gap-2 text-left hover:bg-slate-700 transition-colors duration-200"
+                    key={editor.editor_id}
+                  >
+                    <GlobeEuropeAfricaIcon className="w-6" />
+                    {editor.org.nameEn}
+                  </Link>
+                ))}
+              </div>
+            )}
+            {[].length > 0 && (
+              <div className="font-normal flex flex-col gap-1 w-full">
+                <ul className="flex w-full border-b border-gray-700 md:text-xl mb-4 font-normal">
+                  <li className="pb-2">My Subscriptions</li>
+                </ul>
+              </div>
+            )}
+          </>
         )}
       </nav>
 
