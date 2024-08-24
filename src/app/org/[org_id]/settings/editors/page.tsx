@@ -2,12 +2,16 @@ import AddEditorModal from "@/components/AddEditorModal";
 import RemoveEditor from "@/components/RemoveEditor";
 import { prisma } from "@/lib/prisma";
 import { UserCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { User } from "@prisma/client";
+import { decode } from "jsonwebtoken";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
 const getOrgEditors = async (org_id: string) => {
   const editors = await prisma.editor.findMany({
     where: {
       org_id: org_id,
+      status: "active",
     },
     include: { user: true },
   });
@@ -36,6 +40,9 @@ export default async function OrgSettingsEditorsPage({
 }) {
   const editors = await getOrgEditors(params.org_id);
   const users = await getUsers();
+  const token = cookies().get("token")?.value;
+  if (!token) return;
+  const currentUser = decode(token) as Omit<User, "password">;
   return (
     <>
       <div className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4 border border-gray-700">
@@ -71,7 +78,13 @@ export default async function OrgSettingsEditorsPage({
                   </span>
                 </div>
                 <div className="mt-2 md:mt-0">
-                  <RemoveEditor editor_id={editor.editor_id} />
+                  {editor.user_id == currentUser.user_id ? (
+                    <div className="bg-green-700 px-4 py-2 rounded-md w-full">
+                      you
+                    </div>
+                  ) : (
+                    <RemoveEditor editor_id={editor.editor_id} />
+                  )}
                 </div>
               </div>
             ))}

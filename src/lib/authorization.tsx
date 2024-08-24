@@ -12,7 +12,7 @@ export async function checkOrgPrivilage(org_id: string) {
   if (!user) return false;
 
   const editor = await prisma.editor.findMany({
-    where: { user_id: user.user_id, org_id: org_id },
+    where: { user_id: user.user_id, org_id: org_id, status: "active" },
   });
   return editor.length > 0;
 }
