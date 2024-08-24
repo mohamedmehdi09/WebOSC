@@ -16,3 +16,14 @@ export async function checkOrgPrivilage(org_id: string) {
   });
   return editor.length > 0;
 }
+
+export function checkSuperUser() {
+  const token = cookies().get("token")?.value;
+  if (!token) return false;
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return false;
+  const user = verify(token, secret) as Omit<User, "password">;
+  if (!user) return false;
+
+  return user.super;
+}

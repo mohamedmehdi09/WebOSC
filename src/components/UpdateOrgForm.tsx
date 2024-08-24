@@ -29,7 +29,7 @@ const UpdateOrgForm = ({ org }: { org: Organization }) => {
 
         <input
           className="bg-red-50 p-4 rounded-lg cursor-not-allowed "
-          value={org.id}
+          value={org.org_id}
           name="id"
           id="id"
           required

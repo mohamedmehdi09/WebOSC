@@ -10,7 +10,7 @@ const getOrgEditors = async (org_id: string) => {
     include: {
       user: true,
       _count: {
-        select: { Announcement: true },
+        select: { announcements: true },
       },
     },
   });
@@ -58,7 +58,7 @@ export default async function OrgEditorsPage({
           </div>
           <div className="flex items-center space-x-4">
             <span className="bg-gray-600 text-white px-4 py-2 rounded-md">
-              {editor._count.Announcement}
+              {editor._count.announcements}
             </span>
           </div>
         </div>

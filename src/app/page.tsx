@@ -67,7 +67,7 @@ export default async function RootPage() {
                 </ul>
                 {editors.map((editor) => (
                   <Link
-                    href={`/org/${editor.org.id}/posts`}
+                    href={`/org/${editor.org.org_id}/posts`}
                     className="bg-slate-800 p-2 text-sm rounded-md flex gap-2 text-left hover:bg-slate-700 transition-colors duration-200"
                     key={editor.editor_id}
                   >

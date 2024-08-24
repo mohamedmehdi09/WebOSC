@@ -33,6 +33,7 @@ export async function authenticate(
         lastname: user.lastname,
         isMale: user.isMale,
         email: user.email,
+        super: user.super,
       },
       secret
     );
@@ -63,6 +64,7 @@ export async function createUser(
     const isMale = formData.get("isMale") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const userCount = await prisma.user.count();
     const user = await prisma.user.create({
       data: {
         user_id: userame,
@@ -72,6 +74,7 @@ export async function createUser(
         isMale: isMale === "true",
         email,
         password,
+        super: userCount == 0,
       },
     });
 
@@ -93,14 +96,14 @@ export async function createUser(
 
 export async function CreateOrg(formData: FormData) {
   try {
-    const id = formData.get("id") as string;
+    const org_id = formData.get("org_id") as string;
     const nameEn = formData.get("nameEn") as string;
     const nameAr = formData.get("nameAr") as string;
     const user_id = formData.get("user_id") as string;
     const parent_org_id = formData.get("parent_org_id") as string;
     const org = await prisma.organization.create({
       data: {
-        id,
+        org_id,
         nameEn,
         nameAr,
         parent_org_id: parent_org_id === "null" ? null : parent_org_id,
@@ -116,19 +119,19 @@ export async function CreateOrg(formData: FormData) {
   redirect("/org");
 }
 
-export async function upadateOrg(formData: FormData) {
-  const nameEn = (formData.get("nameEn") as string) || undefined;
-  const nameAr = (formData.get("nameAr") as string) || undefined;
-  const id = formData.get("id") as string;
-  try {
-    const org = await prisma.organization.update({
-      where: { id: id },
-      data: { nameAr: nameAr, nameEn: nameEn },
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
+// export async function upadateOrg(formData: FormData) {
+//   const nameEn = (formData.get("nameEn") as string) || undefined;
+//   const nameAr = (formData.get("nameAr") as string) || undefined;
+//   const id = formData.get("id") as string;
+//   try {
+//     const org = await prisma.organization.update({
+//       where: { org_id: id },
+//       data: { nameAr: nameAr, nameEn: nameEn },
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
@@ -183,7 +186,12 @@ export async function addAnnouncement(
 
     // create announcement
     const announcement = await prisma.announcement.create({
-      data: { title: title, body: body, editor_id: editor[0].editor_id },
+      data: {
+        title: title,
+        body: body,
+        editor_id: editor[0].editor_id,
+        org_id: org_id,
+      },
     });
     state.error = false;
     state.announcement_id = announcement.announcement_id;

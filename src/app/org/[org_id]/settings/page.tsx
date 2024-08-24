@@ -4,7 +4,7 @@ import ChangeFormInput from "@/components/UpdateOrgForm";
 async function getOrg(org_id: string) {
   try {
     const org = await prisma.organization.findUniqueOrThrow({
-      where: { id: org_id },
+      where: { org_id: org_id },
     });
     return org;
   } catch (error) {
