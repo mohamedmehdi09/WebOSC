@@ -3,29 +3,17 @@
 import {
   ClipboardDocumentIcon,
   ClipboardDocumentCheckIcon,
-  CheckIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-export default function CopyToClipboardButton({ text }: { text: string }) {
+export default function CopyToClipboardButton() {
   const [copied, setCopied] = useState(false);
   return (
     <button
       onClick={() => {
-        navigator.clipboard.writeText(text);
-        toast.custom((t) => (
-          <button
-            className="bg-green-300 p-4 text-font-thin rounded-xl flex flex-col gap-2 border-[3px] border-green-700"
-            onClick={() => toast.dismiss(t.id)}
-          >
-            <div className="flex items-center gap-2 font-bold text-green-900 text-lg">
-              <CheckIcon className="w-4" />
-              Success
-            </div>
-            Copied to Clipboard
-          </button>
-        ));
+        navigator.clipboard.writeText(window.location.href);
+        toast.success("Copied to Clipboard");
         setCopied(true);
       }}
       type="button"

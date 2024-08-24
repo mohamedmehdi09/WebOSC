@@ -5,12 +5,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sign, verify } from "jsonwebtoken";
 import { User } from "@prisma/client";
+import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 
 const secret = process.env.JWT_SECRET;
 
 export async function authenticate(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const email = formData.get("email")?.valueOf();
@@ -34,7 +35,7 @@ export async function authenticate(
         isMale: user.isMale,
         email: user.email,
       },
-      secret,
+      secret
     );
 
     cookies().set({
@@ -53,7 +54,7 @@ export async function authenticate(
 
 export async function createUser(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const name = formData.get("name") as string;
@@ -130,22 +131,33 @@ export async function upadateOrg(formData: FormData) {
   }
 }
 
-export async function addEditorToOrg(formData: FormData) {
+export async function addEditorToOrg(
+  state: { error: boolean | null; message: string },
+  formData: FormData
+) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
   try {
     const editor = await prisma.editor.create({
       data: { org_id: org_id, user_id: user_id },
     });
-  } catch (error) {
-    console.log(error);
-    return "error occured";
+    state.error = false;
+    state.message = "editor added to organization";
+  } catch (error: any) {
+    state.error = true;
+    if (
+      error.meta.target.includes("user_id") &&
+      error.meta.target.includes("org_id")
+    ) {
+      state.message = "user is already an editor in this orgainzation!";
+    } else state.message = "unexpected error occurred";
   }
+  return state;
 }
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData,
+  formData: FormData
 ) {
   const org_id = formData.get("org_id") as string;
   const title = formData.get("title") as string;

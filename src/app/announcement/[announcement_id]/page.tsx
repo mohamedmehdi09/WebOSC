@@ -36,7 +36,9 @@ export default async function PostPage({
   return (
     <div className="flex flex-col flex-1 gap-4 rounded-md m-4 md:m-12 p-4 md:p-8 bg-gradient-to-b from-slate-700 to-slate-800 relative">
       <div className="flex flex-col gap-2 md:gap-4">
-        <span className="text-2xl md:text-4xl font-bold">{announcement.title}</span>
+        <span className="text-2xl md:text-4xl font-bold">
+          {announcement.title}
+        </span>
         <div className="flex flex-wrap gap-2 md:gap-4 text-gray-400">
           <Link
             href={`/org/${announcement.editor.org_id}/posts`}
@@ -64,7 +66,7 @@ export default async function PostPage({
         >
           <ArrowLeftIcon className="w-5 md:w-6 group-hover:-translate-x-1 transition-transform duration-200" />
         </Link>
-        <CopyToClipboardButton text={`/announcement/${announcement_id}`} />
+        <CopyToClipboardButton />
       </div>
     </div>
   );

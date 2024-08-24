@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
-import { Editor, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { addEditorToOrg } from "@/lib/actions";
 import SelectUserCombobox from "./SelectUserCombobox";
+import toast from "react-hot-toast";
 
 export default function AddEditorModal({
   users,
@@ -14,6 +16,12 @@ export default function AddEditorModal({
   users: Omit<User, "password">[];
   org_id: string;
 }) {
+  const [formState, formAction] = useFormState(addEditorToOrg, {
+    error: null,
+    message: "",
+  });
+  const { pending } = useFormStatus();
+
   const [isOpen, setIsOpen] = useState(false);
 
   function open() {
@@ -23,6 +31,15 @@ export default function AddEditorModal({
   function close() {
     setIsOpen(false);
   }
+
+  useEffect(() => {
+    if (formState.error == null) return;
+    if (formState.error) toast.error(formState.message);
+    else {
+      window.location.reload();
+    }
+  }, [formState]);
+
   return (
     <>
       <button
@@ -46,10 +63,9 @@ export default function AddEditorModal({
                 Add Editor
               </DialogTitle>
               <form
-                action={(form) => {
-                  // TODO: add notification logic here
+                action={(form: FormData) => {
                   form.append("org_id", org_id);
-                  addEditorToOrg(form);
+                  formAction(form);
                 }}
                 className="flex flex-col gap-6"
               >
@@ -63,7 +79,12 @@ export default function AddEditorModal({
                   </button>
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2 rounded-md bg-green-700 py-1.5 px-5 text-md font-semibol shadow-inner shadow-white/10 focus:outline-none hover:bg-green-800"
+                    className="inline-flex items-center gap-2 rounded-md bg-green-700 py-1.5 px-5 text-md font-semibol shadow-inner shadow-white/10 focus:outline-none hover:bg-green-800 disabled:bg-gray-600"
+                    onClick={(event: FormEvent) => {
+                      if (pending) {
+                        event.preventDefault();
+                      }
+                    }}
                   >
                     Add
                   </button>
