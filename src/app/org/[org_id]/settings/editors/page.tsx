@@ -23,6 +23,7 @@ const getUsers = async () => {
       middlename: true,
       email: true,
       isMale: true,
+      super: true,
     },
   });
   return users;

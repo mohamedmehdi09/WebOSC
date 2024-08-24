@@ -10,7 +10,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function authenticate(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const email = formData.get("email")?.valueOf();
@@ -35,7 +35,7 @@ export async function authenticate(
         email: user.email,
         super: user.super,
       },
-      secret
+      secret,
     );
 
     cookies().set({
@@ -54,7 +54,7 @@ export async function authenticate(
 
 export async function createUser(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const name = formData.get("name") as string;
@@ -135,7 +135,7 @@ export async function CreateOrg(formData: FormData) {
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
@@ -159,7 +159,7 @@ export async function addEditorToOrg(
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData
+  formData: FormData,
 ) {
   const org_id = formData.get("org_id") as string;
   const title = formData.get("title") as string;
@@ -208,7 +208,7 @@ export async function logout(
     error: boolean | null;
     message: string;
   },
-  formData: FormData
+  formData: FormData,
 ) {
   cookies().delete("token");
   state.error = false;

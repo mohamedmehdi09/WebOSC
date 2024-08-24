@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { upadateOrg } from "@/lib/actions";
+// import { upadateOrg } from "@/lib/actions";
 import { Organization } from "@prisma/client";
 import { useFormStatus } from "react-dom";
 import { FormEvent } from "react";
@@ -20,7 +20,10 @@ const UpdateOrgForm = ({ org }: { org: Organization }) => {
   const form = new FormData();
 
   return (
-    <form className="flex flex-col gap-5 items-start w-1/4" action={upadateOrg}>
+    <form
+      className="flex flex-col gap-5 items-start w-1/4"
+      //  action={upadateOrg}
+    >
       <h1 className="text-2xl font-bold text-center">Update Organization</h1>
       <div className="flex flex-col w-full  gap-2">
         <label htmlFor="id" className="">

@@ -1,4 +1,5 @@
 ## Getting Started
+
 1. Execute `npm i` in terminal
 2. Rename `.env.template` to `.env`
 3. Execute `npx prisma db push` in terminal
