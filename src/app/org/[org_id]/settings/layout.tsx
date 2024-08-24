@@ -14,7 +14,7 @@ export default async function OrgSettingsLayout({
   const isAutherized = await checkOrgPrivilage(params.org_id);
   if (isAutherized)
     return (
-      <div className="flex flex-1 w-full rounded-md">
+      <div className="flex flex-1 flex-col md:flex-row md:px-24 rounded-md">
         <SettingsSideBar org_id={params.org_id} />
         <div className="flex flex-1 p-2 relative">{children}</div>
       </div>

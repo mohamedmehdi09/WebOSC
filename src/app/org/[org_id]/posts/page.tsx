@@ -64,10 +64,12 @@ const AnnouncementCard = ({
   return (
     <div
       key={announcement.announcement_id}
-      className="bg-gray-700 rounded p-4 md:p-5 shadow-lg w-full mb-4 flex flex-col md:flex-row justify-between items-start md:items-center"
+      className="bg-gray-700 rounded p-4 md:p-5 shadow-lg w-full mb-4 flex justify-between items-start md:items-center"
     >
       <div className="flex-1 mb-2 md:mb-0">
-        <h3 className="text-xl md:text-2xl font-semibold text-white">{announcement.title}</h3>
+        <h3 className="text-xl md:text-2xl font-semibold text-white">
+          {announcement.title}
+        </h3>
         <p className="text-gray-400 mt-1">
           <span className="text-gray-300">By</span>
           <span className="text-gray-400 hover:underline ml-1">

@@ -7,7 +7,7 @@ import { CogIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 export default function SettingsSideBar({ org_id }: { org_id: string }) {
   const path = usePathname();
   return (
-    <div className="flex flex-col gap-2 p-2 w-full md:w-1/4 ml-4">
+    <div className="flex flex-col gap-2 p-2 w-full md:w-1/4">
       <Link
         data-current={path == `/org/${org_id}/settings`}
         href={`/org/${org_id}/settings`}
