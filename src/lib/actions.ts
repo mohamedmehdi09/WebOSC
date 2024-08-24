@@ -140,19 +140,38 @@ export async function addEditorToOrg(
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
   try {
-    const editor = await prisma.editor.create({
-      data: { org_id: org_id, user_id: user_id },
+    const checkEditor = await prisma.editor.findFirst({
+      where: { user_id: user_id, org_id: org_id },
     });
+
+    if (checkEditor) {
+      if (checkEditor.status == "active")
+        throw Error("user is already an editor in this organization!");
+      else {
+        const editor = await prisma.editor.update({
+          where: { editor_id: checkEditor.editor_id },
+          data: { status: "active" },
+        });
+        state.message = "editor reactivated";
+      }
+    }
+
+    if (!checkEditor) {
+      const editor = await prisma.editor.create({
+        data: { org_id: org_id, user_id: user_id },
+      });
+      state.message = "editor added to organization";
+    }
+
     state.error = false;
-    state.message = "editor added to organization";
   } catch (error: any) {
     state.error = true;
     if (
-      error.meta.target.includes("user_id") &&
-      error.meta.target.includes("org_id")
+      error.meta?.target.includes("user_id") &&
+      error.meta?.target.includes("org_id")
     ) {
       state.message = "user is already an editor in this orgainzation!";
-    } else state.message = "unexpected error occurred";
+    } else state.message = error.message;
   }
   return state;
 }

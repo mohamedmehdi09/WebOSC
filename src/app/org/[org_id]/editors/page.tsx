@@ -6,6 +6,7 @@ const getOrgEditors = async (org_id: string) => {
   const editors = await prisma.editor.findMany({
     where: {
       org_id: org_id,
+      status: "active",
     },
     include: {
       user: true,

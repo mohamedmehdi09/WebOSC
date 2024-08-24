@@ -36,7 +36,8 @@ export default function AddEditorModal({
     if (formState.error == null) return;
     if (formState.error) toast.error(formState.message);
     else {
-      window.location.reload();
+      toast.success(formState.message);
+      setTimeout(() => window.location.reload(), 1000);
     }
   }, [formState]);
 
