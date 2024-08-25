@@ -36,6 +36,7 @@ export default function SignupPage() {
         <h1 className="text-3xl font-bold text-white">Sign Up</h1>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="name">
+            <span className="text-red-500 mr-1">*</span>
             First Name
           </label>
           <input
@@ -64,6 +65,7 @@ export default function SignupPage() {
         </div>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="lastname">
+            <span className="text-red-500 mr-1">*</span>
             Last Name
           </label>
           <input
@@ -78,6 +80,7 @@ export default function SignupPage() {
         </div>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="username">
+            <span className="text-red-500 mr-1">*</span>
             Username
           </label>
           <input
@@ -92,6 +95,7 @@ export default function SignupPage() {
         </div>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="email">
+            <span className="text-red-500 mr-1">*</span>
             Email
           </label>
           <input
@@ -104,6 +108,7 @@ export default function SignupPage() {
         </div>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="password">
+            <span className="text-red-500 mr-1">*</span>
             Password
           </label>
           <div className="relative">
