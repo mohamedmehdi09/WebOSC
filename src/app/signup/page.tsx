@@ -83,7 +83,7 @@ export default function SignupPage() {
           <input
             type="text"
             name="username"
-            value={`${name}${middlename ? `-${middlename[0]}` : ""}${lastname ? `-${lastname}` : ""}`.toLowerCase()}
+            value={`${name.trim()}${middlename.trim() ? `-${middlename[0]}` : ""}${lastname.trim() ? `-${lastname.trim()}` : ""}`.toLowerCase()}
             placeholder="Username (auto-generated)"
             readOnly
             required
