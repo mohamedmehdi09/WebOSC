@@ -10,7 +10,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function authenticate(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const email = formData.get("email")?.valueOf();
@@ -35,7 +35,7 @@ export async function authenticate(
         email: user.email,
         super: user.super,
       },
-      secret,
+      secret
     );
 
     cookies().set({
@@ -54,7 +54,7 @@ export async function authenticate(
 
 export async function createUser(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const name = formData.get("name") as string;
@@ -135,31 +135,50 @@ export async function CreateOrg(formData: FormData) {
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
   try {
-    const editor = await prisma.editor.create({
-      data: { org_id: org_id, user_id: user_id },
+    const checkEditor = await prisma.editor.findFirst({
+      where: { user_id: user_id, org_id: org_id },
     });
+
+    if (checkEditor) {
+      if (checkEditor.status == "active")
+        throw Error("user is already an editor in this organization!");
+      else {
+        const editor = await prisma.editor.update({
+          where: { editor_id: checkEditor.editor_id },
+          data: { status: "active" },
+        });
+        state.message = "editor reactivated";
+      }
+    }
+
+    if (!checkEditor) {
+      const editor = await prisma.editor.create({
+        data: { org_id: org_id, user_id: user_id },
+      });
+      state.message = "editor added to organization";
+    }
+
     state.error = false;
-    state.message = "editor added to organization";
   } catch (error: any) {
     state.error = true;
     if (
-      error.meta.target.includes("user_id") &&
-      error.meta.target.includes("org_id")
+      error.meta?.target.includes("user_id") &&
+      error.meta?.target.includes("org_id")
     ) {
       state.message = "user is already an editor in this orgainzation!";
-    } else state.message = "unexpected error occurred";
+    } else state.message = error.message;
   }
   return state;
 }
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData,
+  formData: FormData
 ) {
   const org_id = formData.get("org_id") as string;
   const title = formData.get("title") as string;
@@ -203,12 +222,59 @@ export async function addAnnouncement(
   return state;
 }
 
+export async function suspendEditor(
+  state: { error: boolean | null; message: string },
+  formData: FormData
+) {
+  const editor_id = formData.get("editor_id") as string;
+  const token = cookies().get("token")?.value;
+
+  if (!token) {
+    throw Error("not authenticated");
+  }
+  if (!secret) {
+    throw Error("Unexpecte Error");
+  }
+
+  const user = verify(token, secret) as User;
+  try {
+    const editor = await prisma.editor.findFirst({
+      where: { editor_id },
+    });
+
+    if (!editor) {
+      throw Error("editor not found!");
+    }
+
+    const checkEditor = await prisma.editor.findFirst({
+      where: { org_id: editor.org_id, user_id: user.user_id },
+    });
+
+    if (!checkEditor) throw Error("action not allowed!");
+
+    if (checkEditor.editor_id == editor_id)
+      throw Error("you can't remove yourself from org!");
+
+    const updatedEditor = await prisma.editor.update({
+      where: { editor_id: editor_id },
+      data: { status: "suspended" },
+    });
+
+    state.error = false;
+    state.message = "editor Suspended";
+  } catch (error: any) {
+    state.error = true;
+    state.message = error.message;
+  }
+  return state;
+}
+
 export async function logout(
   state: {
     error: boolean | null;
     message: string;
   },
-  formData: FormData,
+  formData: FormData
 ) {
   cookies().delete("token");
   state.error = false;

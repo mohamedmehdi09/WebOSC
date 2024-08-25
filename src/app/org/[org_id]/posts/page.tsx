@@ -26,11 +26,11 @@ export default async function OrgPostsPage({
   const announcements = await getOrgAnnouncements(params.org_id);
   const isEditor = await checkOrgPrivilage(params.org_id);
   return (
-    <div className="flex flex-col flex-1 gap-4 w-full p-4 md:p-6 items-center">
+    <div className="flex flex-col flex-1 gap-4 w-full px-4 md:px-24 items-center">
       {announcements.length === 0 ? (
         <p className="text-gray-500">No announcements created</p>
       ) : (
-        <div className="w-full max-w-4xl">
+        <div className="w-full">
           {announcements.map((announcement) => (
             <AnnouncementCard
               key={announcement.announcement_id}
