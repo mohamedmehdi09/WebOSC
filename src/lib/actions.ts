@@ -142,16 +142,20 @@ export async function signup(
         email: signupData.email,
         password: signupData.password,
         super: countUsers === 0,
+        emailVerified: process.env.NODE_ENV === "development",
       },
     });
 
     // Send Verification email
-    mailer.sendMail({
-      from: "OSCA",
-      to: user.email,
-      subject: "Email Verification",
-      html: `<h1>Hi ${user.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${user.emailVerificationPhrase}</p>`,
-    });
+    // email only sent if in production
+    if (process.env.NODE_ENV !== "development") {
+      mailer.sendMail({
+        from: "OSCA",
+        to: user.email,
+        subject: "Email Verification",
+        html: `<h1>Hi ${user.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${user.emailVerificationPhrase}</p>`,
+      });
+    }
 
     // If the secret key is not set, we throw an error
     if (!secret) throw Error("Unexpected Error!");
