@@ -4,93 +4,186 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sign, verify } from "jsonwebtoken";
-import { User } from "@prisma/client";
+import { z } from "zod";
+import { TokenPayload } from "./types";
+import { mailer } from "./mailer";
 
 const secret = process.env.JWT_SECRET;
 
-export async function authenticate(
+export async function login(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
+  // This is a zod schema for validating the form data
+  const loginShema = z.object({
+    email: z.string().email({ message: "Invalid email!" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters!" }),
+  });
+
+  // We get the form data from the form submission
+  const loginData = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
   try {
-    const email = formData.get("email")?.valueOf();
-    const password = formData.get("password")?.valueOf();
+    // We parse the form data using the zod schema
+    const loginParsed = loginShema.safeParse(loginData);
 
-    const user = await prisma.user.findFirst({
-      where: { email: email },
-    });
-
-    if (!user || user?.password !== password) {
-      throw Error("username or password wrong");
+    // If the form data is invalid, we throw an error
+    if (!loginParsed.success) {
+      throw Error(loginParsed.error.issues[0].message);
     }
 
-    if (!secret) throw Error("Unexpected Error");
+    // We query the user from the database using the email
+    const user = await prisma.user.findFirst({
+      where: { email: loginData.email },
+    });
 
+    // If the user doesn't exist or the password is incorrect, we throw an error
+    if (!user || user?.password !== loginData.password)
+      throw Error("Username or Password Wrong!");
+
+    // If the secret key is not set, we throw an error
+    if (!secret) throw Error("Unexpected Error!");
+
+    // We sign the user's data using the secret key
     const token = sign(
       {
         user_id: user.user_id,
-        name: user.name,
-        lastname: user.lastname,
-        isMale: user.isMale,
-        email: user.email,
         super: user.super,
+        emailVerified: user.emailVerified,
       },
       secret
     );
 
+    // We set the token as a cookie
     cookies().set({
       name: "token",
       value: token,
       secure: process.env.NODE_ENV !== "development",
+      httpOnly: true,
     });
+
+    // If the login is successful, we set the state to indicate that
     state.error = false;
     state.message = "logged in successfully";
   } catch (error: any) {
+    // If there's an error, we set the state to indicate that
     state.error = true;
     state.message = error.message;
   }
+  // Finally, we return the state
   return state;
 }
 
-export async function createUser(
+export async function signup(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
+  // We define a schema for validating the signup form data
+  const signupShema = z.object({
+    name: z.string().min(3, "name too short!"),
+    middlename: z.string().nullable(),
+    lastname: z.string().min(3, "lastname too short!"),
+    username: z.string(),
+    isMale: z.boolean().nullable(),
+    email: z.string().email({ message: "Invalid email!" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters!" }),
+  });
+
+  // We get the signup form data
+  const signupData = {
+    name: formData.get("name") as string,
+    middlename: formData.get("middlename") as string,
+    lastname: formData.get("lastname") as string,
+    username: formData.get("username") as string,
+    isMale: (formData.get("isMale") as string) === "true",
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
   try {
-    const name = formData.get("name") as string;
-    const middlename = formData.get("middlename") as string;
-    const userame = formData.get("username") as string;
-    const lastname = formData.get("lastname") as string;
-    const isMale = formData.get("isMale") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const userCount = await prisma.user.count();
-    const user = await prisma.user.create({
-      data: {
-        user_id: userame,
-        middlename: middlename || null,
-        name,
-        lastname,
-        isMale: isMale === "true",
-        email,
-        password,
-        super: userCount == 0,
+    // We validate the signup form data using the schema
+    const signupParsed = signupShema.safeParse(signupData);
+    if (!signupParsed.success)
+      // If the validation fails, we throw an error
+      throw signupParsed.error;
+
+    // We check if the email or username already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: signupData.email }, { user_id: signupData.username }],
       },
     });
 
+    if (existingUser) {
+      // If the email or username already exists, we throw an error
+      if (existingUser.email === signupData.email)
+        throw Error("email already in use!");
+      else if (existingUser.user_id === signupData.username)
+        throw Error("username already in use!");
+    }
+
+    const countUsers = await prisma.user.count();
+
+    // We create a new user in the database
+    const user = await prisma.user.create({
+      data: {
+        user_id: signupData.username,
+        middlename: signupData.middlename,
+        name: signupData.name,
+        lastname: signupData.lastname,
+        isMale: signupData.isMale,
+        email: signupData.email,
+        password: signupData.password,
+        super: countUsers === 0,
+      },
+    });
+
+    // Send Verification email
+    mailer.sendMail({
+      from: "OSCA",
+      to: user.email,
+      subject: "Email Verification",
+      html: `<h1>Hi ${user.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${user.emailVerificationPhrase}</p>`,
+    });
+
+    // If the secret key is not set, we throw an error
+    if (!secret) throw Error("Unexpected Error!");
+
+    // We sign the user's data using the secret key
+    const token = sign(
+      {
+        user_id: user.user_id,
+        super: user.super,
+        emailVerified: user.emailVerified,
+      },
+      secret
+    );
+
+    // We set the token as a cookie
+    cookies().set({
+      name: "token",
+      value: token,
+      secure: process.env.NODE_ENV !== "development",
+      httpOnly: true,
+    });
+
+    // If the signup is successful, we set the state to indicate that
     state.error = false;
     state.message = "user created successfully!";
   } catch (error: any) {
+    // If there's an error, we set the state to indicate that
     state.error = true;
-    state.message = "unexpected error!";
-
-    if (error.code === "P2002") {
-      if (error.meta.target.includes("email"))
-        state.message = "email already in use!";
-      else state.message = "username already in use!";
-    }
+    state.message = error?.issues?.[0]?.message || error.message;
   }
 
+  // Finally, we return the state
   return state;
 }
 
@@ -118,20 +211,6 @@ export async function CreateOrg(formData: FormData) {
   }
   redirect("/org");
 }
-
-// export async function upadateOrg(formData: FormData) {
-//   const nameEn = (formData.get("nameEn") as string) || undefined;
-//   const nameAr = (formData.get("nameAr") as string) || undefined;
-//   const id = formData.get("id") as string;
-//   try {
-//     const org = await prisma.organization.update({
-//       where: { org_id: id },
-//       data: { nameAr: nameAr, nameEn: nameEn },
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
@@ -180,20 +259,20 @@ export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
   formData: FormData
 ) {
-  const org_id = formData.get("org_id") as string;
-  const title = formData.get("title") as string;
-  const body = formData.get("body") as string;
-  const token = cookies().get("token")?.value;
-
-  if (!token) {
-    throw Error("not authenticated");
-  }
-  if (!secret) {
-    throw Error("Unexpecte Error");
-  }
-
-  const user = verify(token, secret) as User;
   try {
+    const org_id = formData.get("org_id") as string;
+    const title = formData.get("title") as string;
+    const body = formData.get("body") as string;
+    const token = cookies().get("token")?.value;
+    if (!token) {
+      throw Error("not authenticated");
+    }
+    if (!secret) {
+      throw Error("Unexpecte Error");
+    }
+
+    const user = verify(token, secret) as TokenPayload;
+
     // make sure user is editor in the target org
     const editor = await prisma.editor.findMany({
       where: { org_id: org_id, user_id: user.user_id },
@@ -226,18 +305,19 @@ export async function suspendEditor(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
-  const editor_id = formData.get("editor_id") as string;
-  const token = cookies().get("token")?.value;
-
-  if (!token) {
-    throw Error("not authenticated");
-  }
-  if (!secret) {
-    throw Error("Unexpecte Error");
-  }
-
-  const user = verify(token, secret) as User;
   try {
+    const editor_id = formData.get("editor_id") as string;
+    const token = cookies().get("token")?.value;
+
+    if (!token) {
+      throw Error("not authenticated");
+    }
+    if (!secret) {
+      throw Error("Unexpecte Error");
+    }
+
+    const user = verify(token, secret) as TokenPayload;
+
     const editor = await prisma.editor.findFirst({
       where: { editor_id },
     });
@@ -279,5 +359,97 @@ export async function logout(
   cookies().delete("token");
   state.error = false;
   state.message = "loggged out successfully";
+  return state;
+}
+
+export async function verifyEmail(
+  state: { success: boolean | null; message: string },
+  formData: FormData
+) {
+  const token = cookies().get("token")?.value;
+
+  if (!token) {
+    state = {
+      success: false,
+      message: "You need to be logged in to verify your email!",
+    };
+    return state;
+  }
+
+  if (!secret) {
+    state = {
+      success: false,
+      message: "Internal Error. Please try again later.",
+    };
+    return state;
+  }
+
+  const userToken = verify(token, secret) as TokenPayload;
+
+  if (!userToken) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    };
+    return state;
+  }
+
+  if (userToken.emailVerified) {
+    state = { success: false, message: "Email already verified!" };
+    return state;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { user_id: userToken.user_id },
+  });
+
+  if (!user) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    };
+    return state;
+  }
+  if (user.emailVerified) {
+    state = { success: false, message: "Email already verified!" };
+    return state;
+  }
+
+  const emailVerificationPhrase = formData.get(
+    "emailVerificationPhrase"
+  ) as string;
+
+  if (user.emailVerificationPhrase !== emailVerificationPhrase) {
+    state = {
+      success: false,
+      message: "Invalid pass phrase. Please try again!",
+    };
+    return state;
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { user_id: user.user_id },
+    data: { emailVerified: true, emailVerificationPhrase: null },
+  });
+
+  const newToken = sign(
+    {
+      user_id: updatedUser.user_id,
+      emailVerified: updatedUser.emailVerified,
+      super: updatedUser.super,
+    },
+    secret
+  );
+
+  cookies().set({
+    name: "token",
+    value: newToken,
+    secure: process.env.NODE_ENV !== "development",
+    httpOnly: true,
+  });
+
+  state = { success: true, message: "Email Verified!" };
   return state;
 }

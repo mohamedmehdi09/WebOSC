@@ -1,6 +1,6 @@
 "use client";
 
-import { authenticate } from "@/lib/actions";
+import { login } from "@/lib/actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { FormEvent, useState, useEffect } from "react";
@@ -8,7 +8,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [formState, formAction] = useFormState(authenticate, {
+  const [formState, formAction] = useFormState(login, {
     error: null,
     message: "",
   });
@@ -21,7 +21,7 @@ export default function LoginPage() {
     if (formState.error) toast.error(formState.message);
     else {
       toast.success(formState.message);
-      setTimeout(() => window.location.replace("/"), 3000);
+      setTimeout(() => window.location.replace("/"), 1000);
     }
   }, [formState]);
 
@@ -34,6 +34,7 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold text-white">Login</h1>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="email">
+            <span className="text-red-500 mr-1">*</span>
             Email
           </label>
           <input
@@ -42,11 +43,13 @@ export default function LoginPage() {
             placeholder="Email..."
             required
             autoFocus
-            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400"
+            pattern="^[a-zA-Z0-9._+-]+\@[a-zA-Z0-9.-]+\.[a-z]{2,}$"
+            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 invalid:border-red-800"
           />
         </div>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="password">
+            <span className="text-red-500 mr-1">*</span>
             Password
           </label>
           <div className="relative">
@@ -55,7 +58,8 @@ export default function LoginPage() {
               name="password"
               placeholder="Password..."
               required
-              className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400"
+              minLength={8}
+              className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 invalid:border-red-800"
             />
             <button
               type="button"

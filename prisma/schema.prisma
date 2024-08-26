@@ -22,15 +22,17 @@ model Organization {
 }
 
 model User {
-  user_id    String   @id @default(uuid())
-  name       String
-  middlename String?
-  lastname   String
-  isMale     Boolean?
-  email      String   @unique
-  password   String
-  super      Boolean  @default(false)
-  editors    Editor[]
+  user_id                 String   @id @default(uuid())
+  name                    String
+  middlename              String?
+  lastname                String
+  isMale                  Boolean?
+  email                   String   @unique
+  emailVerified           Boolean  @default(false)
+  emailVerificationPhrase String?  @default(uuid())
+  password                String
+  super                   Boolean  @default(false)
+  editors                 Editor[]
 }
 
 model Editor {

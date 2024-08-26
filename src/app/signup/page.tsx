@@ -1,13 +1,13 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { createUser } from "@/lib/actions";
+import { signup } from "@/lib/actions";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
 export default function SignupPage() {
-  const [formState, formAction] = useFormState(createUser, {
+  const [formState, formAction] = useFormState(signup, {
     error: null,
     message: "",
   });
@@ -25,7 +25,7 @@ export default function SignupPage() {
     if (formState.error) toast.error(formState.message);
     else {
       toast.success(formState.message);
-      setTimeout(() => window.location.replace("/login"), 3000);
+      setTimeout(() => (window.location.href = "/emailVerification"), 1000);
     }
   }, [formState]);
 
