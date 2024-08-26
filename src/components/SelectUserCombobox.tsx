@@ -36,7 +36,7 @@ export default function SelectUserCombobox({
     >
       <div className="w-full flex flex-col gap-2">
         <label htmlFor="nameEn" className="font-medium">
-          Select A User:
+          Select User:
         </label>
         <div className="relative">
           <ComboboxInput
@@ -66,7 +66,7 @@ export default function SelectUserCombobox({
           className="group flex cursor-default items-center gap-2 rounded-md py-1.5 px-4 select-none data-[focus]:bg-white/10"
         >
           <XMarkIcon className="invisible size-4 fill-white group-data-[selected]:visible" />
-          <div className="text-sm/6 text-white">select a user</div>
+          <div className="text-sm/6 text-white">Select User</div>
         </ComboboxOption>
         {filteredUsers.map((user) => (
           <ComboboxOption

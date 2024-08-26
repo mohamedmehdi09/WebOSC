@@ -44,53 +44,54 @@ export default async function OrgSettingsEditorsPage({
   if (!token) return;
   const currentUser = decode(token) as Omit<User, "password">;
   return (
-    <>
-      <div className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4 border border-gray-700">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-semibold">Manage access</h1>
-          <AddEditorModal org_id={params.org_id} users={users} />
-        </div>
-        <ul className="flex space-x-4 md:space-x-6 text-white border-b border-gray-700">
-          <li className="pb-2 border-b-2 border-blue-500">Editors</li>
-          <li className="pb-2">Invitations</li>
-        </ul>
+<>
+  <div className="bg-gray-800 p-6 w-full flex flex-col gap-6 rounded-lg shadow-xl border border-gray-700">
+    <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-bold text-white">Manage Access</h1>
+      <AddEditorModal org_id={params.org_id} users={users} />
+    </div>
+    
+    <ul className="flex space-x-6 text-gray-300 border-b border-gray-600">
+      <li className="pb-2 border-b-2 border-blue-500 text-white cursor-pointer">Editors</li>
+      <li className="pb-2 cursor-pointer hover:text-white transition-colors duration-200">Invitations</li>
+    </ul>
 
-        <div className="flex flex-col gap-2 bg-gray-800 px-2 rounded-lg">
-          <div className="flex gap-2 md:gap-4 pb-4 border-b border-gray-700">
-            <MagnifyingGlassIcon className="w-5 md:w-6" />
-            <input
-              type="text"
-              placeholder="Find Editors..."
-              className="bg-inherit focus:outline-none text-white py-2 rounded-md w-full"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {editors.map((editor) => (
-              <div
-                key={editor.editor_id}
-                className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
-              >
-                <div className="flex items-center">
-                  <UserCircleIcon className="w-6 md:w-8" />
-                  <span className="ml-4 text-blue-400 font-bold">
-                    {editor.user.name} {editor.user.lastname}
-                  </span>
-                </div>
-                <div className="mt-2 md:mt-0">
-                  {editor.user_id == currentUser.user_id ? (
-                    <div className="bg-green-700 px-4 py-2 rounded-md w-full">
-                      you
-                    </div>
-                  ) : (
-                    <RemoveEditor editor_id={editor.editor_id} />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className="flex flex-col gap-4 bg-gray-700 p-4 rounded-lg">
+      <div className="flex gap-4 items-center pb-4 border-b border-gray-600">
+        <MagnifyingGlassIcon className="w-6 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Find Editors.."
+          className="bg-gray-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full transition-shadow duration-200"
+        />
       </div>
-    </>
+
+      <div className="flex flex-col gap-3">
+        {editors.map((editor) => (
+    <div
+    key={editor.editor_id}
+    className="flex justify-between items-center bg-gray-700 p-5 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-200"
+  >
+    <div className="flex items-center">
+      <UserCircleIcon className="w-10 h-10 text-green-500" />
+      <span className="ml-4 text-white font-bold text-lg capitalize">
+        {editor.user.name} {editor.user.lastname}
+      </span>
+    </div>
+    <div className="mt-2 md:mt-0 flex items-center">
+      {editor.user_id === currentUser.user_id ? (
+        <div className="bg-green-500 px-4 py-2 rounded-full text-sm text-white font-medium">
+          You
+        </div>
+      ) : (
+        <RemoveEditor editor_id={editor.editor_id} />
+      )}
+    </div>
+  </div>        ))}
+      </div>
+    </div>
+  </div>
+</>
+
   );
 }
