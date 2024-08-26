@@ -58,7 +58,7 @@ export default function SelectUserCombobox({
         transition
         className={clsx(
           "w-[var(--input-width)] rounded-md border border-white/50 bg-gray-600 p-1 [--anchor-gap:var(--spacing-1)] empty:invisible z-30",
-          "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0 flex flex-col gap-2"
+          "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0 flex flex-col gap-2",
         )}
       >
         <ComboboxOption

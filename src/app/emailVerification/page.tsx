@@ -6,7 +6,11 @@ import { verifyEmail } from "@/lib/actions";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
 
-export default function EmailVerificationPage() {
+export default function EmailVerificationPage({
+  searchParams,
+}: {
+  searchParams: { redirect: string };
+}) {
   const [formState, formAction] = useFormState(verifyEmail, {
     success: null,
     message: "",
@@ -14,14 +18,15 @@ export default function EmailVerificationPage() {
 
   const { pending } = useFormStatus();
 
-  const redirect = useSearchParams()?.get("redirect");
-
   useEffect(() => {
     if (formState.success === true) {
       toast.success(formState.message);
-      setTimeout(() => window.location.replace(redirect || "/"), 1000);
+      setTimeout(
+        () => window.location.replace(searchParams.redirect || "/"),
+        1000,
+      );
     }
-  }, [formState, redirect]);
+  }, [formState, searchParams.redirect]);
 
   return (
     <div className="flex flex-1 items-center justify-center">
