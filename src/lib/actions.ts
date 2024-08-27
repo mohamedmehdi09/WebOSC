@@ -7,6 +7,7 @@ import { sign, verify } from "jsonwebtoken";
 import { z } from "zod";
 import { TokenPayload } from "./types";
 import { mailer } from "./mailer";
+import { randomUUID } from "crypto";
 
 const secret = process.env.JWT_SECRET;
 
@@ -64,7 +65,7 @@ export async function login(
       name: "token",
       value: token,
       secure: process.env.NODE_ENV !== "development",
-      httpOnly: true,
+      httpOnly: false,
     });
 
     // If the login is successful, we set the state to indicate that
@@ -183,7 +184,7 @@ export async function signup(
       name: "token",
       value: token,
       secure: process.env.NODE_ENV !== "development",
-      httpOnly: true,
+      httpOnly: false,
     });
 
     // If the signup is successful, we set the state to indicate that
@@ -510,9 +511,93 @@ export async function verifyEmail(
     name: "token",
     value: newToken,
     secure: process.env.NODE_ENV !== "development",
-    httpOnly: true,
+    httpOnly: false,
   });
 
   state = { success: true, message: "Email Verified!" };
+  return state;
+}
+
+export async function resendVerificationEmail(
+  state: { success: boolean | null; message: string },
+  formData: FormData,
+) {
+  const token = cookies().get("token")?.value;
+
+  if (!token) {
+    state = {
+      success: false,
+      message: "You need to be logged in to verify your email!",
+    };
+    return state;
+  }
+
+  if (!secret) {
+    state = {
+      success: false,
+      message: "Internal Error. Please try again later.",
+    };
+    return state;
+  }
+
+  const userToken = verify(token, secret) as TokenPayload;
+
+  if (!userToken) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    };
+    return state;
+  }
+
+  if (userToken.emailVerified) {
+    state = { success: false, message: "Email already verified!" };
+    return state;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { user_id: userToken.user_id },
+  });
+
+  if (!user) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    };
+    return state;
+  }
+  if (user.emailVerified) {
+    state = { success: false, message: "Email already verified!" };
+    return state;
+  }
+
+  const newEmailVerificationPhrase = randomUUID();
+
+  const updatedUser = await prisma.user.update({
+    where: { user_id: user.user_id },
+    data: { emailVerificationPhrase: newEmailVerificationPhrase },
+  });
+
+  if (process.env.NODE_ENV !== "development") {
+    mailer.sendMail({
+      from: "OSCA",
+      to: user.email,
+      subject: "Email Verification",
+      html: `<h1>Hi ${updatedUser.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${updatedUser.emailVerificationPhrase}</p>`,
+    });
+  }
+  // if in development we just console.log the secret phrase
+  else {
+    console.log(
+      "new secret key for user " +
+        updatedUser.name +
+        " is " +
+        updatedUser.emailVerificationPhrase,
+    );
+  }
+
+  state = { success: true, message: "Email Resent! check your inbox" };
   return state;
 }
