@@ -8,12 +8,13 @@ import { User } from "@prisma/client";
 import { addEditorToOrg } from "@/lib/actions";
 import SelectUserCombobox from "./SelectUserCombobox";
 import toast from "react-hot-toast";
+import { FrontendUser } from "@/lib/types";
 
 export default function AddEditorModal({
   users,
   org_id,
 }: {
-  users: Omit<User, "password">[];
+  users: FrontendUser[];
   org_id: string;
 }) {
   const [formState, formAction] = useFormState(addEditorToOrg, {

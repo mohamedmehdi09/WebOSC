@@ -65,9 +65,12 @@ export default async function PostPage({
           </Link>
         </div>
       </div>
-      <div className="flex-1 rounded-md px-3 md:px-5 text-lg md:text-2xl">
+      <textarea
+        readOnly
+        className="flex-1 rounded-md px-3 md:px-5 text-lg md:text-2xl bg-transparent outline-none cursor-default resize-none"
+      >
         {announcement.body}
-      </div>
+      </textarea>
     </div>
   );
 }

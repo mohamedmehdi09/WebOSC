@@ -1,4 +1,5 @@
-import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkOrgPrivilage, checkEmailValidation } from "@/lib/authorization";
+import { redirect } from "next/navigation";
 
 export default async function CreatePostLayout({
   children,
@@ -7,6 +8,8 @@ export default async function CreatePostLayout({
   children: React.ReactNode;
   params: { org_id: string };
 }) {
-  const isAuthed = await checkOrgPrivilage(params.org_id);
-  return <>{isAuthed ? children : "Not Allowed!"}</>;
+  if (!(await checkOrgPrivilage(params.org_id))) return "Not Allowed!";
+  if (!checkEmailValidation()) return redirect("/emailVerification");
+
+  return children;
 }

@@ -13,11 +13,12 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { User } from "@prisma/client";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import { FrontendUser } from "@/lib/types";
 
 export default function SelectUserCombobox({
   users,
 }: {
-  users: Omit<User, "password">[];
+  users: FrontendUser[];
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<User | null>(null);

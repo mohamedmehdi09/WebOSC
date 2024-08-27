@@ -28,7 +28,7 @@ export default function CreatePostPage({
       setTimeout(
         () =>
           window.location.replace(`/announcement/${formState.announcement_id}`),
-        1000,
+        1000
       );
     }
   }, [formState]);
@@ -39,7 +39,7 @@ export default function CreatePostPage({
           form.append("org_id", params.org_id);
           formAction(form);
         }}
-        className="rounded-md w-full max-w-4xl mx-auto flex flex-col flex-1 text-white relative p-4 sm:p-8"
+        className="rounded-md w-full max-w-4xl mx-auto flex flex-col flex-1 relative p-4 sm:p-8"
       >
         <div className="relative">
           <input
@@ -49,7 +49,8 @@ export default function CreatePostPage({
             required
             autoFocus
             maxLength={40}
-            className="w-full px-4 py-2 sm:px-8 sm:py-4 outline-none text-2xl sm:text-4xl bg-gradient-to-b from-slate-600 to-slate-700 rounded-t-md"
+            spellCheck
+            className="w-full px-4 py-2 sm:px-8 sm:py-4 outline-none text-2xl font-semibold sm:text-4xl bg-gradient-to-b from-slate-600 to-slate-700 rounded-t-md"
             onChange={(e) => {
               setTitleCount(e.target.value.length);
             }}
@@ -65,12 +66,13 @@ export default function CreatePostPage({
           name="body"
           placeholder="Body.."
           required
-          className="w-full px-4 py-2 sm:px-8 sm:py-4 bg-gradient-to-b from-slate-700 to-slate-800 outline-none resize-none text-lg sm:text-2xl flex flex-grow rounded-b-md"
+          maxLength={2000}
+          className="w-full px-4 py-2 sm:px-12 sm:py-4 bg-gradient-to-b from-slate-700 to-slate-800 outline-none resize-none text-lg sm:text-2xl font-medium flex flex-1 rounded-b-md"
         />
 
         <button
           disabled={pending || formState.error === false}
-          className="bg-green-700 hover:bg-green-800 text-white mt-4 p-2 sm:p-3 rounded-md self-end transition-colors duration-300 focus:outline-green-800 disabled:bg-gray-600"
+          className="bg-green-700 hover:bg-green-800 mt-4 p-2 sm:p-3 rounded-md self-end transition-colors duration-300 focus:outline-green-800 disabled:bg-gray-600"
           type="submit"
           onClick={(event: FormEvent) => {
             if (pending) {

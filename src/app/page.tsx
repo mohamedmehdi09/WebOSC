@@ -6,10 +6,13 @@ import { BellIcon } from "@heroicons/react/20/solid";
 import { decode } from "jsonwebtoken";
 import { GlobeEuropeAfricaIcon } from "@heroicons/react/24/solid";
 import LogOutForm from "@/components/LogoutForm";
+import { TokenPayload } from "@/lib/types";
 
 // Fetch announcements from the database
+
 const getOrgAnnouncements = async () => {
   const announcements = await prisma.announcement.findMany({
+    orderBy: { announcement_id: "desc" },
     include: {
       editor: {
         include: {
@@ -25,7 +28,7 @@ const getOrgAnnouncements = async () => {
 const getEditorOrgs = async () => {
   const token = cookies().get("token")?.value;
   if (!token) return [];
-  const user = decode(token) as Omit<User, "password">;
+  const user = decode(token) as TokenPayload;
   const editors = await prisma.editor.findMany({
     where: { user_id: user.user_id },
     include: { org: true },
