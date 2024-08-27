@@ -42,7 +42,7 @@ export default function EmailVerificationLayout({
     );
 
   return (
-    <div className="flex flex-1 flex-col gap-5 items-center justify-center">
+    <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4">
       {children}
     </div>
   );

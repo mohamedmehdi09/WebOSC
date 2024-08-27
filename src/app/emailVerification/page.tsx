@@ -33,7 +33,10 @@ export default function EmailVerificationPage({
 
   return formState.success == null || formState.success == false ? (
     <>
-      <form action={formAction} className="flex flex-col gap-6 md:w-1/3 w-full">
+      <form
+        action={formAction}
+        className="flex flex-col items-center gap-6 bg-gray-800 p-8 rounded-lg w-full max-w-md border border-gray-600"
+      >
         <h1 className="text-xl sm:text-2xl font-bold text-center">
           verify email
         </h1>
