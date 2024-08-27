@@ -1,3 +1,3 @@
 export default async function NotFoundPage() {
-  return "not found";
+  return "Not Found!";
 }

@@ -27,7 +27,7 @@ const UpdateOrgForm = ({ org }: { org: Organization }) => {
       <h1 className="text-2xl font-bold text-center">Update Organization</h1>
       <div className="flex flex-col w-full  gap-2">
         <label htmlFor="id" className="">
-          identifier:
+          Identifier:
         </label>
 
         <input

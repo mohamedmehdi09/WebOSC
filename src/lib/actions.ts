@@ -45,10 +45,10 @@ export async function login(
 
     // If the user doesn't exist or the password is incorrect, we throw an error
     if (!user || user?.password !== loginData.password)
-      throw Error("Username or Password Wrong!");
+      throw Error("Username or password is incorrect!");
 
     // If the secret key is not set, we throw an error
-    if (!secret) throw Error("Unexpected Error!");
+    if (!secret) throw Error("Unexpected error!");
 
     // We sign the user's data using the secret key
     const token = sign(
@@ -70,7 +70,7 @@ export async function login(
 
     // If the login is successful, we set the state to indicate that
     state.error = false;
-    state.message = "logged in successfully";
+    state.message = "Welcome!";
   } catch (error: any) {
     // If there's an error, we set the state to indicate that
     state.error = true;
@@ -86,9 +86,9 @@ export async function signup(
 ) {
   // We define a schema for validating the signup form data
   const signupShema = z.object({
-    name: z.string().min(3, "name too short!"),
+    name: z.string().min(3, "Name too short!"),
     middlename: z.string().nullable(),
-    lastname: z.string().min(3, "lastname too short!"),
+    lastname: z.string().min(3, "Lastname too short!"),
     username: z.string(),
     isMale: z.boolean().nullable(),
     email: z.string().email({ message: "Invalid email!" }),
@@ -125,9 +125,9 @@ export async function signup(
     if (existingUser) {
       // If the email or username already exists, we throw an error
       if (existingUser.email === signupData.email)
-        throw Error("email already in use!");
+        throw Error("Email is already in use!");
       else if (existingUser.user_id === signupData.username)
-        throw Error("username already in use!");
+        throw Error("Username is already in use!");
     }
 
     const countUsers = await prisma.user.count();
@@ -159,7 +159,7 @@ export async function signup(
     // if in development we just console.log the secret phrase
     else {
       console.log(
-        "secret key for user " +
+        "Secret key for user " +
           user.name +
           " is " +
           user.emailVerificationPhrase,
@@ -189,7 +189,7 @@ export async function signup(
 
     // If the signup is successful, we set the state to indicate that
     state.error = false;
-    state.message = "user created successfully!";
+    state.message = "User has been created successfully!";
   } catch (error: any) {
     // If there's an error, we set the state to indicate that
     state.error = true;
@@ -222,7 +222,7 @@ export async function CreateOrg(formData: FormData) {
     });
   } catch (error: any) {
     console.log(error);
-    throw Error("Error while Creating Org");
+    throw Error("Error while creating the organization!");
   }
   redirect("/org");
 }
@@ -240,13 +240,13 @@ export async function addEditorToOrg(
 
     if (checkEditor) {
       if (checkEditor.status == "active")
-        throw Error("user is already an editor in this organization!");
+        throw Error("The user is already an editor in this organization!");
       else {
         const editor = await prisma.editor.update({
           where: { editor_id: checkEditor.editor_id },
           data: { status: "active" },
         });
-        state.message = "editor reactivated";
+        state.message = "Editor has been reactivated!";
       }
     }
 
@@ -254,7 +254,7 @@ export async function addEditorToOrg(
       const editor = await prisma.editor.create({
         data: { org_id: org_id, user_id: user_id },
       });
-      state.message = "editor added to organization";
+      state.message = "Editor has been added to the organization!";
     }
 
     state.error = false;
@@ -264,7 +264,7 @@ export async function addEditorToOrg(
       error.meta?.target.includes("user_id") &&
       error.meta?.target.includes("org_id")
     ) {
-      state.message = "user is already an editor in this orgainzation!";
+      state.message = "User is already an editor in this organization!";
     } else state.message = error.message;
   }
   return state;
@@ -281,15 +281,15 @@ export async function addAnnouncement(
     const token = cookies().get("token")?.value;
 
     if (!token) {
-      throw Error("not authenticated");
+      throw Error("Not authenticated!");
     }
     if (!secret) {
-      throw Error("Unexpecte Error");
+      throw Error("Unexpected error!");
     }
 
     const user = verify(token, secret) as TokenPayload;
 
-    if (!user.emailVerified) throw Error("email not verified!");
+    if (!user.emailVerified) throw Error("Email not verified!");
 
     // make sure user is editor in the target org
     const editor = await prisma.editor.findMany({
@@ -297,7 +297,7 @@ export async function addAnnouncement(
     });
 
     if (editor.length == 0) {
-      throw Error("action not allowed!");
+      throw Error("Action not allowed!");
     }
 
     // create announcement
@@ -311,7 +311,7 @@ export async function addAnnouncement(
     });
     state.error = false;
     state.announcement_id = announcement.announcement_id;
-    state.message = "post created successfully";
+    state.message = "The post was created successfully!";
   } catch (error: any) {
     state.error = true;
     state.message = error.message;
@@ -328,22 +328,22 @@ export async function suspendEditor(
     const token = cookies().get("token")?.value;
 
     if (!token) {
-      throw Error("not authenticated");
+      throw Error("Not authenticated!");
     }
     if (!secret) {
-      throw Error("Unexpecte Error");
+      throw Error("Unexpected error!");
     }
 
     const user = verify(token, secret) as TokenPayload;
 
-    if (!user.emailVerified) throw Error("email not verified!");
+    if (!user.emailVerified) throw Error("Email not verified!");
 
     const editor = await prisma.editor.findFirst({
       where: { editor_id },
     });
 
     if (!editor) {
-      throw Error("editor not found!");
+      throw Error("Editor not found!");
     }
 
     const checkEditor = await prisma.editor.findFirst({
@@ -351,10 +351,10 @@ export async function suspendEditor(
     });
 
     if (!checkEditor || checkEditor.status === "suspended")
-      throw Error("action not allowed!");
+      throw Error("Action not allowed!");
 
     if (checkEditor.editor_id == editor_id)
-      throw Error("you can't remove yourself from org!");
+      throw Error("You can't remove yourself from the organization!");
 
     const updatedEditor = await prisma.editor.update({
       where: { editor_id: editor_id },
@@ -362,7 +362,7 @@ export async function suspendEditor(
     });
 
     state.error = false;
-    state.message = "editor Suspended";
+    state.message = "The editor has been suspended!";
   } catch (error: any) {
     state.error = true;
     state.message = error.message;
@@ -379,23 +379,23 @@ export async function activateEditor(
     const token = cookies().get("token")?.value;
 
     if (!token) {
-      throw Error("not authenticated");
+      throw Error("Not authenticated!");
     }
     if (!secret) {
-      throw Error("Unexpecte Error");
+      throw Error("Unexpected error!");
     }
 
     const user = verify(token, secret) as TokenPayload;
 
-    if (!user.emailVerified) throw Error("email not verified!");
+    if (!user.emailVerified) throw Error("Email not verified!");
 
     const editor = await prisma.editor.findFirst({
       where: { editor_id },
     });
 
-    if (!editor) throw Error("editor not found!");
+    if (!editor) throw Error("Editor not found!");
 
-    if (editor.status == "active") throw Error("editor is already active!");
+    if (editor.status == "active") throw Error("Editor is already active!");
 
     const checkEditor = await prisma.editor.findFirst({
       where: { org_id: editor.org_id, user_id: user.user_id },
@@ -406,7 +406,7 @@ export async function activateEditor(
       checkEditor.status === "suspended" ||
       checkEditor.editor_id == editor_id
     )
-      throw Error("not authorized");
+      throw Error("Not authorized!");
 
     const updatedEditor = await prisma.editor.update({
       where: { editor_id: editor_id },
@@ -414,7 +414,7 @@ export async function activateEditor(
     });
 
     state.error = false;
-    state.message = "editor reactivated";
+    state.message = "Editor reactivated!";
   } catch (error: any) {
     state.error = true;
     state.message = error.message;
@@ -431,7 +431,7 @@ export async function logout(
 ) {
   cookies().delete("token");
   state.error = false;
-  state.message = "loggged out successfully";
+  state.message = "Successfully logged out!";
   return state;
 }
 
@@ -444,7 +444,7 @@ export async function verifyEmail(
   if (!token) {
     state = {
       success: false,
-      message: "You need to be logged in to verify your email!",
+      message: "You must be logged in to verify your email!",
     };
     return state;
   }
@@ -452,7 +452,7 @@ export async function verifyEmail(
   if (!secret) {
     state = {
       success: false,
-      message: "Internal Error. Please try again later.",
+      message: "Internal error. Please try again later!",
     };
     return state;
   }
@@ -463,13 +463,13 @@ export async function verifyEmail(
     cookies().delete("token");
     state = {
       success: false,
-      message: "Something went wrong. Please try again later.",
+      message: "Something went wrong. Please try again later!",
     };
     return state;
   }
 
   if (userToken.emailVerified) {
-    state = { success: false, message: "Email already verified!" };
+    state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
@@ -481,12 +481,12 @@ export async function verifyEmail(
     cookies().delete("token");
     state = {
       success: false,
-      message: "Something went wrong. Please try again later.",
+      message: "Something went wrong. Please try again later!",
     };
     return state;
   }
   if (user.emailVerified) {
-    state = { success: false, message: "Email already verified!" };
+    state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
@@ -497,7 +497,7 @@ export async function verifyEmail(
   if (user.emailVerificationPhrase !== emailVerificationPhrase) {
     state = {
       success: false,
-      message: "Invalid pass phrase. Please try again!",
+      message: "Invalid passphrase. Please try again!",
     };
     return state;
   }
@@ -523,7 +523,7 @@ export async function verifyEmail(
     httpOnly: false,
   });
 
-  state = { success: true, message: "Email Verified!" };
+  state = { success: true, message: "Email verified!" };
   return state;
 }
 
@@ -536,7 +536,7 @@ export async function resendVerificationEmail(
   if (!token) {
     state = {
       success: false,
-      message: "You need to be logged in to verify your email!",
+      message: "You must be logged in to verify your email!",
     };
     return state;
   }
@@ -544,7 +544,7 @@ export async function resendVerificationEmail(
   if (!secret) {
     state = {
       success: false,
-      message: "Internal Error. Please try again later.",
+      message: "Internal error. Please try again later!",
     };
     return state;
   }
@@ -555,13 +555,13 @@ export async function resendVerificationEmail(
     cookies().delete("token");
     state = {
       success: false,
-      message: "Something went wrong. Please try again later.",
+      message: "Something went wrong. Please try again later!",
     };
     return state;
   }
 
   if (userToken.emailVerified) {
-    state = { success: false, message: "Email already verified!" };
+    state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
@@ -573,12 +573,12 @@ export async function resendVerificationEmail(
     cookies().delete("token");
     state = {
       success: false,
-      message: "Something went wrong. Please try again later.",
+      message: "Something went wrong. Please try again later!",
     };
     return state;
   }
   if (user.emailVerified) {
-    state = { success: false, message: "Email already verified!" };
+    state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
@@ -600,13 +600,13 @@ export async function resendVerificationEmail(
   // if in development we just console.log the secret phrase
   else {
     console.log(
-      "new secret key for user " +
+      "New secret key for user " +
         updatedUser.name +
         " is " +
         updatedUser.emailVerificationPhrase,
     );
   }
 
-  state = { success: true, message: "Email Resent! check your inbox" };
+  state = { success: true, message: "Email resent! Please check your inbox!" };
   return state;
 }

@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
 
   if (request.cookies.has("token"))
     return NextResponse.redirect(new URL("/", request.url));
+  
   else return response;
 }
 
