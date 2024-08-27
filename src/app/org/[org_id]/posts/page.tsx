@@ -27,9 +27,9 @@ export default async function OrgPostsPage({
   const announcements = await getOrgAnnouncements(params.org_id);
   const isEditor = await checkOrgPrivilage(params.org_id);
   return (
-    <div className="flex flex-col flex-1 gap-1 w-full px-4 md:px-24 items-center pt-4">
+    <div className="flex flex-col flex-1 gap-1 w-full px-4 md:px-24 items-center pt-3">
       {announcements.length === 0 ? (
-        <p className="text-gray-500">No announcements created</p>
+        <p className="text-gray-500 pb-4">No announcements created</p>
       ) : (
         <div className="w-full">
           {announcements.map((announcement) => (
