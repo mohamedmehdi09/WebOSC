@@ -3,6 +3,8 @@
 import SettingsSideBar from "@/components/SettingsSideBar";
 import { ReactNode } from "react";
 import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkEmailValidation } from "@/lib/authorization";
+import { redirect } from "next/navigation";
 
 export default async function OrgSettingsLayout({
   children,
@@ -11,6 +13,7 @@ export default async function OrgSettingsLayout({
   children: ReactNode;
   params: { org_id: string };
 }) {
+  if (!checkEmailValidation()) return redirect("/emailVerification");
   const isAutherized = await checkOrgPrivilage(params.org_id);
   if (isAutherized)
     return (
