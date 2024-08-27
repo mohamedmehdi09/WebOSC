@@ -8,10 +8,8 @@ export default async function CreatePostLayout({
   children: React.ReactNode;
   params: { org_id: string };
 }) {
-  const emailValid = checkEmailValidation();
-  if (!emailValid) return redirect("/emailVerification");
-  const Authed = await checkOrgPrivilage(params.org_id);
-  if (!Authed) return "Not Allowed!";
+  if (!(await checkOrgPrivilage(params.org_id))) return "Not Allowed!";
+  if (!checkEmailValidation()) return redirect("/emailVerification");
 
   return children;
 }

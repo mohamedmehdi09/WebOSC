@@ -28,8 +28,8 @@ async function getUsers() {
 }
 
 export default async function CreateOrgPage() {
-  if (!checkEmailValidation()) return redirect("/emailVerification");
   if (!checkSuperUser()) return <>not allowed!</>;
+  if (!checkEmailValidation()) return redirect("/emailVerification");
   else return <CreateOrgComponent />;
 }
 
