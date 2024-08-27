@@ -142,7 +142,6 @@ export async function signup(
         email: signupData.email,
         password: signupData.password,
         super: countUsers === 0,
-        emailVerified: process.env.NODE_ENV === "development",
       },
     });
 
@@ -155,6 +154,15 @@ export async function signup(
         subject: "Email Verification",
         html: `<h1>Hi ${user.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${user.emailVerificationPhrase}</p>`,
       });
+    }
+    // if in development we just console.log the secret phrase
+    else {
+      console.log(
+        "secret key for user " +
+          user.name +
+          " is " +
+          user.emailVerificationPhrase,
+      );
     }
 
     // If the secret key is not set, we throw an error
