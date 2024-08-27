@@ -342,7 +342,8 @@ export async function suspendEditor(
       where: { org_id: editor.org_id, user_id: user.user_id },
     });
 
-    if (!checkEditor) throw Error("action not allowed!");
+    if (!checkEditor || checkEditor.status === "suspended")
+      throw Error("action not allowed!");
 
     if (checkEditor.editor_id == editor_id)
       throw Error("you can't remove yourself from org!");
@@ -354,6 +355,56 @@ export async function suspendEditor(
 
     state.error = false;
     state.message = "editor Suspended";
+  } catch (error: any) {
+    state.error = true;
+    state.message = error.message;
+  }
+  return state;
+}
+
+export async function activateEditor(
+  state: { error: boolean | null; message: string },
+  formData: FormData,
+) {
+  try {
+    const editor_id = formData.get("editor_id") as string;
+    const token = cookies().get("token")?.value;
+
+    if (!token) {
+      throw Error("not authenticated");
+    }
+    if (!secret) {
+      throw Error("Unexpecte Error");
+    }
+
+    const user = verify(token, secret) as TokenPayload;
+
+    const editor = await prisma.editor.findFirst({
+      where: { editor_id },
+    });
+
+    if (!editor) throw Error("editor not found!");
+
+    if (editor.status == "active") throw Error("editor is already active!");
+
+    const checkEditor = await prisma.editor.findFirst({
+      where: { org_id: editor.org_id, user_id: user.user_id },
+    });
+
+    if (
+      !checkEditor ||
+      checkEditor.status === "suspended" ||
+      checkEditor.editor_id == editor_id
+    )
+      throw Error("not authorized");
+
+    const updatedEditor = await prisma.editor.update({
+      where: { editor_id: editor_id },
+      data: { status: "active" },
+    });
+
+    state.error = false;
+    state.message = "editor reactivated";
   } catch (error: any) {
     state.error = true;
     state.message = error.message;

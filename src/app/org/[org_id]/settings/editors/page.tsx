@@ -6,6 +6,7 @@ import { UserCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { decode } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import ReactivateEditor from "@/components/ReactivateEditor";
 
 const getOrgEditors = async (org_id: string) => {
   const editors = await prisma.editor.findMany({
@@ -133,12 +134,13 @@ export default async function OrgSettingsEditorsPage({
                       <div className="flex items-center">
                         <UserCircleIcon className="w-6 md:w-8" />
                         <span className="ml-4 text-blue-400 font-bold">
-                          {editor.user.name}
-                          {editor.user?.middlename} {editor.user.lastname}
+                          {editor.user.name} {editor.user?.middlename}{" "}
+                          {editor.user.lastname}
                         </span>
                       </div>
                       <div className="mt-2 md:mt-0">
                         {/*  <RemoveEditor editor_id={editor.editor_id} /> */}
+                        <ReactivateEditor editor_id={editor.editor_id} />
                       </div>
                     </div>
                   ))}
