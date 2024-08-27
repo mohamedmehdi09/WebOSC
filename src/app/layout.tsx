@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={font.className}>
         <Toaster position="top-right" />
-        <main className="flex flex-col min-h-screen bg-gray-900 text-white">
+        <main className="flex flex-col min-h-screen bg-gray-900 text-white selection:bg-slate-300 selection:text-gray-800">
           {children}
         </main>
       </body>
