@@ -9,8 +9,10 @@ import LogOutForm from "@/components/LogoutForm";
 import { TokenPayload } from "@/lib/types";
 
 // Fetch announcements from the database
+
 const getOrgAnnouncements = async () => {
   const announcements = await prisma.announcement.findMany({
+    orderBy: { announcement_id: "desc" },
     include: {
       editor: {
         include: {

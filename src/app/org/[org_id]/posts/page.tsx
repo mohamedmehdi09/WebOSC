@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const getOrgAnnouncements = async (org_id: string) => {
   const announcements = await prisma.announcement.findMany({
+    orderBy: { announcement_id: "desc" },
     where: {
       editor: {
         org_id: org_id,
