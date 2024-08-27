@@ -202,6 +202,8 @@ export async function signup(
 
 export async function CreateOrg(formData: FormData) {
   try {
+    // TODO: Protect this Form from unautherized access YOU IDIOT
+    // TODO: add zod type checks on this form
     const org_id = formData.get("org_id") as string;
     const nameEn = formData.get("nameEn") as string;
     const nameAr = formData.get("nameAr") as string;
@@ -277,6 +279,7 @@ export async function addAnnouncement(
     const title = formData.get("title") as string;
     const body = formData.get("body") as string;
     const token = cookies().get("token")?.value;
+
     if (!token) {
       throw Error("not authenticated");
     }
@@ -285,6 +288,8 @@ export async function addAnnouncement(
     }
 
     const user = verify(token, secret) as TokenPayload;
+
+    if (!user.emailVerified) throw Error("email not verified!");
 
     // make sure user is editor in the target org
     const editor = await prisma.editor.findMany({
@@ -330,6 +335,8 @@ export async function suspendEditor(
     }
 
     const user = verify(token, secret) as TokenPayload;
+
+    if (!user.emailVerified) throw Error("email not verified!");
 
     const editor = await prisma.editor.findFirst({
       where: { editor_id },
@@ -379,6 +386,8 @@ export async function activateEditor(
     }
 
     const user = verify(token, secret) as TokenPayload;
+
+    if (!user.emailVerified) throw Error("email not verified!");
 
     const editor = await prisma.editor.findFirst({
       where: { editor_id },
