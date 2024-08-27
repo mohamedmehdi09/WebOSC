@@ -44,10 +44,10 @@ export default async function RootPage() {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen bg-black text-white">
       {/* Sidebar navigation */}
-      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col gap-6 items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black relative">
+      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col gap-3 items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black relative">
         <Link
           href="/org"
-          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 w-full text-center transition-colors break-words whitespace-normal"
+          className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 w-full text-center transition-colors truncate"
         >
           Browse Organizations
         </Link>
@@ -64,18 +64,18 @@ export default async function RootPage() {
         {cookies().get("token") && (
           <>
             {editors.length > 0 && (
-              <div className="font-normal flex flex-col gap-1 w-full">
+              <div className="font-normal flex flex-col w-full">
                 <ul className="flex w-full border-b border-gray-700 md:text-xl mb-4 font-normal">
-                  <li className="pb-2">My Organizations</li>
+                  <li className="pb-2 truncate">My Organizations</li>
                 </ul>
                 {editors.map((editor) => (
                   <Link
                     href={`/org/${editor.org.org_id}/posts`}
-                    className="bg-slate-800 p-2 text-sm rounded-md flex gap-2 text-left hover:bg-slate-700 transition-colors duration-200"
+                    className="bg-slate-800 p-2 text-sm rounded-md flex items-center gap-2 text-left hover:bg-slate-700 transition-colors duration-200"
                     key={editor.editor_id}
                   >
-                    <GlobeEuropeAfricaIcon className="w-6" />
-                    {editor.org.nameEn}
+                    <GlobeEuropeAfricaIcon className="w-6 shrink-0" />
+                    <span className="truncate">{editor.org.nameEn}</span>
                   </Link>
                 ))}
               </div>

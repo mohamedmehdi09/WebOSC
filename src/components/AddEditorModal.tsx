@@ -49,7 +49,7 @@ export default function AddEditorModal({
         className="rounded-md bg-green-700 py-2 px-4 text-sm font-medium hover:bg-green-800 flex gap-2 items-center"
       >
         <UserPlusIcon className="w-6" />
-        Add An Editor
+        Add
       </button>
 
       <Dialog
