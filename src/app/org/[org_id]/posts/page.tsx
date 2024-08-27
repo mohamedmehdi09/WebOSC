@@ -44,7 +44,7 @@ export default async function OrgPostsPage({
       {isEditor && (
         <Link
           href={`/org/${params.org_id}/posts/create`}
-          className="bg-blue-500 text-white rounded p-3 md:p-4 mb-4 text-center hover:bg-blue-600 transition"
+          className="bg-blue-800 text-white rounded p-3 md:p-4 mb-4 text-center hover:bg-blue-700 transition"
         >
           Add Announcement
         </Link>
@@ -80,9 +80,9 @@ const AnnouncementCard = ({
       </div>
       <Link
         href={`/announcement/${announcement.announcement_id}`}
-        className="p-2 bg-gray-800 rounded-md flex-shrink-0"
+        className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
       >
-        <EyeIcon className="w-6 h-6 text-gray-400" />
+        <EyeIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
       </Link>
     </div>
   );
