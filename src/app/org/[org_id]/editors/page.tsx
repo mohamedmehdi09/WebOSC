@@ -44,9 +44,9 @@ export default async function OrgEditorsPage({
           className="flex justify-between items-center bg-gray-700 p-4 rounded-md"
         >
           <div className="flex items-center">
-            <UserCircleIcon className="w-8 h-8 text-blue-400" />
+            <UserCircleIcon className="w-8 h-8 text-green-400" />
             <div className="ml-4">
-              <div className="text-blue-400 font-extrabold text-lg">
+              <div className="text-green-400 font-extrabold text-lg">
                 {editor.user.name} {editor.user.lastname}
               </div>
               <Link

@@ -95,8 +95,8 @@ export default async function OrgSettingsEditorsPage({
                   className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
                 >
                   <div className="flex items-center">
-                    <UserCircleIcon className="w-6 md:w-8" />
-                    <span className="ml-4 text-blue-400 font-bold">
+                    <UserCircleIcon className="w-6 md:w-8 text-green-400" />
+                    <span className="ml-4 text-green-400 font-bold capitalize">
                       {editor.user.name} {editor.user?.middlename}{" "}
                       {editor.user.lastname}
                     </span>
@@ -133,7 +133,7 @@ export default async function OrgSettingsEditorsPage({
                     >
                       <div className="flex items-center">
                         <UserCircleIcon className="w-6 md:w-8" />
-                        <span className="ml-4 text-blue-400 font-bold">
+                        <span className="ml-4 text-green-400 font-bold">
                           {editor.user.name} {editor.user?.middlename}{" "}
                           {editor.user.lastname}
                         </span>

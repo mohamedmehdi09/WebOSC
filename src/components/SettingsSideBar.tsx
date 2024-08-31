@@ -6,24 +6,47 @@ import { CogIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 
 export default function SettingsSideBar({ org_id }: { org_id: string }) {
   const path = usePathname();
+
   return (
-    <div className="flex flex-col gap-2 p-2 w-full md:w-1/4">
-      <Link
-        data-current={path == `/org/${org_id}/settings`}
+    <div className="flex flex-col gap-2 p-4 w-full md:w-1/4 bg-[rgb(31,41,55)] shadow-lg rounded-md">
+      <SidebarLink
         href={`/org/${org_id}/settings`}
-        className="w-full hover:bg-green-700/25 data-[current=true]:bg-green-700 rounded-md p-2 flex items-center gap-2"
-      >
-        <CogIcon className="w-6 h-6" />
-        <span className="text-sm md:text-base">General</span>
-      </Link>
-      <Link
-        data-current={path == `/org/${org_id}/settings/editors`}
+        isActive={path === `/org/${org_id}/settings`}
+        icon={<CogIcon className="w-6 h-6 text-white" />}
+        label="General"
+      />
+      <SidebarLink
         href={`/org/${org_id}/settings/editors`}
-        className="w-full hover:bg-green-700/25 data-[current=true]:bg-green-700 rounded-md p-2 flex items-center gap-2"
-      >
-        <UserGroupIcon className="w-6 h-6" />
-        <span className="text-sm md:text-base">Editors</span>
-      </Link>
+        isActive={path === `/org/${org_id}/settings/editors`}
+        icon={<UserGroupIcon className="w-6 h-6 text-white" />}
+        label="Editors"
+      />
     </div>
+  );
+}
+
+function SidebarLink({
+  href,
+  isActive,
+  icon,
+  label,
+}: {
+  href: string;
+  isActive: boolean;
+  icon: ReactNode;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors duration-200 ${
+        isActive
+          ? "bg-green-600 text-white"
+          : "bg-transparent hover:bg-green-600/25 text-gray-300"
+      }`}
+    >
+      {icon}
+      <span className="text-sm md:text-base">{label}</span>
+    </Link>
   );
 }
