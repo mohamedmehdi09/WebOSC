@@ -13,7 +13,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function login(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   // This is a zod schema for validating the form data
   const loginShema = z.object({
@@ -60,7 +60,7 @@ export async function login(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      secret,
     );
 
     // We set the token as a cookie
@@ -85,7 +85,7 @@ export async function login(
 
 export async function signup(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   // We define a schema for validating the signup form data
   const signupShema = z.object({
@@ -199,7 +199,7 @@ export async function signup(
         "Secret key for user " +
           user.name +
           " is " +
-          user.PrimaryEmail.emailVerificationPhrase
+          user.PrimaryEmail.emailVerificationPhrase,
       );
     }
 
@@ -213,7 +213,7 @@ export async function signup(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      secret,
     );
 
     // We set the token as a cookie
@@ -266,7 +266,7 @@ export async function CreateOrg(formData: FormData) {
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
@@ -309,7 +309,7 @@ export async function addEditorToOrg(
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const org_id = formData.get("org_id") as string;
@@ -358,7 +358,7 @@ export async function addAnnouncement(
 
 export async function suspendEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -409,7 +409,7 @@ export async function suspendEditor(
 
 export async function activateEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -464,7 +464,7 @@ export async function logout(
     error: boolean | null;
     message: string;
   },
-  formData: FormData
+  formData: FormData,
 ) {
   cookies().delete("token");
   state.error = false;
@@ -474,7 +474,7 @@ export async function logout(
 
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   // First, we check if the user is logged in by checking if the token cookie exists
   const token = cookies().get("token")?.value;
@@ -543,7 +543,7 @@ export async function verifyEmail(
 
   // Then, we get the email verification phrase from the form data
   const emailVerificationPhrase = formData.get(
-    "emailVerificationPhrase"
+    "emailVerificationPhrase",
   ) as string;
 
   // If the email verification phrase doesn't match the one stored in the database, we return an error message
@@ -574,7 +574,7 @@ export async function verifyEmail(
       emailVerified: updatedEmail.emailVerified,
       super: updatedUser.super,
     },
-    secret
+    secret,
   );
 
   // We set the new token as the value of the token cookie
@@ -592,7 +592,7 @@ export async function verifyEmail(
 
 export async function resendVerificationEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const token = cookies().get("token")?.value;
 
@@ -703,7 +703,7 @@ export async function resendVerificationEmail(
       "New secret key for user " +
         updatedUser.name +
         " is " +
-        updatedUser.PrimaryEmail.emailVerificationPhrase
+        updatedUser.PrimaryEmail.emailVerificationPhrase,
     );
   }
 

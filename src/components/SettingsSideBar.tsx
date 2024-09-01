@@ -8,7 +8,7 @@ export default function SettingsSideBar({ org_id }: { org_id: string }) {
   const path = usePathname();
 
   return (
-    <div className="flex flex-col gap-2 p-4 w-full md:w-1/4 bg-[rgb(31,41,55)] shadow-lg rounded-md">
+    <div className="flex flex-col gap-2 p-4 w-full md:w-1/4 bg-[rgb(31,41,55)] shadow-lg rounded-md h-fit">
       <SidebarLink
         href={`/org/${org_id}/settings`}
         isActive={path === `/org/${org_id}/settings`}
@@ -33,7 +33,7 @@ function SidebarLink({
 }: {
   href: string;
   isActive: boolean;
-  icon: ReactNode;
+  icon: React.ReactNode;
   label: string;
 }) {
   return (
