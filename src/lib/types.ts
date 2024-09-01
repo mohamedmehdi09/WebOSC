@@ -12,3 +12,10 @@ export type FrontendUser = {
   email: string;
   isMale: boolean | null;
 };
+
+export class ActionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ActionError";
+  }
+}

@@ -25,6 +25,8 @@ export default function EmailVerificationPage({
         () => window.location.replace(searchParams.redirect || "/"),
         1000
       );
+    } else if (formState.success === false) {
+      toast.error(formState.message);
     }
   }, [formState, searchParams.redirect]);
 
@@ -52,8 +54,6 @@ export default function EmailVerificationPage({
             pattern="[a-zA-Z0-9\-]{10,}"
           />
         </div>
-        <p className="text-red-500 w-full text-center">{formState.message}</p>
-
         <button
           disabled={pending}
           type="submit"

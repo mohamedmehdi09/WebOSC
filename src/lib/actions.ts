@@ -5,9 +5,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sign, verify } from "jsonwebtoken";
 import { z } from "zod";
-import { TokenPayload } from "./types";
+import { ActionError, TokenPayload } from "./types";
 import { mailer } from "./mailer";
 import { hash, randomUUID } from "crypto";
+import { Email, User } from "@prisma/client";
 
 const secret = process.env.JWT_SECRET;
 
@@ -173,34 +174,7 @@ export async function signup(
         from: "OSCA",
         to: user.email,
         subject: "Email Verification",
-        html: `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Email Verification</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            h1 { color: #4a4a4a; }
-            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
-            .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Hi ${user.name},</h1>
-            <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
-            <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
-            <p>Then, enter the following secret key:</p>
-            <p class="secret-key">
-              ${user.PrimaryEmail.emailVerificationPhrase}
-            </p>
-          </div>
-        </body>
-        </html>
-        `,
+        html: generateEmailHTML(user),
       });
     }
     // if in development we just console.log the secret phrase
@@ -274,20 +248,98 @@ export async function CreateOrg(formData: FormData) {
   redirect("/org");
 }
 
+// done
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
-  const user_id = formData.get("user_id") as string;
-  const org_id = formData.get("org_id") as string;
+  const addEditorFormSchema = z.object({
+    org_id: z.string().min(4, { message: "Organization ID is required!" }),
+    user_id: z.string().min(6, { message: "User ID is required!" }),
+  });
+
   try {
-    const checkEditor = await prisma.editor.findFirst({
-      where: { user_id: user_id, org_id: org_id },
+    // validate form
+    const addEditorFormData = {
+      org_id: formData.get("org_id") as string,
+      user_id: formData.get("user_id") as string,
+    };
+
+    const parsAddEditorForm = addEditorFormSchema.safeParse(addEditorFormData);
+
+    if (!parsAddEditorForm.success)
+      throw new ActionError(parsAddEditorForm.error.issues[0].message);
+
+    // authenticate user
+    const user = authenticateUser();
+
+    // check if org exists
+
+    const checkOrg = await prisma.organization.findFirst({
+      where: {
+        org_id: addEditorFormData.org_id,
+      },
     });
 
-    if (checkEditor) {
+    if (!checkOrg) throw new ActionError("Organization Not Found!");
+
+    // authorize user
+    const checkEditorPrivilages = await prisma.editor.findFirst({
+      where: {
+        user_id: user.user_id,
+        org_id: addEditorFormData.org_id,
+      },
+    });
+
+    if (!checkEditorPrivilages)
+      throw new ActionError("You Are not An Editor Of This Organization!");
+
+    if (checkEditorPrivilages.status !== "active")
+      throw new ActionError(
+        "You Are not An Editor Of This Organization anymore!"
+      );
+
+    // check if added user exists
+
+    const checkUser = await prisma.user.findFirst({
+      where: {
+        user_id: addEditorFormData.user_id,
+      },
+      include: {
+        PrimaryEmail: true,
+      },
+    });
+
+    if (!checkUser) throw new ActionError("User Not Found!");
+
+    // check if added user email is verified
+
+    if (!checkUser.PrimaryEmail.emailVerified)
+      throw new ActionError(
+        "You are trying to add a User with an unverified Email"
+      );
+
+    // add editor
+    const checkEditor = await prisma.editor.findFirst({
+      where: {
+        user_id: addEditorFormData.user_id,
+        org_id: addEditorFormData.org_id,
+      },
+    });
+
+    if (!checkEditor) {
+      const editor = await prisma.editor.create({
+        data: {
+          org_id: addEditorFormData.org_id,
+          user_id: addEditorFormData.user_id,
+        },
+      });
+      state.message = "Editor has been added to the organization!";
+    } else {
       if (checkEditor.status == "active")
-        throw Error("The user is already an editor in this organization!");
+        throw new ActionError(
+          "The user is already an editor in this organization!"
+        );
       else {
         const editor = await prisma.editor.update({
           where: { editor_id: checkEditor.editor_id },
@@ -297,114 +349,154 @@ export async function addEditorToOrg(
       }
     }
 
-    if (!checkEditor) {
-      const editor = await prisma.editor.create({
-        data: { org_id: org_id, user_id: user_id },
-      });
-      state.message = "Editor has been added to the organization!";
-    }
-
     state.error = false;
   } catch (error: any) {
     state.error = true;
-    if (
-      error.meta?.target.includes("user_id") &&
-      error.meta?.target.includes("org_id")
-    ) {
-      state.message = "User is already an editor in this organization!";
-    } else state.message = error.message;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
   }
   return state;
 }
 
+// done
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
   formData: FormData
 ) {
+  const addAnnouncementFormSchema = z.object({
+    org_id: z.string().min(4, { message: "Organization ID is required!" }),
+    title: z.string().min(1, { message: "Title is required!" }).max(40, {
+      message: "Title must be less than 40 characters!",
+    }),
+    body: z.string().min(1, { message: "Body is required!" }),
+  });
   try {
-    const org_id = formData.get("org_id") as string;
-    const title = formData.get("title") as string;
-    const body = formData.get("body") as string;
-    const token = cookies().get("token")?.value;
+    const addAnnouncementFormData = {
+      org_id: formData.get("org_id") as string,
+      title: formData.get("title") as string,
+      body: formData.get("body") as string,
+    };
 
-    if (!token) {
-      throw Error("Not authenticated!");
-    }
-    if (!secret) {
-      throw Error("Unexpected error!");
-    }
+    // authenticate user
+    const user = authenticateUser();
 
-    const user = verify(token, secret) as TokenPayload;
+    // check if org exists
 
-    if (!user.emailVerified) throw Error("Email not verified!");
-
-    // make sure user is editor in the target org
-    const editor = await prisma.editor.findMany({
-      where: { org_id: org_id, user_id: user.user_id },
+    const checkOrg = await prisma.organization.findFirst({
+      where: {
+        org_id: addAnnouncementFormData.org_id,
+      },
     });
 
-    if (editor.length == 0) {
-      throw Error("Action not allowed!");
+    if (!checkOrg) throw new ActionError("Organization Not Found!");
+
+    // authorize user
+
+    const checkEditorPrivilages = await prisma.editor.findFirst({
+      where: {
+        user_id: user.user_id,
+        org_id: addAnnouncementFormData.org_id,
+      },
+    });
+
+    if (!checkEditorPrivilages)
+      throw new ActionError("You Are not An Editor Of This Organization!");
+
+    if (checkEditorPrivilages.status !== "active")
+      throw new ActionError(
+        "You Are not An Editor Of This Organization anymore!"
+      );
+
+    // validate form
+    const parsedAddAnnouncementFormData = addAnnouncementFormSchema.safeParse(
+      addAnnouncementFormData
+    );
+
+    if (!parsedAddAnnouncementFormData.success) {
+      throw new ActionError(
+        parsedAddAnnouncementFormData.error.issues[0].message
+      );
     }
 
     // create announcement
     const announcement = await prisma.announcement.create({
       data: {
-        title: title,
-        body: body,
-        editor_id: editor[0].editor_id,
-        org_id: org_id,
+        title: addAnnouncementFormData.title,
+        body: addAnnouncementFormData.body,
+        editor_id: checkEditorPrivilages.editor_id,
+        org_id: addAnnouncementFormData.org_id,
       },
     });
     state.error = false;
     state.announcement_id = announcement.announcement_id;
-    state.message = "The post was created successfully!";
+    state.message = "The announcement was created successfully!";
   } catch (error: any) {
     state.error = true;
-    state.message = error.message;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
   }
   return state;
 }
 
+// done
 export async function suspendEditor(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
+  const suspendEditorFormSchema = z.object({
+    editor_id: z.string().uuid({ message: "Invalid editor id!" }),
+  });
   try {
-    const editor_id = formData.get("editor_id") as string;
-    const token = cookies().get("token")?.value;
+    // authenticate user
+    const user = authenticateUser();
 
-    if (!token) {
-      throw Error("Not authenticated!");
+    // validate form
+    const suspendEditorFormData = {
+      editor_id: formData.get("editor_id") as string,
+    };
+
+    const parsedSuspendEditorFormData = suspendEditorFormSchema.safeParse(
+      suspendEditorFormData
+    );
+
+    if (!parsedSuspendEditorFormData.success) {
+      throw new ActionError(
+        parsedSuspendEditorFormData.error.issues[0].message
+      );
     }
-    if (!secret) {
-      throw Error("Unexpected error!");
-    }
 
-    const user = verify(token, secret) as TokenPayload;
-
-    if (!user.emailVerified) throw Error("Email not verified!");
+    // check if editor exists
 
     const editor = await prisma.editor.findFirst({
-      where: { editor_id },
+      where: { editor_id: suspendEditorFormData.editor_id },
     });
 
     if (!editor) {
-      throw Error("Editor not found!");
+      throw new ActionError("Editor not found!");
     }
+
+    if (editor.status == "suspended")
+      throw new ActionError("The editor is already suspended!");
+
+    // authorize user
 
     const checkEditor = await prisma.editor.findFirst({
       where: { org_id: editor.org_id, user_id: user.user_id },
     });
 
-    if (!checkEditor || checkEditor.status === "suspended")
-      throw Error("Action not allowed!");
+    if (!checkEditor)
+      throw new ActionError("You are not An Editor in this organization!");
 
-    if (checkEditor.editor_id == editor_id)
-      throw Error("You can't remove yourself from the organization!");
+    if (checkEditor.status == "suspended")
+      throw new ActionError(
+        "You are not An Editor in this organization Anymore!"
+      );
+
+    if (checkEditor.editor_id == suspendEditorFormData.editor_id)
+      throw new ActionError("You can't remove yourself from the organization!");
 
     const updatedEditor = await prisma.editor.update({
-      where: { editor_id: editor_id },
+      where: { editor_id: suspendEditorFormData.editor_id },
       data: { status: "suspended" },
     });
 
@@ -412,59 +504,77 @@ export async function suspendEditor(
     state.message = "The editor has been suspended!";
   } catch (error: any) {
     state.error = true;
-    state.message = error.message;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
   }
   return state;
 }
 
+// done
 export async function activateEditor(
   state: { error: boolean | null; message: string },
   formData: FormData
 ) {
+  const activateEditorFormSchema = z.object({
+    editor_id: z.string().uuid({ message: "Invalid editor id!" }),
+  });
   try {
-    const editor_id = formData.get("editor_id") as string;
-    const token = cookies().get("token")?.value;
+    // authenticate user
+    const user = authenticateUser();
 
-    if (!token) {
-      throw Error("Not authenticated!");
+    // validate form
+    const activateEditorFormData = {
+      editor_id: formData.get("editor_id") as string,
+    };
+
+    const parsedActivateEditorFormData = activateEditorFormSchema.safeParse(
+      activateEditorFormData
+    );
+
+    if (!parsedActivateEditorFormData.success) {
+      throw new ActionError(
+        parsedActivateEditorFormData.error.issues[0].message
+      );
     }
-    if (!secret) {
-      throw Error("Unexpected error!");
-    }
 
-    const user = verify(token, secret) as TokenPayload;
-
-    if (!user.emailVerified) throw Error("Email not verified!");
+    // check if editor exists
 
     const editor = await prisma.editor.findFirst({
-      where: { editor_id },
+      where: { editor_id: activateEditorFormData.editor_id },
     });
 
-    if (!editor) throw Error("Editor not found!");
+    if (!editor) {
+      throw new ActionError("Editor not found!");
+    }
 
-    if (editor.status == "active") throw Error("Editor is already active!");
+    if (editor.status == "active")
+      throw new ActionError("The editor is already active!");
+
+    // authorize user
 
     const checkEditor = await prisma.editor.findFirst({
       where: { org_id: editor.org_id, user_id: user.user_id },
     });
 
-    if (
-      !checkEditor ||
-      checkEditor.status === "suspended" ||
-      checkEditor.editor_id == editor_id
-    )
-      throw Error("Not authorized!");
+    if (!checkEditor)
+      throw new ActionError("You are not An Editor in this organization!");
+
+    if (checkEditor.status == "suspended")
+      throw new ActionError(
+        "You are not An Editor in this organization Anymore!"
+      );
 
     const updatedEditor = await prisma.editor.update({
-      where: { editor_id: editor_id },
+      where: { editor_id: activateEditorFormData.editor_id },
       data: { status: "active" },
     });
 
     state.error = false;
-    state.message = "Editor reactivated!";
+    state.message = "The editor has been reactivated!";
   } catch (error: any) {
     state.error = true;
-    state.message = error.message;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
   }
   return state;
 }
@@ -482,120 +592,101 @@ export async function logout(
   return state;
 }
 
+// done
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
   formData: FormData
 ) {
-  // First, we check if the user is logged in by checking if the token cookie exists
-  const token = cookies().get("token")?.value;
-
-  if (!token) {
-    // If the token cookie doesn't exist, we return an error message indicating that the user must log in first
-    state = {
-      success: false,
-      message: "You must be logged in to verify your email!",
-    };
-    return state;
-  }
-
-  // Next, we check if the secret for signing the token is set
-  if (!secret) {
-    // If the secret isn't set, we return an error message indicating that there's an internal error
-    state = {
-      success: false,
-      message: "Internal error. Please try again later!",
-    };
-    return state;
-  }
-
-  // Then, we verify the token using the secret and check if it's valid
-  const userToken = verify(token, secret) as TokenPayload;
-
-  // If the token is invalid, we delete the token cookie and return an error message
-  if (!userToken) {
-    cookies().delete("token");
-    state = {
-      success: false,
-      message: "Something went wrong. Please try again later!",
-    };
-    return state;
-  }
-
-  // Next, we check if the user's email is already verified
-  if (userToken.emailVerified) {
-    // If the email is already verified, we return an error message indicating that the email is already verified
-    state = { success: false, message: "Email is already verified!" };
-    return state;
-  }
-
-  // Then, we query the user and their primary email address from the database
-  const user = await prisma.user.findUnique({
-    where: { user_id: userToken.user_id },
-    include: { PrimaryEmail: true },
+  const verifyEmailFormSchema = z.object({
+    emailVerificationPhrase: z
+      .string()
+      .uuid({ message: "Invalid passphrase!" }),
   });
+  try {
+    // First, we authenticate the user
+    const user = authenticateUser();
 
-  // If the user or their primary email address can't be found, we delete the token cookie and return an error message
-  if (!user) {
-    cookies().delete("token");
-    state = {
-      success: false,
-      message: "Something went wrong. Please try again later!",
+    // check if user exists
+
+    const checkUser = await prisma.user.findUnique({
+      where: { user_id: user.user_id },
+      include: { PrimaryEmail: true },
+    });
+
+    if (!checkUser) {
+      cookies().delete("token");
+      throw new ActionError("Something went wrong. Please try again later!");
+    }
+
+    if (checkUser.PrimaryEmail.emailVerified)
+      throw new ActionError("Email is already verified!");
+
+    // validate form
+    const verifyEmailFormData = {
+      emailVerificationPhrase: formData.get(
+        "emailVerificationPhrase"
+      ) as string,
     };
-    return state;
-  }
 
-  // Next, we check if the user's primary email address is already verified
-  if (user.PrimaryEmail.emailVerified) {
-    // If the email is already verified, we return an error message indicating that the email is already verified
-    state = { success: false, message: "Email is already verified!" };
-    return state;
-  }
+    const parsedVerifyEmailFormData =
+      verifyEmailFormSchema.safeParse(verifyEmailFormData);
 
-  // Then, we get the email verification phrase from the form data
-  const emailVerificationPhrase = formData.get(
-    "emailVerificationPhrase"
-  ) as string;
+    if (!parsedVerifyEmailFormData.success) {
+      throw new ActionError(parsedVerifyEmailFormData.error.issues[0].message);
+    }
 
-  // If the email verification phrase doesn't match the one stored in the database, we return an error message
-  if (user.PrimaryEmail.emailVerificationPhrase !== emailVerificationPhrase) {
-    state = {
-      success: false,
-      message: "Invalid passphrase. Please try again!",
-    };
-    return state;
-  }
+    // check if pass phrase is valid
 
-  // Finally, we update the user's primary email address to set the emailVerified flag to true and null out the email verification phrase
-  const updatedUser = await prisma.user.update({
-    where: { user_id: user.user_id },
-    data: {
-      PrimaryEmail: {
-        update: { emailVerified: true, emailVerificationPhrase: null },
+    if (
+      checkUser.PrimaryEmail.emailVerificationPhrase !==
+      verifyEmailFormData.emailVerificationPhrase
+    ) {
+      throw new ActionError("Invalid email verification phrase!");
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: {
+        PrimaryEmail: {
+          update: { emailVerified: true, emailVerificationPhrase: null },
+        },
       },
-    },
-    include: { PrimaryEmail: true },
-  });
+      include: { PrimaryEmail: true },
+    });
 
-  // We sign a new token using the updated user's data and the secret
-  const newToken = sign(
-    {
-      user_id: updatedUser.user_id,
-      emailVerified: updatedUser.PrimaryEmail.emailVerified,
-      super: updatedUser.super,
-    },
-    secret
-  );
+    if (!secret) {
+      state = {
+        success: false,
+        message: "Unexpected error!",
+      };
+      return state;
+    }
 
-  // We set the new token as the value of the token cookie
-  cookies().set({
-    name: "token",
-    value: newToken,
-    secure: process.env.NODE_ENV !== "development",
-    httpOnly: false,
-  });
+    // We sign a new token using the updated user's data and the secret
+    const newToken = sign(
+      {
+        user_id: updatedUser.user_id,
+        emailVerified: updatedUser.PrimaryEmail.emailVerified,
+        super: updatedUser.super,
+      },
+      secret
+    );
 
-  // Finally, we return a success message indicating that the email has been verified
-  state = { success: true, message: "Email verified!" };
+    // We set the new token as the value of the token cookie
+    cookies().set({
+      name: "token",
+      value: newToken,
+      secure: process.env.NODE_ENV !== "development",
+      httpOnly: false,
+    });
+
+    state.success = true;
+    state.message = "Email verified!";
+  } catch (error) {
+    state.success = false;
+    if (error instanceof Error) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
+  }
   return state;
 }
 
@@ -676,34 +767,7 @@ export async function resendVerificationEmail(
       from: "OSCA",
       to: user.email,
       subject: "Email Verification",
-      html: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Email Verification</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          h1 { color: #4a4a4a; }
-          .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
-          .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Hi ${updatedUser.name},</h1>
-          <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
-          <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
-          <p>Then, enter the following secret key:</p>
-          <p class="secret-key">
-            ${updatedUser.PrimaryEmail.emailVerificationPhrase}
-          </p>
-        </div>
-      </body>
-      </html>
-      `,
+      html: generateEmailHTML(updatedUser),
     });
   }
   // if in development we just console.log the secret phrase
@@ -724,56 +788,23 @@ export async function changeEmail(
   state: { success: boolean | null; message: string },
   formData: FormData
 ) {
-  // First, we check if the user is logged in by checking if the token cookie exists
-  const token = cookies().get("token")?.value;
-
-  if (!token) {
-    // If the token cookie doesn't exist, we return an error message indicating that the user must log in first
-    state = {
-      success: false,
-      message: "You must be logged in to verify your email!",
-    };
-    return state;
-  }
-
-  // Next, we check if the secret for signing the token is set
-  if (!secret) {
-    // If the secret isn't set, we return an error message indicating that there's an internal error
-    state = {
-      success: false,
-      message: "Internal error. Please try again later!",
-    };
-    return state;
-  }
-
-  // Then, we verify the token using the secret and check if it's valid
-  const userToken = verify(token, secret) as TokenPayload;
-
-  // If the token is invalid, we delete the token cookie and return an error message
-  if (!userToken) {
-    cookies().delete("token");
-    state = {
-      success: false,
-      message: "Something went wrong. Please try again later!",
-    };
-    return state;
-  }
+  const user = authenticateUser();
 
   // Next, we check if the user's email is already verified
-  if (userToken.emailVerified) {
+  if (user.emailVerified) {
     // If the email is already verified, we return an error message indicating that the email is already verified
     state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
   // Then, we query the user and their primary email address from the database
-  const user = await prisma.user.findUnique({
-    where: { user_id: userToken.user_id },
+  const checkUser = await prisma.user.findUnique({
+    where: { user_id: user.user_id },
     include: { PrimaryEmail: true },
   });
 
   // If the user or their primary email address can't be found, we delete the token cookie and return an error message
-  if (!user) {
+  if (!checkUser) {
     cookies().delete("token");
     state = {
       success: false,
@@ -783,7 +814,7 @@ export async function changeEmail(
   }
 
   // Next, we check if the user's primary email address is already verified
-  if (user.PrimaryEmail.emailVerified) {
+  if (checkUser.PrimaryEmail.emailVerified) {
     // If the email is already verified, we return an error message indicating that the email is already verified
     state = { success: false, message: "Email is already verified!" };
     return state;
@@ -826,7 +857,7 @@ export async function changeEmail(
 
   // delete old email
   await prisma.email.delete({
-    where: { email: user.PrimaryEmail.email },
+    where: { email: checkUser.PrimaryEmail.email },
   });
 
   // Send Verification email
@@ -834,36 +865,9 @@ export async function changeEmail(
   if (process.env.NODE_ENV !== "development") {
     mailer.sendMail({
       from: "OSCA",
-      to: user.email,
+      to: checkUser.email,
       subject: "Email Verification",
-      html: `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Email Verification</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            h1 { color: #4a4a4a; }
-            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
-            .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Hi ${updatedUser.name},</h1>
-            <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
-            <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
-            <p>Then, enter the following secret key:</p>
-            <p class="secret-key">
-              ${updatedUser.PrimaryEmail.emailVerificationPhrase}
-            </p>
-          </div>
-        </body>
-        </html>
-        `,
+      html: generateEmailHTML(updatedUser),
     });
   }
   // if in development we just console.log the secret phrase
@@ -884,4 +888,53 @@ export async function changeEmail(
     message: "Email updated! and email verification sent",
   };
   return state;
+}
+
+function authenticateUser() {
+  const token = cookies().get("token")?.value;
+
+  if (!token) throw new ActionError("You are not Logged In!");
+
+  if (!secret) throw new ActionError("Internal error. Please try again later!");
+
+  let user;
+  try {
+    user = verify(token, secret) as TokenPayload;
+  } catch (error) {
+    cookies().delete("token");
+    console.log("unverified token");
+    throw new ActionError("Token invalid or expired. Please log in again!");
+  }
+
+  return user;
+}
+
+function generateEmailHTML(user: User & { PrimaryEmail: Email }) {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Email Verification</title>
+      <style> 
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        h1 { color: #4a4a4a; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+        .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+      <h1>Hi ${user.name},</h1>
+      <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
+      <p><a href="${process.env.HOSTNAME}/verify-email" class="btn">Verify Email</a></p>
+      <p>Then, enter the following secret key:</p>
+      <p class="secret-key">
+        ${user.PrimaryEmail.emailVerificationPhrase}
+      </p>
+      </div>
+    </body>
+  </html>`;
 }
