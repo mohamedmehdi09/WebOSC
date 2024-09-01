@@ -7,13 +7,13 @@ import { sign, verify } from "jsonwebtoken";
 import { z } from "zod";
 import { TokenPayload } from "./types";
 import { mailer } from "./mailer";
-import { randomUUID } from "crypto";
+import { hash, randomUUID } from "crypto";
 
 const secret = process.env.JWT_SECRET;
 
 export async function login(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   // This is a zod schema for validating the form data
   const loginShema = z.object({
@@ -46,8 +46,13 @@ export async function login(
       },
     });
 
+    const passwordHash =
+      process.env.NODE_ENV == "development"
+        ? loginData.password
+        : hash("sha512", loginData.password);
+
     // If the user doesn't exist or the password is incorrect, we throw an error
-    if (!user || user?.password !== loginData.password)
+    if (!user || user?.password !== passwordHash)
       throw Error("Username or password is incorrect!");
 
     // If the secret key is not set, we throw an error
@@ -60,7 +65,7 @@ export async function login(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret,
+      secret
     );
 
     // We set the token as a cookie
@@ -85,7 +90,7 @@ export async function login(
 
 export async function signup(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   // We define a schema for validating the signup form data
   const signupShema = z.object({
@@ -135,6 +140,11 @@ export async function signup(
 
     const countUsers = await prisma.user.count();
 
+    const passwordHash =
+      process.env.NODE_ENV == "development"
+        ? signupData.password
+        : hash("sha512", signupData.password);
+
     // We create a new user in the database along with the associated email
     const user = await prisma.user.create({
       data: {
@@ -143,7 +153,7 @@ export async function signup(
         name: signupData.name,
         lastname: signupData.lastname,
         isMale: signupData.isMale,
-        password: signupData.password,
+        password: passwordHash,
         super: countUsers === 0,
         PrimaryEmail: {
           create: {
@@ -199,7 +209,7 @@ export async function signup(
         "Secret key for user " +
           user.name +
           " is " +
-          user.PrimaryEmail.emailVerificationPhrase,
+          user.PrimaryEmail.emailVerificationPhrase
       );
     }
 
@@ -213,7 +223,7 @@ export async function signup(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret,
+      secret
     );
 
     // We set the token as a cookie
@@ -266,7 +276,7 @@ export async function CreateOrg(formData: FormData) {
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
@@ -309,7 +319,7 @@ export async function addEditorToOrg(
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const org_id = formData.get("org_id") as string;
@@ -358,7 +368,7 @@ export async function addAnnouncement(
 
 export async function suspendEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -409,7 +419,7 @@ export async function suspendEditor(
 
 export async function activateEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -464,7 +474,7 @@ export async function logout(
     error: boolean | null;
     message: string;
   },
-  formData: FormData,
+  formData: FormData
 ) {
   cookies().delete("token");
   state.error = false;
@@ -474,7 +484,7 @@ export async function logout(
 
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   // First, we check if the user is logged in by checking if the token cookie exists
   const token = cookies().get("token")?.value;
@@ -543,7 +553,7 @@ export async function verifyEmail(
 
   // Then, we get the email verification phrase from the form data
   const emailVerificationPhrase = formData.get(
-    "emailVerificationPhrase",
+    "emailVerificationPhrase"
   ) as string;
 
   // If the email verification phrase doesn't match the one stored in the database, we return an error message
@@ -574,7 +584,7 @@ export async function verifyEmail(
       emailVerified: updatedEmail.emailVerified,
       super: updatedUser.super,
     },
-    secret,
+    secret
   );
 
   // We set the new token as the value of the token cookie
@@ -592,7 +602,7 @@ export async function verifyEmail(
 
 export async function resendVerificationEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   const token = cookies().get("token")?.value;
 
@@ -703,7 +713,7 @@ export async function resendVerificationEmail(
       "New secret key for user " +
         updatedUser.name +
         " is " +
-        updatedUser.PrimaryEmail.emailVerificationPhrase,
+        updatedUser.PrimaryEmail.emailVerificationPhrase
     );
   }
 
