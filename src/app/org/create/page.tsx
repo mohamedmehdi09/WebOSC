@@ -22,7 +22,8 @@ async function getUsers() {
       email: true,
       isMale: true,
     },
-    where: { emailVerified: true },
+
+    where: { PrimaryEmail: { emailVerified: true } },
   });
   return users;
 }

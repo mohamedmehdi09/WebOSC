@@ -13,7 +13,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function login(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   // This is a zod schema for validating the form data
   const loginShema = z.object({
@@ -41,6 +41,9 @@ export async function login(
     // We query the user from the database using the email
     const user = await prisma.user.findFirst({
       where: { email: loginData.email },
+      include: {
+        PrimaryEmail: true,
+      },
     });
 
     // If the user doesn't exist or the password is incorrect, we throw an error
@@ -55,9 +58,9 @@ export async function login(
       {
         user_id: user.user_id,
         super: user.super,
-        emailVerified: user.emailVerified,
+        emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret,
+      secret
     );
 
     // We set the token as a cookie
@@ -82,7 +85,7 @@ export async function login(
 
 export async function signup(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   // We define a schema for validating the signup form data
   const signupShema = z.object({
@@ -132,7 +135,7 @@ export async function signup(
 
     const countUsers = await prisma.user.count();
 
-    // We create a new user in the database
+    // We create a new user in the database along with the associated email
     const user = await prisma.user.create({
       data: {
         user_id: signupData.username,
@@ -140,9 +143,16 @@ export async function signup(
         name: signupData.name,
         lastname: signupData.lastname,
         isMale: signupData.isMale,
-        email: signupData.email,
         password: signupData.password,
         super: countUsers === 0,
+        PrimaryEmail: {
+          create: {
+            email: signupData.email,
+          },
+        },
+      },
+      include: {
+        PrimaryEmail: true,
       },
     });
 
@@ -153,7 +163,34 @@ export async function signup(
         from: "OSCA",
         to: user.email,
         subject: "Email Verification",
-        html: `<h1>Hi ${user.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${user.emailVerificationPhrase}</p>`,
+        html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Verification</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            h1 { color: #4a4a4a; }
+            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+            .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Hi ${user.name},</h1>
+            <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
+            <p><a href="http://localhost:3000/emailVerification" class="btn">Verify Email</a></p>
+            <p>Then, enter the following secret key:</p>
+            <p class="secret-key">
+              ${user.PrimaryEmail.emailVerificationPhrase}
+            </p>
+          </div>
+        </body>
+        </html>
+        `,
       });
     }
     // if in development we just console.log the secret phrase
@@ -162,7 +199,7 @@ export async function signup(
         "Secret key for user " +
           user.name +
           " is " +
-          user.emailVerificationPhrase,
+          user.PrimaryEmail.emailVerificationPhrase
       );
     }
 
@@ -174,9 +211,9 @@ export async function signup(
       {
         user_id: user.user_id,
         super: user.super,
-        emailVerified: user.emailVerified,
+        emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret,
+      secret
     );
 
     // We set the token as a cookie
@@ -229,7 +266,7 @@ export async function CreateOrg(formData: FormData) {
 
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   const user_id = formData.get("user_id") as string;
   const org_id = formData.get("org_id") as string;
@@ -272,7 +309,7 @@ export async function addEditorToOrg(
 
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const org_id = formData.get("org_id") as string;
@@ -321,7 +358,7 @@ export async function addAnnouncement(
 
 export async function suspendEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -372,7 +409,7 @@ export async function suspendEditor(
 
 export async function activateEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     const editor_id = formData.get("editor_id") as string;
@@ -427,7 +464,7 @@ export async function logout(
     error: boolean | null;
     message: string;
   },
-  formData: FormData,
+  formData: FormData
 ) {
   cookies().delete("token");
   state.error = false;
@@ -437,11 +474,13 @@ export async function logout(
 
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
+  // First, we check if the user is logged in by checking if the token cookie exists
   const token = cookies().get("token")?.value;
 
   if (!token) {
+    // If the token cookie doesn't exist, we return an error message indicating that the user must log in first
     state = {
       success: false,
       message: "You must be logged in to verify your email!",
@@ -449,7 +488,9 @@ export async function verifyEmail(
     return state;
   }
 
+  // Next, we check if the secret for signing the token is set
   if (!secret) {
+    // If the secret isn't set, we return an error message indicating that there's an internal error
     state = {
       success: false,
       message: "Internal error. Please try again later!",
@@ -457,8 +498,10 @@ export async function verifyEmail(
     return state;
   }
 
+  // Then, we verify the token using the secret and check if it's valid
   const userToken = verify(token, secret) as TokenPayload;
 
+  // If the token is invalid, we delete the token cookie and return an error message
   if (!userToken) {
     cookies().delete("token");
     state = {
@@ -468,15 +511,20 @@ export async function verifyEmail(
     return state;
   }
 
+  // Next, we check if the user's email is already verified
   if (userToken.emailVerified) {
+    // If the email is already verified, we return an error message indicating that the email is already verified
     state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
+  // Then, we query the user and their primary email address from the database
   const user = await prisma.user.findUnique({
     where: { user_id: userToken.user_id },
+    include: { PrimaryEmail: true },
   });
 
+  // If the user or their primary email address can't be found, we delete the token cookie and return an error message
   if (!user) {
     cookies().delete("token");
     state = {
@@ -485,16 +533,21 @@ export async function verifyEmail(
     };
     return state;
   }
-  if (user.emailVerified) {
+
+  // Next, we check if the user's primary email address is already verified
+  if (user.PrimaryEmail.emailVerified) {
+    // If the email is already verified, we return an error message indicating that the email is already verified
     state = { success: false, message: "Email is already verified!" };
     return state;
   }
 
+  // Then, we get the email verification phrase from the form data
   const emailVerificationPhrase = formData.get(
-    "emailVerificationPhrase",
+    "emailVerificationPhrase"
   ) as string;
 
-  if (user.emailVerificationPhrase !== emailVerificationPhrase) {
+  // If the email verification phrase doesn't match the one stored in the database, we return an error message
+  if (user.PrimaryEmail.emailVerificationPhrase !== emailVerificationPhrase) {
     state = {
       success: false,
       message: "Invalid passphrase. Please try again!",
@@ -502,20 +555,29 @@ export async function verifyEmail(
     return state;
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { user_id: user.user_id },
+  // Finally, we update the user's primary email address to set the emailVerified flag to true and null out the email verification phrase
+  const updatedEmail = await prisma.email.update({
+    where: { email: user.email },
     data: { emailVerified: true, emailVerificationPhrase: null },
+    include: {
+      user: true,
+    },
   });
 
+  // We get the updated user from the updated email address
+  const updatedUser = updatedEmail.user[0];
+
+  // We sign a new token using the updated user's data and the secret
   const newToken = sign(
     {
       user_id: updatedUser.user_id,
-      emailVerified: updatedUser.emailVerified,
+      emailVerified: updatedEmail.emailVerified,
       super: updatedUser.super,
     },
-    secret,
+    secret
   );
 
+  // We set the new token as the value of the token cookie
   cookies().set({
     name: "token",
     value: newToken,
@@ -523,13 +585,14 @@ export async function verifyEmail(
     httpOnly: false,
   });
 
+  // Finally, we return a success message indicating that the email has been verified
   state = { success: true, message: "Email verified!" };
   return state;
 }
 
 export async function resendVerificationEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData,
+  formData: FormData
 ) {
   const token = cookies().get("token")?.value;
 
@@ -567,6 +630,7 @@ export async function resendVerificationEmail(
 
   const user = await prisma.user.findUnique({
     where: { user_id: userToken.user_id },
+    include: { PrimaryEmail: true },
   });
 
   if (!user) {
@@ -577,7 +641,7 @@ export async function resendVerificationEmail(
     };
     return state;
   }
-  if (user.emailVerified) {
+  if (user.PrimaryEmail.emailVerified) {
     state = { success: false, message: "Email is already verified!" };
     return state;
   }
@@ -586,7 +650,16 @@ export async function resendVerificationEmail(
 
   const updatedUser = await prisma.user.update({
     where: { user_id: user.user_id },
-    data: { emailVerificationPhrase: newEmailVerificationPhrase },
+    data: {
+      PrimaryEmail: {
+        update: {
+          emailVerificationPhrase: newEmailVerificationPhrase,
+        },
+      },
+    },
+    include: {
+      PrimaryEmail: true,
+    },
   });
 
   if (process.env.NODE_ENV !== "development") {
@@ -594,7 +667,34 @@ export async function resendVerificationEmail(
       from: "OSCA",
       to: user.email,
       subject: "Email Verification",
-      html: `<h1>Hi ${updatedUser.name}</h1><p>Thanks for joining OSCA. Please verify your email by clicking on the link below.</p><a href="http://localhost:3000/emailVerification">Verify Email</a><p>and enter the following secret key: ${updatedUser.emailVerificationPhrase}</p>`,
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Verification</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          h1 { color: #4a4a4a; }
+          .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+          .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Hi ${updatedUser.name},</h1>
+          <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
+          <p><a href="http://localhost:3000/emailVerification" class="btn">Verify Email</a></p>
+          <p>Then, enter the following secret key:</p>
+          <p class="secret-key">
+            ${updatedUser.PrimaryEmail.emailVerificationPhrase}
+          </p>
+        </div>
+      </body>
+      </html>
+      `,
     });
   }
   // if in development we just console.log the secret phrase
@@ -603,7 +703,7 @@ export async function resendVerificationEmail(
       "New secret key for user " +
         updatedUser.name +
         " is " +
-        updatedUser.emailVerificationPhrase,
+        updatedUser.PrimaryEmail.emailVerificationPhrase
     );
   }
 
