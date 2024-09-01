@@ -2,19 +2,15 @@
 
 import { useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { verifyEmail } from "@/lib/actions";
+import { changeEmail } from "@/lib/actions";
 import toast from "react-hot-toast";
-import { cookies } from "next/headers";
-import { decode } from "jsonwebtoken";
-import { TokenPayload } from "@/lib/types";
-import ResendEmailForm from "@/components/ResendEmailForm";
 
 export default function EmailVerificationPage({
   searchParams,
 }: {
   searchParams: { redirect: string };
 }) {
-  const [formState, formAction] = useFormState(verifyEmail, {
+  const [formState, formAction] = useFormState(changeEmail, {
     success: null,
     message: "",
   });
@@ -24,52 +20,46 @@ export default function EmailVerificationPage({
   useEffect(() => {
     if (formState.success === true) {
       toast.success(formState.message);
-      setTimeout(
-        () => window.location.replace(searchParams.redirect || "/"),
-        1000,
-      );
+      setTimeout(() => window.location.replace("/verify-email"), 1000);
+    }
+    if (formState.success === false) {
+      toast.error(formState.message);
     }
   }, [formState, searchParams.redirect]);
 
-  return formState.success == null || formState.success == false ? (
+  return (
     <>
       <form
         action={formAction}
         className="flex flex-col items-center gap-6 bg-gray-800 p-8 rounded-lg w-full max-w-md border border-gray-600"
       >
         <h1 className="text-xl sm:text-2xl font-bold text-center">
-          verify email
+          Change Email
         </h1>
         <div className="w-full flex flex-col gap-2">
-          <label htmlFor="emailVerificationPhrase" className="font-medium">
-            Pass Phrase
+          <label htmlFor="email" className="font-medium">
+            New Email:
           </label>
           <input
             type="text"
             className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none invalid:border-red-800"
-            placeholder="XXXX-XXXX-XXXX-XXXX"
-            name="emailVerificationPhrase"
-            id="emailVerificationPhrase"
+            placeholder="Email..."
+            name="email"
+            id="email"
             required
             autoFocus
-            pattern="[a-zA-Z0-9\-]{10,}"
+            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
           />
         </div>
-        <p className="text-red-500 w-full text-center">{formState.message}</p>
 
         <button
           disabled={pending}
           type="submit"
           className="rounded-md p-2 bg-blue-800 disabled:bg-slate-800"
         >
-          verify email
+          Change Email
         </button>
       </form>
-      <ResendEmailForm />
     </>
-  ) : (
-    <h1 className="text-xl sm:text-3xl font-bold text-center">
-      email verified
-    </h1>
   );
 }

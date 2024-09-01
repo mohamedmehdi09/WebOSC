@@ -566,22 +566,21 @@ export async function verifyEmail(
   }
 
   // Finally, we update the user's primary email address to set the emailVerified flag to true and null out the email verification phrase
-  const updatedEmail = await prisma.email.update({
-    where: { email: user.email },
-    data: { emailVerified: true, emailVerificationPhrase: null },
-    include: {
-      user: true,
+  const updatedUser = await prisma.user.update({
+    where: { user_id: user.user_id },
+    data: {
+      PrimaryEmail: {
+        update: { emailVerified: true, emailVerificationPhrase: null },
+      },
     },
+    include: { PrimaryEmail: true },
   });
-
-  // We get the updated user from the updated email address
-  const updatedUser = updatedEmail.user[0];
 
   // We sign a new token using the updated user's data and the secret
   const newToken = sign(
     {
       user_id: updatedUser.user_id,
-      emailVerified: updatedEmail.emailVerified,
+      emailVerified: updatedUser.PrimaryEmail.emailVerified,
       super: updatedUser.super,
     },
     secret
@@ -718,5 +717,171 @@ export async function resendVerificationEmail(
   }
 
   state = { success: true, message: "Email resent! Please check your inbox!" };
+  return state;
+}
+
+export async function changeEmail(
+  state: { success: boolean | null; message: string },
+  formData: FormData
+) {
+  // First, we check if the user is logged in by checking if the token cookie exists
+  const token = cookies().get("token")?.value;
+
+  if (!token) {
+    // If the token cookie doesn't exist, we return an error message indicating that the user must log in first
+    state = {
+      success: false,
+      message: "You must be logged in to verify your email!",
+    };
+    return state;
+  }
+
+  // Next, we check if the secret for signing the token is set
+  if (!secret) {
+    // If the secret isn't set, we return an error message indicating that there's an internal error
+    state = {
+      success: false,
+      message: "Internal error. Please try again later!",
+    };
+    return state;
+  }
+
+  // Then, we verify the token using the secret and check if it's valid
+  const userToken = verify(token, secret) as TokenPayload;
+
+  // If the token is invalid, we delete the token cookie and return an error message
+  if (!userToken) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later!",
+    };
+    return state;
+  }
+
+  // Next, we check if the user's email is already verified
+  if (userToken.emailVerified) {
+    // If the email is already verified, we return an error message indicating that the email is already verified
+    state = { success: false, message: "Email is already verified!" };
+    return state;
+  }
+
+  // Then, we query the user and their primary email address from the database
+  const user = await prisma.user.findUnique({
+    where: { user_id: userToken.user_id },
+    include: { PrimaryEmail: true },
+  });
+
+  // If the user or their primary email address can't be found, we delete the token cookie and return an error message
+  if (!user) {
+    cookies().delete("token");
+    state = {
+      success: false,
+      message: "Something went wrong. Please try again later!",
+    };
+    return state;
+  }
+
+  // Next, we check if the user's primary email address is already verified
+  if (user.PrimaryEmail.emailVerified) {
+    // If the email is already verified, we return an error message indicating that the email is already verified
+    state = { success: false, message: "Email is already verified!" };
+    return state;
+  }
+
+  // Then, we get the email verification phrase from the form data
+  const newEmail = formData.get("email") as string;
+
+  const emailSchema = z
+    .string({ message: "email field must be a string!" })
+    .email({ message: "Invalid email!" });
+
+  const parsedEmail = emailSchema.safeParse(newEmail);
+
+  if (!parsedEmail.success) {
+    state = { success: false, message: parsedEmail.error.issues[0].message };
+    return state;
+  }
+
+  // make sure email is not already in use
+  const emailInUse = await prisma.email.count({
+    where: { email: newEmail },
+  });
+
+  if (emailInUse > 0) {
+    state = { success: false, message: "Email already in use!" };
+    return state;
+  }
+
+  // Finally, we update the user's primary email address to set the emailVerified flag to true and null out the email verification phrase
+  const updatedUser = await prisma.user.update({
+    where: { user_id: user.user_id },
+    data: {
+      PrimaryEmail: {
+        create: { email: newEmail },
+      },
+    },
+    include: { PrimaryEmail: true },
+  });
+
+  // delete old email
+  await prisma.email.delete({
+    where: { email: user.PrimaryEmail.email },
+  });
+
+  // Send Verification email
+  // email only sent if in production
+  if (process.env.NODE_ENV !== "development") {
+    mailer.sendMail({
+      from: "OSCA",
+      to: user.email,
+      subject: "Email Verification",
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Verification</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            h1 { color: #4a4a4a; }
+            .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+            .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Hi ${updatedUser.name},</h1>
+            <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
+            <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
+            <p>Then, enter the following secret key:</p>
+            <p class="secret-key">
+              ${updatedUser.PrimaryEmail.emailVerificationPhrase}
+            </p>
+          </div>
+        </body>
+        </html>
+        `,
+    });
+  }
+  // if in development we just console.log the secret phrase
+  else {
+    console.log(
+      "Secret key for user " +
+        updatedUser.name +
+        " is " +
+        updatedUser.PrimaryEmail.emailVerificationPhrase +
+        " sent to email " +
+        updatedUser.email
+    );
+  }
+
+  // Finally, we return a success message indicating that the email has been verified
+  state = {
+    success: true,
+    message: "Email updated! and email verification sent",
+  };
   return state;
 }

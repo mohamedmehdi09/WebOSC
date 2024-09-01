@@ -2,8 +2,19 @@ import { cookies } from "next/headers";
 import { decode } from "jsonwebtoken";
 import { TokenPayload } from "@/lib/types";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function EmailVerificationLayout({
+const getUser = async (user_id: string) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      user_id: user_id,
+    },
+    include: { PrimaryEmail: true },
+  });
+  return user;
+};
+
+export default async function EmailVerificationLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -24,13 +35,13 @@ export default function EmailVerificationLayout({
         </Link>
       </div>
     );
-  const user = decode(token) as TokenPayload;
+  const userToken = decode(token) as TokenPayload;
 
-  if (user.emailVerified)
+  if (userToken.emailVerified)
     return (
       <div className="flex flex-1 flex-col gap-5 items-center justify-center">
         <h1 className="text-xl sm:text-3xl font-bold text-center">
-          email verified
+          email verified, you can change it from user profile (not implemented)
         </h1>
         <Link
           href="/"
@@ -41,8 +52,14 @@ export default function EmailVerificationLayout({
       </div>
     );
 
+  const user = await getUser(userToken.user_id);
   return (
     <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4">
+      <p className="gap-2 flex items-center">
+        <span className="text-gray-300 font-bold text-xl">
+          {user?.PrimaryEmail?.email}
+        </span>
+      </p>
       {children}
     </div>
   );
