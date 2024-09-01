@@ -192,7 +192,7 @@ export async function signup(
           <div class="container">
             <h1>Hi ${user.name},</h1>
             <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
-            <p><a href="http://localhost:3000/emailVerification" class="btn">Verify Email</a></p>
+            <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
             <p>Then, enter the following secret key:</p>
             <p class="secret-key">
               ${user.PrimaryEmail.emailVerificationPhrase}
@@ -696,7 +696,7 @@ export async function resendVerificationEmail(
         <div class="container">
           <h1>Hi ${updatedUser.name},</h1>
           <p>Thanks for joining OSCA. Please verify your email by clicking on the button below.</p>
-          <p><a href="http://localhost:3000/emailVerification" class="btn">Verify Email</a></p>
+          <p><a href="http://localhost:3000/verify-email" class="btn">Verify Email</a></p>
           <p>Then, enter the following secret key:</p>
           <p class="secret-key">
             ${updatedUser.PrimaryEmail.emailVerificationPhrase}
