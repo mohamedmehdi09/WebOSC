@@ -43,6 +43,9 @@ const getUsers = async () => {
       email: true,
       isMale: true,
     },
+    where: {
+      PrimaryEmail: { emailVerified: true },
+    },
   });
   return users;
 };
