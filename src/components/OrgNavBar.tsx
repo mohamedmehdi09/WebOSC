@@ -16,7 +16,7 @@ export default function OrgNavBar({
   return (
     <>
       <nav className="bg-black h-28 w-full border-b border-gray-500">
-        <div className="text-gray-300 text-md h-1/2 flex px-5 py-2 items-end gap-3">
+        <div className="text-gray-300 text-md h-1/2 flex px-5 py-2 items-end gap-2">
           <Link className="h-full p-1 hover:bg-gray-900 rounded-md" href={"/"}>
             <img
               src="/logo-white.png"
@@ -53,7 +53,7 @@ export default function OrgNavBar({
               key={segment}
               data-seleted={segment === path.split("/")[3]}
               href={`/org/${org_id}/${segment}`}
-              className="h-full flex items-center justify-center p-4 text-center rounded-md  data-[seleted=true]:bg-gray-900 hover:bg-gray-900/75 data-[seleted=true]:font-bold"
+              className="h-full flex items-center justify-center p-4 text-center rounded-md data-[seleted=true]:bg-gray-900 hover:bg-gray-900/75 data-[seleted=true]:font-bold"
             >
               {segment}
             </Link>

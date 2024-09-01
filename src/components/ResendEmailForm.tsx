@@ -32,7 +32,7 @@ export default function ResendEmailForm() {
         type="submit"
         className="text-blue-400 enabled:hover:underline disabled:text-gray-400"
       >
-        Resend Verification Email
+        Resend the verification email?
       </button>
     </form>
   );

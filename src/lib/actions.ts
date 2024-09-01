@@ -281,7 +281,7 @@ export async function addEditorToOrg(
       },
     });
 
-    if (!checkOrg) throw new ActionError("Organization Not Found!");
+    if (!checkOrg) throw new ActionError("Organization not found!");
 
     // authorize user
     const checkEditorPrivilages = await prisma.editor.findFirst({
@@ -292,11 +292,11 @@ export async function addEditorToOrg(
     });
 
     if (!checkEditorPrivilages)
-      throw new ActionError("You Are not An Editor Of This Organization!");
+      throw new ActionError("You are not an Editor in this organization!");
 
     if (checkEditorPrivilages.status !== "active")
       throw new ActionError(
-        "You Are not An Editor Of This Organization anymore!"
+        "You are no longer an Editor in this organization!"
       );
 
     // check if added user exists
@@ -316,7 +316,7 @@ export async function addEditorToOrg(
 
     if (!checkUser.PrimaryEmail.emailVerified)
       throw new ActionError(
-        "You are trying to add a User with an unverified Email"
+        "You are trying to add a user with an unverified email!"
       );
 
     // add editor
@@ -400,11 +400,11 @@ export async function addAnnouncement(
     });
 
     if (!checkEditorPrivilages)
-      throw new ActionError("You Are not An Editor Of This Organization!");
+      throw new ActionError("You are not an Editor in this organization!");
 
     if (checkEditorPrivilages.status !== "active")
       throw new ActionError(
-        "You Are not An Editor Of This Organization anymore!"
+        "You are no longer an Editor in this organization!"
       );
 
     // validate form
@@ -485,11 +485,11 @@ export async function suspendEditor(
     });
 
     if (!checkEditor)
-      throw new ActionError("You are not An Editor in this organization!");
+      throw new ActionError("You are not an Editor in this organization!");
 
     if (checkEditor.status == "suspended")
       throw new ActionError(
-        "You are not An Editor in this organization Anymore!"
+        "You are no longer an Editor in this organization!"
       );
 
     if (checkEditor.editor_id == suspendEditorFormData.editor_id)
@@ -557,11 +557,11 @@ export async function activateEditor(
     });
 
     if (!checkEditor)
-      throw new ActionError("You are not An Editor in this organization!");
+      throw new ActionError("You are not an Editor in this organization!");
 
     if (checkEditor.status == "suspended")
       throw new ActionError(
-        "You are not An Editor in this organization Anymore!"
+        "You are no longer an Editor in this organization!"
       );
 
     const updatedEditor = await prisma.editor.update({
@@ -824,7 +824,7 @@ export async function changeEmail(
   const newEmail = formData.get("email") as string;
 
   const emailSchema = z
-    .string({ message: "email field must be a string!" })
+    .string({ message: "The email field must be a string!" })
     .email({ message: "Invalid email!" });
 
   const parsedEmail = emailSchema.safeParse(newEmail);
@@ -885,7 +885,7 @@ export async function changeEmail(
   // Finally, we return a success message indicating that the email has been verified
   state = {
     success: true,
-    message: "Email updated! and email verification sent",
+    message: "Email updated. A verification email has been sent!",
   };
   return state;
 }
@@ -902,7 +902,7 @@ function authenticateUser() {
     user = verify(token, secret) as TokenPayload;
   } catch (error) {
     cookies().delete("token");
-    console.log("unverified token");
+    console.log("Unverified token");
     throw new ActionError("Token invalid or expired. Please log in again!");
   }
 

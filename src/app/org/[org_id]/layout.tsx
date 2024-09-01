@@ -20,7 +20,7 @@ export default async function OrgLayout({
       <div className="flex flex-1 flex-col gap-5 items-center justify-center text-xl">
         <span>
           <span className="font-semibold text-2xl"> {params.org_id} </span>
-          not found!
+          Not found!
         </span>
         <Link
           href="/"

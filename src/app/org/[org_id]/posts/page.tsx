@@ -44,7 +44,7 @@ export default async function OrgPostsPage({
       {isEditor && (
         <Link
           href={`/org/${params.org_id}/posts/create`}
-          className="bg-blue-800 text-white rounded p-3 md:p-4 mb-4 text-center hover:bg-blue-700 transition"
+          className="bg-green-600 text-white rounded p-3 md:p-4 mb-4 text-center hover:bg-blue-700 transition"
         >
           Add Announcement
         </Link>

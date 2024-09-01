@@ -29,7 +29,7 @@ export default async function OrgEditorsPage({
       <div>No Editors In This Organization</div>
     </div>
   ) : (
-    <div className="flex flex-col flex-1 gap-4 px-2 md:px-24">
+    <div className="flex flex-col flex-1 gap-4 px-4 md:px-24">
       <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
         <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
           <span>Editors</span>

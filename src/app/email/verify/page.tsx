@@ -34,18 +34,18 @@ export default function EmailVerificationPage({
     <>
       <form
         action={formAction}
-        className="flex flex-col items-center gap-6 bg-gray-800 p-8 rounded-lg w-full max-w-md border border-gray-600"
+        className="flex flex-col items-center gap-6 bg-gray-800 p-6 md:p-8 rounded-lg w-full max-w-md border border-gray-600 shadow-lg"
       >
-        <h1 className="text-xl sm:text-2xl font-bold text-center">
-          verify email
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-white">
+          Verify your email
         </h1>
-        <div className="w-full flex flex-col gap-2">
-          <label htmlFor="emailVerificationPhrase" className="font-medium">
-            Pass Phrase
+        <div className="w-full flex flex-col gap-3">
+          <label htmlFor="emailVerificationPhrase" className="font-medium text-gray-200">
+            Passphrase:
           </label>
           <input
             type="text"
-            className="w-full p-3 border border-gray-300 rounded-md bg-gray-800 outline-none invalid:border-red-800"
+            className="w-full p-3 border border-gray-300 rounded-md bg-gray-900 outline-none invalid:border-red-800 focus:border-blue-500"
             placeholder="XXXX-XXXX-XXXX-XXXX"
             name="emailVerificationPhrase"
             id="emailVerificationPhrase"
@@ -57,16 +57,16 @@ export default function EmailVerificationPage({
         <button
           disabled={pending}
           type="submit"
-          className="rounded-md p-2 bg-blue-800 disabled:bg-slate-800"
+          className="rounded-md p-2 w-full bg-blue-700 hover:bg-blue-600 disabled:bg-gray-600 text-white font-semibold transition-colors duration-200"
         >
-          verify email
+          Confirm
         </button>
       </form>
       <ResendEmailForm />
     </>
   ) : (
-    <h1 className="text-xl sm:text-3xl font-bold text-center">
-      email verified
+    <h1 className="text-2xl sm:text-3xl font-bold text-center text-white mt-8">
+      Email verified!
     </h1>
   );
 }

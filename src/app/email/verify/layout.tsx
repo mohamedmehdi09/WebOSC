@@ -23,29 +23,30 @@ export default async function EmailVerificationLayout({
 
   if (!token)
     return (
-      <div className="flex flex-1 flex-col gap-5 items-center justify-center">
-        <h1 className="text-xl sm:text-3xl font-bold text-center">
-          must be logged in
+      <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4 md:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-white">
+          You must be logged in
         </h1>
         <Link
           href="/login"
-          className="font-normal text-lg py-2 px-4 bg-blue-800 rounded-md hover:bg-blue-900"
+          className="font-normal text-lg py-2 px-4 bg-blue-800 hover:bg-blue-900 rounded-md text-white transition-colors duration-200"
         >
           Log In
         </Link>
       </div>
     );
+  
   const userToken = decode(token) as TokenPayload;
 
   if (userToken.emailVerified)
     return (
-      <div className="flex flex-1 flex-col gap-5 items-center justify-center">
-        <h1 className="text-xl sm:text-3xl font-bold text-center">
-          email verified
+      <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4 md:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-white">
+          Email verified
         </h1>
         <Link
           href="/"
-          className="font-normal text-lg py-2 px-4 bg-blue-800 rounded-md hover:bg-blue-900"
+          className="font-normal text-lg py-2 px-4 bg-blue-800 hover:bg-blue-900 rounded-md text-white transition-colors duration-200"
         >
           Go Home
         </Link>
@@ -53,22 +54,23 @@ export default async function EmailVerificationLayout({
     );
 
   const user = await getUser(userToken.user_id);
+
   return (
-    <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4">
-      <p className="gap-2 flex items-center">
-        <span>a vrification passphrase was sent to your email</span>
-        <span className="text-gray-300 font-bold text-xl">
+    <div className="flex flex-1 flex-col gap-5 items-center justify-center p-4 md:p-8 bg-gray-900 text-gray-300">
+      <p className="gap-2 flex flex-col md:flex-row items-center text-center md:text-left">
+        <span>A verification passphrase was sent to your email:</span>
+        <span className="text-gray-100 font-bold text-xl">
           {user?.PrimaryEmail?.email}
         </span>
       </p>
       {children}
-      <p className="flex gap-2">
-        made a mistake?
+      <p className="flex gap-2 text-gray-400">
+        Made a mistake?
         <Link
           href={"/email/change"}
-          className="text-blue-400 enabled:hover:underline disabled:text-gray-400"
+          className="text-blue-400 hover:underline disabled:text-gray-400 transition-colors duration-200"
         >
-          change email!
+          Change email
         </Link>
       </p>
     </div>
