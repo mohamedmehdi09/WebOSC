@@ -16,7 +16,7 @@ And change directory to `another-project` with the command: `cd another-project`
 ### Install Node Stuff:
 
 1. Execute `npm i` in terminal
-2. Create a `.env` file in the project root folder and copy the content of `.env.template` into it
+2. Create a `.env` file in the project root folder and copy the content of `.env.template` into it (Don't forget to replace `<username>` and `<password>` with your actual PostgreSQL username and password)
 3. Execute `npx prisma db push` in terminal
 4. Execute `npx prisma generate` in terminal
 5. Execute `npm run dev` in terminal
