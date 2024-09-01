@@ -13,13 +13,21 @@ export default function SettingsSideBar({ org_id }: { org_id: string }) {
         href={`/org/${org_id}/settings`}
         isActive={path === `/org/${org_id}/settings`}
         icon={<CogIcon className="w-6 h-6 text-white" />}
-        label="General"
+        label={
+          <span className="text-base md:text-base lg:text-base text-white">
+            General
+          </span>
+        }
       />
       <SidebarLink
         href={`/org/${org_id}/settings/editors`}
         isActive={path === `/org/${org_id}/settings/editors`}
         icon={<UserGroupIcon className="w-6 h-6 text-white" />}
-        label="Editors"
+        label={
+          <span className="text-base md:text-base lg:text-base text-white">
+            Editors
+          </span>
+        }
       />
     </div>
   );
