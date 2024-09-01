@@ -9,7 +9,7 @@ export default async function CreatePostLayout({
   params: { org_id: string };
 }) {
   if (!(await checkOrgPrivilage(params.org_id))) return "Not Allowed!";
-  if (!checkEmailValidation()) return redirect("/verify-email");
+  if (!checkEmailValidation()) return redirect("/email/verify");
 
   return children;
 }

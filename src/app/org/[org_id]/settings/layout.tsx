@@ -12,7 +12,7 @@ export default async function OrgSettingsLayout({
   params: { org_id: string };
 }) {
   if (!(await checkOrgPrivilage(params.org_id))) return "Not allowed!";
-  if (!checkEmailValidation()) return redirect("/verify-email");
+  if (!checkEmailValidation()) return redirect("/email/verify");
 
   return (
     <div className="flex flex-1 flex-col md:flex-row gap-4 md:gap-8 rounded-md bg-[rgb(17,24,39)] p-4 pt-0 md:p-8 md:pt-0">

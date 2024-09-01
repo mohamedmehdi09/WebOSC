@@ -25,7 +25,7 @@ export default function SignupPage() {
     if (formState.error) toast.error(formState.message);
     else {
       toast.success(formState.message);
-      setTimeout(() => (window.location.href = "/verify-email"), 1000);
+      setTimeout(() => (window.location.href = "/email/verify"), 1000);
     }
   }, [formState]);
 

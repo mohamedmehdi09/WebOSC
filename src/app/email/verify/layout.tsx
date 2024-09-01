@@ -65,7 +65,7 @@ export default async function EmailVerificationLayout({
       <p className="flex gap-2">
         made a mistake?
         <Link
-          href={"/change-email"}
+          href={"/email/change"}
           className="text-blue-400 enabled:hover:underline disabled:text-gray-400"
         >
           change email!

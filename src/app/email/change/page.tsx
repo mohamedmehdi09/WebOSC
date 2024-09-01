@@ -20,7 +20,7 @@ export default function EmailVerificationPage({
   useEffect(() => {
     if (formState.success === true) {
       toast.success(formState.message);
-      setTimeout(() => window.location.replace("/verify-email"), 1000);
+      setTimeout(() => window.location.replace("/email/verify"), 1000);
     }
     if (formState.success === false) {
       toast.error(formState.message);
