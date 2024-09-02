@@ -890,6 +890,156 @@ export async function changeEmail(
   return state;
 }
 
+export async function sendPasswordResetEmail(
+  state: { success: boolean | null; message: string },
+  formData: FormData
+) {
+  try {
+    const email = formData.get("email") as string;
+
+    const parsedEmail = z
+      .string()
+      .email({ message: "Invalid email!" })
+      .safeParse(email);
+
+    if (!parsedEmail.success)
+      throw new ActionError(parsedEmail.error.issues[0].message);
+
+    // make sure email exists
+    const checkUser = await prisma.user.findUnique({
+      where: { email },
+      include: { passwordResets: true },
+    });
+
+    // if email does not exist, send success message to not leak information about what emails are available
+    if (!checkUser)
+      return {
+        success: true,
+        message:
+          "if your email exists, A password reset Email was sent to your email " +
+          email +
+          "!",
+      };
+
+    // set all previous password resets to expired
+    await prisma.passwordReset.updateMany({
+      where: { user_id: checkUser.user_id, status: "pending" },
+      data: { status: "expired" },
+    });
+
+    // if email exists, send password reset email
+    const passphrase = await prisma.passwordReset.create({
+      data: {
+        user_id: checkUser.user_id,
+      },
+      include: { user: true },
+    });
+    // email only sent if in production
+    if (process.env.NODE_ENV !== "development") {
+      mailer.sendMail({
+        from: "OSCA",
+        to: email,
+        subject: "Password Reset",
+        html: generatePasswordResetHTML(
+          passphrase.user,
+          passphrase.reset_passcode
+        ),
+      });
+    }
+    // if in development we just console.log the secret phrase
+    else {
+      console.log(
+        "Secret key for user " +
+          passphrase.user.name +
+          " sent to email " +
+          email +
+          " with reset link " +
+          process.env.HOSTNAME +
+          "/password-reset/" +
+          passphrase.reset_passcode
+      );
+    }
+
+    state.success = true;
+    state.message =
+      "if your email exists, A password reset Email was sent to your email" +
+      email +
+      "!";
+  } catch (error) {
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Unexpected error. Please try again later!";
+  }
+  return state;
+}
+
+export async function resetPassword(
+  state: {
+    success: boolean | null;
+    message: string;
+  },
+  formData: FormData
+) {
+  const resetPasswordFormSchema = z.object({
+    reset_passcode: z.string().uuid({ message: "Invalid reset passcode!" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters long!" }),
+  });
+  try {
+    // validate form
+    const resetPasswordFormData = {
+      reset_passcode: formData.get("reset_passcode") as string,
+      password: formData.get("password") as string,
+    };
+
+    const resetPasswordFormParsed = resetPasswordFormSchema.safeParse(
+      resetPasswordFormData
+    );
+
+    if (!resetPasswordFormParsed.success) {
+      throw new ActionError(resetPasswordFormParsed.error.issues[0].message);
+    }
+
+    // check if passcode is valid
+    const checkPasscode = await prisma.passwordReset.findFirst({
+      where: { reset_passcode: resetPasswordFormData.reset_passcode },
+    });
+
+    if (!checkPasscode) throw new ActionError("Invalid reset passcode!");
+
+    if (checkPasscode.status == "completed")
+      throw new ActionError("Passcode Already used");
+    if (checkPasscode.status == "expired")
+      throw new ActionError("Passcode Expired");
+
+    // update password
+    const passwordHash =
+      process.env.NODE_ENV == "development"
+        ? resetPasswordFormData.password
+        : hash("sha512", resetPasswordFormData.password);
+
+    const updatedUser = await prisma.user.update({
+      where: { user_id: checkPasscode.user_id },
+      data: { password: passwordHash },
+    });
+
+    // set passcode to completed
+    const updatedPasscode = await prisma.passwordReset.update({
+      where: { reset_passcode: checkPasscode.reset_passcode },
+      data: { status: "completed" },
+    });
+
+    state.success = true;
+    state.message = "Password reset successful!";
+  } catch (error: any) {
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Unexpected error. Please try again later!";
+  }
+  return state;
+}
+
 function authenticateUser() {
   const token = cookies().get("token")?.value;
 
@@ -937,4 +1087,35 @@ function generateEmailHTML(user: User & { PrimaryEmail: Email }) {
       </div>
     </body>
   </html>`;
+}
+
+function generatePasswordResetHTML(user: User, passphrase: string) {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Password Reset</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        h1 { color: #4a4a4a; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; }
+        .secret-key { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+      <h1>Hi, ${user.name}</h1>
+      <p>We received a request to reset the password for your OSCA account.</p>
+      <p>To reset your password, please enter the following secret key:</p>
+      <a class="secret-key">
+        ${process.env.HOSTNAME}/reset-password/${passphrase}
+      </a>
+      </div>
+    </body>
+  </html>
+      
+      `;
 }

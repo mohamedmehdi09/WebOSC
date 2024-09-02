@@ -87,9 +87,21 @@ export default function LoginPage() {
         >
           Login
         </button>
-        <Link href="/signup" className="font-normal underline text-blue-400">
-          Create an account
-        </Link>
+        <div className="w-full flex">
+          <Link
+            href="/signup"
+            className="font-normal flex-1 text-center underline text-blue-400"
+          >
+            Create an account
+          </Link>
+          <span className="font-bold">|</span>
+          <Link
+            href="/password-reset"
+            className="font-normal flex-1 text-center underline text-blue-400"
+          >
+            forgot Password
+          </Link>
+        </div>
       </form>
     </div>
   );

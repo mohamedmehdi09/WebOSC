@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,16 +19,17 @@ model Organization {
 }
 
 model User {
-  user_id      String   @id @default(uuid())
-  name         String
-  middlename   String?
-  lastname     String
-  isMale       Boolean?
-  email        String   @unique
-  PrimaryEmail Email    @relation(fields: [email], references: [email])
-  password     String
-  super        Boolean  @default(false)
-  editors      Editor[]
+  user_id        String          @id @default(uuid())
+  name           String
+  middlename     String?
+  lastname       String
+  isMale         Boolean?
+  email          String          @unique
+  PrimaryEmail   Email           @relation(fields: [email], references: [email])
+  password       String
+  super          Boolean         @default(false)
+  editors        Editor[]
+  passwordResets PasswordReset[]
 }
 
 model Email {
@@ -39,6 +37,15 @@ model Email {
   emailVerified           Boolean @default(false)
   emailVerificationPhrase String? @default(uuid())
   user                    User[]
+}
+
+model PasswordReset {
+  reset_passcode String              @id @default(uuid())
+  created_at     DateTime            @default(now())
+  updated_at     DateTime            @updatedAt
+  user_id        String
+  status         PasswordResetStatus @default(pending)
+  user           User                @relation(fields: [user_id], references: [user_id])
 }
 
 model Editor {
@@ -66,4 +73,10 @@ model Announcement {
 enum EditorStatus {
   active
   suspended
+}
+
+enum PasswordResetStatus {
+  pending
+  completed
+  expired
 }
