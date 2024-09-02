@@ -30,7 +30,7 @@ const getEditorOrgs = async () => {
   if (!token) return [];
   const user = decode(token) as TokenPayload;
   const editors = await prisma.editor.findMany({
-    where: { user_id: user.user_id },
+    where: { user_id: user.user_id, status: "active" },
     include: { org: true },
   });
   return editors;
