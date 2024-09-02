@@ -51,7 +51,7 @@ export default function ResetPasswordForm({ passcode }: { passcode: string }) {
           Reset Your Password
         </h1>
         <p className="text-gray-400 text-center mb-4">
-          Enter your new password below. Make sure it's strong and secure.
+          Make sure your new password is strong and secure!
         </p>
         <div className="w-full flex flex-col gap-2">
           <label className="font-medium text-white" htmlFor="password">
