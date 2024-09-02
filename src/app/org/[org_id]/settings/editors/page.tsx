@@ -120,23 +120,23 @@ export default async function OrgSettingsEditorsPage({
           <TabPanel className="flex flex-col gap-2 bg-gray-800 px-2 rounded-lg">
             {suspendedEditors.length > 0 ? (
               <>
-                <div className="flex gap-2 md:gap-4 pb-4 border-b border-gray-700">
+                <div className="flex gap-2 md:gap-4 pb-1 border-b border-gray-700">
                   <MagnifyingGlassIcon className="w-5 md:w-6" />
                   <input
                     type="text"
-                    placeholder="Find Editors.."
+                    placeholder="Find Editors..."
                     className="bg-inherit focus:outline-none text-white py-2 rounded-md w-full"
                   />
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 pt-2">
                   {suspendedEditors.map((editor) => (
                     <div
                       key={editor.editor_id}
                       className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
                     >
                       <div className="flex items-center">
-                        <UserCircleIcon className="w-6 md:w-8" />
-                        <span className="ml-4 text-green-400 font-bold">
+                        <UserCircleIcon className="w-6 md:w-8 text-green-400" />
+                        <span className="ml-4 text-green-400 font-bold capitalize">
                           {editor.user.name} {editor.user?.middlename}{" "}
                           {editor.user.lastname}
                         </span>
