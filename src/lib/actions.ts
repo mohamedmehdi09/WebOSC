@@ -1021,7 +1021,12 @@ export async function resetPassword(
 
     const updatedUser = await prisma.user.update({
       where: { user_id: checkPasscode.user_id },
-      data: { password: passwordHash },
+      data: {
+        password: passwordHash,
+        PrimaryEmail: {
+          update: { emailVerified: true, emailVerificationPhrase: null },
+        },
+      },
     });
 
     // set passcode to completed
@@ -1111,7 +1116,7 @@ function generatePasswordResetHTML(user: User, passphrase: string) {
       <p>We received a request to reset the password for your OSCA account.</p>
       <p>To reset your password, please enter the following secret key:</p>
       <a class="secret-key">
-        ${process.env.HOSTNAME}/reset-password/${passphrase}
+        ${process.env.HOSTNAME}/password-reset/${passphrase}
       </a>
       </div>
     </body>
