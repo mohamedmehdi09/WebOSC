@@ -916,9 +916,7 @@ export async function sendPasswordResetEmail(
       return {
         success: true,
         message:
-          "if your email exists, A password reset Email was sent to your email " +
-          email +
-          "!",
+        "If your email address " + email + " is known to us, we'll send a password recovery link in a few minutes!"
       };
 
     // set all previous password resets to expired
@@ -962,9 +960,7 @@ export async function sendPasswordResetEmail(
 
     state.success = true;
     state.message =
-      "if your email exists, A password reset Email was sent to your email" +
-      email +
-      "!";
+      "If your email address " + email + " is known to us, we'll send a password recovery link in a few minutes!";
   } catch (error) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;

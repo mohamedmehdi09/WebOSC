@@ -87,19 +87,18 @@ export default function LoginPage() {
         >
           Login
         </button>
-        <div className="w-full flex">
+        <div className="w-full flex flex-col items-center gap-2">
           <Link
             href="/signup"
-            className="font-normal flex-1 text-center underline text-blue-400"
+            className="font-semibold text-blue-500 hover:text-blue-600 underline transition-colors duration-200"
           >
-            Create an account
+            Sign Up
           </Link>
-          <span className="font-bold">|</span>
           <Link
             href="/password-reset"
-            className="font-normal flex-1 text-center underline text-blue-400"
+            className="text-sm text-gray-400 hover:text-gray-200 underline transition-colors duration-200"
           >
-            forgot Password
+            Forgot your password?
           </Link>
         </div>
       </form>
