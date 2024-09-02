@@ -14,12 +14,7 @@ const getOrgAnnouncements = async () => {
   const announcements = await prisma.announcement.findMany({
     orderBy: { announcement_id: "desc" },
     include: {
-      editor: {
-        include: {
-          user: { select: { name: true, middlename: true, lastname: true } },
-          org: true,
-        },
-      },
+      editor: true,
     },
   });
   return announcements;
@@ -116,10 +111,7 @@ const AnnouncementCard = ({
   announcement,
 }: {
   announcement: Announcement & {
-    editor: Editor & {
-      user: { name: string; lastname: string };
-      org: Organization;
-    };
+    editor: Editor;
   };
 }) => {
   return (
@@ -133,9 +125,11 @@ const AnnouncementCard = ({
       </h3>
       <div className="text-gray-400">
         <div className="font-semibold text-sm md:text-base">
-          {announcement.editor.org.nameEn}
+          {announcement.org_id}
         </div>
-        <span className="text-xs">@{announcement.editor.user_id}</span>
+        <span className="text-xs md:text-sm">
+          @{announcement.editor.user_id}
+        </span>
       </div>
     </Link>
   );
