@@ -66,10 +66,10 @@ model Announcement {
   org_id          String
   title           String
   body            String
-  created_at      DateTime?    @default(now())
-  updated_at      DateTime?    @updatedAt
-  publishes_at    DateTime?
-  ends_at         DateTime?
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  publishes_at    DateTime
+  ends_at         DateTime
   editor          Editor       @relation(fields: [editor_id], references: [editor_id])
   org             Organization @relation(fields: [org_id], references: [org_id])
 }

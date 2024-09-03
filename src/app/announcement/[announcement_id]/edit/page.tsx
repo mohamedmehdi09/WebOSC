@@ -52,27 +52,23 @@ export default async function EditAnnouncementPage({
         <div className="flex flex-col gap-2 md:gap-4 text-base md:text-xl">
           <div className="flex flex-col gap-1">
             <span className="text-lg font-semibold">Created At:</span>
-            {announcement.created_at
-              ? announcement.created_at.toLocaleDateString("en-UK", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                })
-              : "not spacified"}
+            {announcement.created_at.toLocaleDateString("en-UK", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            })}
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-lg font-semibold">Updated At:</span>
-            {announcement.updated_at
-              ? announcement.updated_at.toLocaleDateString("en-UK", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                })
-              : "not spacified"}
+            {announcement.updated_at.toLocaleDateString("en-UK", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            })}
           </div>
           <UpdateAnnouncementPublishDateForm
             announcement_id={announcement.announcement_id}

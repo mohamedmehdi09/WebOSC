@@ -10,7 +10,7 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
   ends_at,
   announcement_id,
 }: {
-  ends_at: Date | null;
+  ends_at: Date;
   announcement_id: number;
 }) {
   const [formState, formAction] = useFormState(
@@ -18,7 +18,7 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
     {
       success: null,
       message: "",
-    }
+    },
   );
 
   const [edit, setEdit] = useState(false);
@@ -46,15 +46,11 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
       <h3 className="text-lg font-semibold">Ends Publishing At:</h3>
       <div className="flex gap-2 flex-1 items-center">
         <input
-          defaultValue={
-            ends_at
-              ? new Date(
-                  ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000
-                )
-                  .toISOString()
-                  .slice(0, 16)
-              : undefined
-          }
+          defaultValue={new Date(
+            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000,
+          )
+            .toISOString()
+            .slice(0, 16)}
           className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 outline-none invalid:border-red-800"
           aria-label="Date and time"
           type="datetime-local"

@@ -10,7 +10,7 @@ export default function UpdateAnnouncementPublishDateForm({
   publishes_at,
   announcement_id,
 }: {
-  publishes_at: Date | null;
+  publishes_at: Date;
   announcement_id: number;
 }) {
   const [formState, formAction] = useFormState(updateAnnouncementPublishDate, {
@@ -43,16 +43,12 @@ export default function UpdateAnnouncementPublishDateForm({
       <h3 className="text-lg font-semibold">Publishes At:</h3>
       <div className="flex gap-2 flex-1 items-center">
         <input
-          defaultValue={
-            publishes_at
-              ? new Date(
-                  publishes_at.getTime() -
-                    publishes_at.getTimezoneOffset() * 60 * 1000
-                )
-                  .toISOString()
-                  .slice(0, 16)
-              : undefined
-          }
+          defaultValue={new Date(
+            publishes_at.getTime() -
+              publishes_at.getTimezoneOffset() * 60 * 1000,
+          )
+            .toISOString()
+            .slice(0, 16)}
           className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 outline-none invalid:border-red-800"
           aria-label="Date and time"
           type="datetime-local"

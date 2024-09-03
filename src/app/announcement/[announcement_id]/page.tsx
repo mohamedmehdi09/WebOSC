@@ -63,14 +63,13 @@ export default async function PostPage({
           {announcement.title}
         </h1>
         <div className="flex flex-wrap text-xl gap-2 md:gap-4">
-          {announcement.updated_at &&
-            announcement.updated_at.toLocaleDateString("en-UK", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-              hour: "numeric",
-              minute: "numeric",
-            })}
+          {announcement.publishes_at.toLocaleDateString("en-UK", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+          })}
         </div>
         <div className="flex flex-wrap gap-2 md:gap-4 text-gray-400">
           <Link

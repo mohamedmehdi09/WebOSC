@@ -2,17 +2,22 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Announcement, Editor, Organization, User } from "@prisma/client";
 import { cookies } from "next/headers";
-import { BellIcon } from "@heroicons/react/20/solid";
 import { decode } from "jsonwebtoken";
 import { GlobeEuropeAfricaIcon } from "@heroicons/react/24/solid";
 import LogOutForm from "@/components/LogoutForm";
 import { TokenPayload } from "@/lib/types";
+import { CalendarIcon, BellIcon } from "@heroicons/react/24/outline";
 
 // Fetch announcements from the database
 
 const getOrgAnnouncements = async () => {
+  const currentDate = new Date();
   const announcements = await prisma.announcement.findMany({
-    orderBy: { announcement_id: "desc" },
+    where: {
+      publishes_at: { lte: currentDate },
+      ends_at: { gt: currentDate },
+    },
+    orderBy: { publishes_at: "desc" },
     include: {
       editor: true,
     },
@@ -119,9 +124,21 @@ const AnnouncementCard = ({
       href={`/announcement/${announcement.announcement_id}`}
       className="bg-gray-800 rounded-md p-4 shadow-lg mb-4 flex flex-col gap-4 hover:bg-gray-700 transition-colors"
     >
-      <h3 className="text-lg md:text-xl font-bold flex items-center gap-2">
+      <h3 className="text-lg md:text-2xl font-bold flex items-center gap-2">
         <BellIcon className="w-5 md:w-6 text-yellow-400" />
         <span>{announcement.title}</span>
+      </h3>
+      <h3 className="text-lg font-medium flex items-center gap-2">
+        <CalendarIcon className="w-5 md:w-6 text-yellow-400" />
+        <span>
+          {announcement.publishes_at.toLocaleDateString("en-UK", {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+          })}
+        </span>
       </h3>
       <div className="text-gray-400">
         <div className="font-semibold text-sm md:text-base">
