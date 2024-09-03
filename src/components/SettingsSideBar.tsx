@@ -46,7 +46,9 @@ function SidebarLink({
       }`}
     >
       {icon}
-      <span className="text-base md:text-base lg:text-base text-white">{label}</span>
+      <span className="text-base md:text-base lg:text-base text-white">
+        {label}
+      </span>
     </Link>
   );
 }

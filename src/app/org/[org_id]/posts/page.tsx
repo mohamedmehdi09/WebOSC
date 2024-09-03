@@ -20,16 +20,16 @@ const getOrgAnnouncements = async (org_id: string) => {
     (a) =>
       a.publishes_at &&
       a.publishes_at < currentDate &&
-      (!a.ends_at || a.ends_at < currentDate)
+      (!a.ends_at || a.ends_at < currentDate),
   );
   const publishingAnnouncements = announcements.filter(
     (a) =>
       a.publishes_at &&
       a.publishes_at < currentDate &&
-      (!a.ends_at || a.ends_at > currentDate)
+      (!a.ends_at || a.ends_at > currentDate),
   );
   const plannedAnnouncements = announcements.filter(
-    (a) => a.publishes_at && a.publishes_at > currentDate
+    (a) => a.publishes_at && a.publishes_at > currentDate,
   );
 
   return {
@@ -45,7 +45,7 @@ export default async function OrgPostsPage({
   params: { org_id: string };
 }) {
   const { published, publishing, planned } = await getOrgAnnouncements(
-    params.org_id
+    params.org_id,
   );
   const isEditor = await checkOrgPrivilage(params.org_id);
   return (

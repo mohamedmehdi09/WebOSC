@@ -57,7 +57,7 @@ export default function UpdateAnnouncementPublishDateForm({
               publishes_at
                 ? new Date(
                     publishes_at.getTime() -
-                      publishes_at.getTimezoneOffset() * 60 * 1000
+                      publishes_at.getTimezoneOffset() * 60 * 1000,
                   )
                     .toISOString()
                     .slice(0, 16)

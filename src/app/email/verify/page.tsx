@@ -23,7 +23,7 @@ export default function EmailVerificationPage({
       toast.success(formState.message);
       setTimeout(
         () => window.location.replace(searchParams.redirect || "/"),
-        1000
+        1000,
       );
     } else if (formState.success === false) {
       toast.error(formState.message);
@@ -40,7 +40,10 @@ export default function EmailVerificationPage({
           Verify your email
         </h1>
         <div className="w-full flex flex-col gap-3">
-          <label htmlFor="emailVerificationPhrase" className="font-medium text-gray-200">
+          <label
+            htmlFor="emailVerificationPhrase"
+            className="font-medium text-gray-200"
+          >
             Passphrase:
           </label>
           <input

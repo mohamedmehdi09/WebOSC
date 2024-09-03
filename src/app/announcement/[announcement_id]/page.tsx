@@ -35,6 +35,11 @@ export default async function PostPage({
   const announcement = await getAnnouncement(announcement_id);
   const isEdior = await checkOrgPrivilage(announcement.org_id);
 
+  if (announcement.publishes_at > new Date() && !isEdior) throw Error();
+
+  if (announcement.ends_at < new Date() && !isEdior)
+    return <>announcement archived</>;
+
   return (
     <div className="relative flex flex-col flex-1 gap-6 rounded-lg m-4 md:m-12 p-6 md:p-10 bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
       {/* Top-right action buttons */}

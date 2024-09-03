@@ -35,7 +35,7 @@ export default async function EmailVerificationLayout({
         </Link>
       </div>
     );
-  
+
   const userToken = decode(token) as TokenPayload;
 
   if (userToken.emailVerified)
