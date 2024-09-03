@@ -1080,7 +1080,7 @@ export async function updateAnnouncementPublishDate(
       },
     });
 
-    if (!announcement) throw new ActionError("announcement not found");
+    if (!announcement) throw new ActionError("Announcement not found!");
 
     // check if user is editor in announcement org
 
@@ -1088,14 +1088,14 @@ export async function updateAnnouncementPublishDate(
       where: { org_id: announcement.org_id, user_id: user.user_id },
     });
     if (!editor)
-      throw new ActionError("you are not allowed to preform this action!");
+      throw new ActionError("You are not allowed to preform this action!");
 
     // check if publish date is in the past
     if (
       announcement.publishes_at &&
       updateAnnouncementPublishDateFormData.publishes_at < new Date()
     )
-      throw new ActionError("announcement publish date cannot be in the past!");
+      throw new ActionError("The announcement publish date cannot be in the past!");
 
     // update announcement publish date
     const updatedAnnouncement = await prisma.announcement.update({
@@ -1108,7 +1108,7 @@ export async function updateAnnouncementPublishDate(
     });
 
     state.success = true;
-    state.message = "announcement publish date updated successfully!";
+    state.message = "The announcement publish date has been updated successfully!";
   } catch (error) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;
@@ -1153,7 +1153,7 @@ export async function updateAnnouncementEndPublishingDate(
       },
     });
 
-    if (!announcement) throw new ActionError("announcement not found");
+    if (!announcement) throw new ActionError("Announcement not found!");
 
     // check if user is editor in announcement org
 
@@ -1161,21 +1161,21 @@ export async function updateAnnouncementEndPublishingDate(
       where: { org_id: announcement.org_id, user_id: user.user_id },
     });
     if (!editor)
-      throw new ActionError("you are not allowed to preform this action!");
+      throw new ActionError("You are not allowed to preform this action!");
 
     // check if publish date is in the past
     if (
       announcement.ends_at &&
       updateAnnouncementPublishDateFormData.ends_at < new Date()
     )
-      throw new ActionError("announcement publish date cannot be in the past!");
+      throw new ActionError("The announcement publish date cannot be in the past!");
 
     if (
       announcement.publishes_at &&
       updateAnnouncementPublishDateFormData.ends_at <= announcement.publishes_at
     )
       throw new ActionError(
-        "announcement end publish date cannot be before announcement publish date!"
+        "The end publish date cannot be before the announcement publish date!"
       );
 
     // update announcement publish date
@@ -1189,7 +1189,7 @@ export async function updateAnnouncementEndPublishingDate(
     });
 
     state.success = true;
-    state.message = "announcement end publish date updated successfully!";
+    state.message = "The announcement end publish date has been updated successfully!";
   } catch (error) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;
