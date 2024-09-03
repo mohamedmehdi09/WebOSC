@@ -14,7 +14,7 @@ const secret = process.env.JWT_SECRET;
 
 export async function login(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   // This is a zod schema for validating the form data
   const loginShema = z.object({
@@ -66,7 +66,7 @@ export async function login(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      secret,
     );
 
     // We set the token as a cookie
@@ -91,7 +91,7 @@ export async function login(
 
 export async function signup(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   // We define a schema for validating the signup form data
   const signupShema = z.object({
@@ -183,7 +183,7 @@ export async function signup(
         "Secret key for user " +
           user.name +
           " is " +
-          user.PrimaryEmail.emailVerificationPhrase
+          user.PrimaryEmail.emailVerificationPhrase,
       );
     }
 
@@ -197,7 +197,7 @@ export async function signup(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      secret,
     );
 
     // We set the token as a cookie
@@ -251,7 +251,7 @@ export async function CreateOrg(formData: FormData) {
 // done
 export async function addEditorToOrg(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const addEditorFormSchema = z.object({
     org_id: z.string().min(4, { message: "Organization ID is required!" }),
@@ -296,7 +296,7 @@ export async function addEditorToOrg(
 
     if (checkEditorPrivilages.status !== "active")
       throw new ActionError(
-        "You are no longer an Editor in this organization!"
+        "You are no longer an Editor in this organization!",
       );
 
     // check if added user exists
@@ -316,7 +316,7 @@ export async function addEditorToOrg(
 
     if (!checkUser.PrimaryEmail.emailVerified)
       throw new ActionError(
-        "You are trying to add a user with an unverified email!"
+        "You are trying to add a user with an unverified email!",
       );
 
     // add editor
@@ -338,7 +338,7 @@ export async function addEditorToOrg(
     } else {
       if (checkEditor.status == "active")
         throw new ActionError(
-          "The user is already an editor in this organization!"
+          "The user is already an editor in this organization!",
         );
       else {
         const editor = await prisma.editor.update({
@@ -361,7 +361,7 @@ export async function addEditorToOrg(
 // done
 export async function addAnnouncement(
   state: { error: boolean | null; message: string; announcement_id: number },
-  formData: FormData
+  formData: FormData,
 ) {
   const addAnnouncementFormSchema = z.object({
     org_id: z.string().min(4, { message: "Organization ID is required!" }),
@@ -369,12 +369,20 @@ export async function addAnnouncement(
       message: "Title must be less than 40 characters!",
     }),
     body: z.string().min(1, { message: "Body is required!" }),
+    publishes_at: z.date({ message: "publishing date is required" }),
+    ends_at: z.date({ message: "publishing ending date is required" }),
   });
   try {
     const addAnnouncementFormData = {
       org_id: formData.get("org_id") as string,
       title: formData.get("title") as string,
       body: formData.get("body") as string,
+      publishes_at: (formData.get("publishes_at") as string)
+        ? new Date(formData.get("publishes_at") as string)
+        : null,
+      ends_at: (formData.get("ends_at") as string)
+        ? new Date(formData.get("ends_at") as string)
+        : null,
     };
 
     // authenticate user
@@ -404,27 +412,44 @@ export async function addAnnouncement(
 
     if (checkEditorPrivilages.status !== "active")
       throw new ActionError(
-        "You are no longer an Editor in this organization!"
+        "You are no longer an Editor in this organization!",
       );
 
     // validate form
     const parsedAddAnnouncementFormData = addAnnouncementFormSchema.safeParse(
-      addAnnouncementFormData
+      addAnnouncementFormData,
     );
 
     if (!parsedAddAnnouncementFormData.success) {
       throw new ActionError(
-        parsedAddAnnouncementFormData.error.issues[0].message
+        parsedAddAnnouncementFormData.error.issues[0].message,
       );
     }
+
+    // make sure publish date is in the future
+
+    if (new Date() > parsedAddAnnouncementFormData.data.publishes_at)
+      throw new ActionError("publish date cannot be in the past");
+
+    // make sure ends date is not before publish date
+    //
+    if (
+      parsedAddAnnouncementFormData.data.publishes_at >
+      parsedAddAnnouncementFormData.data.ends_at
+    )
+      throw new ActionError(
+        "ends publishing date must be after publishing date",
+      );
 
     // create announcement
     const announcement = await prisma.announcement.create({
       data: {
-        title: addAnnouncementFormData.title,
-        body: addAnnouncementFormData.body,
+        title: parsedAddAnnouncementFormData.data.title,
+        body: parsedAddAnnouncementFormData.data.body,
         editor_id: checkEditorPrivilages.editor_id,
-        org_id: addAnnouncementFormData.org_id,
+        org_id: parsedAddAnnouncementFormData.data.org_id,
+        publishes_at: parsedAddAnnouncementFormData.data.publishes_at,
+        ends_at: parsedAddAnnouncementFormData.data.ends_at,
       },
     });
     state.error = false;
@@ -441,7 +466,7 @@ export async function addAnnouncement(
 // done
 export async function suspendEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const suspendEditorFormSchema = z.object({
     editor_id: z.string().uuid({ message: "Invalid editor id!" }),
@@ -456,12 +481,12 @@ export async function suspendEditor(
     };
 
     const parsedSuspendEditorFormData = suspendEditorFormSchema.safeParse(
-      suspendEditorFormData
+      suspendEditorFormData,
     );
 
     if (!parsedSuspendEditorFormData.success) {
       throw new ActionError(
-        parsedSuspendEditorFormData.error.issues[0].message
+        parsedSuspendEditorFormData.error.issues[0].message,
       );
     }
 
@@ -489,7 +514,7 @@ export async function suspendEditor(
 
     if (checkEditor.status == "suspended")
       throw new ActionError(
-        "You are no longer an Editor in this organization!"
+        "You are no longer an Editor in this organization!",
       );
 
     if (checkEditor.editor_id == suspendEditorFormData.editor_id)
@@ -513,7 +538,7 @@ export async function suspendEditor(
 // done
 export async function activateEditor(
   state: { error: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const activateEditorFormSchema = z.object({
     editor_id: z.string().uuid({ message: "Invalid editor id!" }),
@@ -528,12 +553,12 @@ export async function activateEditor(
     };
 
     const parsedActivateEditorFormData = activateEditorFormSchema.safeParse(
-      activateEditorFormData
+      activateEditorFormData,
     );
 
     if (!parsedActivateEditorFormData.success) {
       throw new ActionError(
-        parsedActivateEditorFormData.error.issues[0].message
+        parsedActivateEditorFormData.error.issues[0].message,
       );
     }
 
@@ -561,7 +586,7 @@ export async function activateEditor(
 
     if (checkEditor.status == "suspended")
       throw new ActionError(
-        "You are no longer an Editor in this organization!"
+        "You are no longer an Editor in this organization!",
       );
 
     const updatedEditor = await prisma.editor.update({
@@ -584,7 +609,7 @@ export async function logout(
     error: boolean | null;
     message: string;
   },
-  formData: FormData
+  formData: FormData,
 ) {
   cookies().delete("token");
   state.error = false;
@@ -595,7 +620,7 @@ export async function logout(
 // done
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const verifyEmailFormSchema = z.object({
     emailVerificationPhrase: z
@@ -624,7 +649,7 @@ export async function verifyEmail(
     // validate form
     const verifyEmailFormData = {
       emailVerificationPhrase: formData.get(
-        "emailVerificationPhrase"
+        "emailVerificationPhrase",
       ) as string,
     };
 
@@ -669,7 +694,7 @@ export async function verifyEmail(
         emailVerified: updatedUser.PrimaryEmail.emailVerified,
         super: updatedUser.super,
       },
-      secret
+      secret,
     );
 
     // We set the new token as the value of the token cookie
@@ -692,7 +717,7 @@ export async function verifyEmail(
 
 export async function resendVerificationEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const token = cookies().get("token")?.value;
 
@@ -776,7 +801,7 @@ export async function resendVerificationEmail(
       "New secret key for user " +
         updatedUser.name +
         " is " +
-        updatedUser.PrimaryEmail.emailVerificationPhrase
+        updatedUser.PrimaryEmail.emailVerificationPhrase,
     );
   }
 
@@ -786,7 +811,7 @@ export async function resendVerificationEmail(
 
 export async function changeEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const user = authenticateUser();
 
@@ -878,7 +903,7 @@ export async function changeEmail(
         " is " +
         updatedUser.PrimaryEmail.emailVerificationPhrase +
         " sent to email " +
-        updatedUser.email
+        updatedUser.email,
     );
   }
 
@@ -892,7 +917,7 @@ export async function changeEmail(
 
 export async function sendPasswordResetEmail(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const email = formData.get("email") as string;
@@ -942,7 +967,7 @@ export async function sendPasswordResetEmail(
         subject: "Password Reset",
         html: generatePasswordResetHTML(
           passphrase.user,
-          passphrase.reset_passcode
+          passphrase.reset_passcode,
         ),
       });
     }
@@ -956,7 +981,7 @@ export async function sendPasswordResetEmail(
           " with reset link " +
           process.env.HOSTNAME +
           "/password-reset/" +
-          passphrase.reset_passcode
+          passphrase.reset_passcode,
       );
     }
 
@@ -978,7 +1003,7 @@ export async function resetPassword(
     success: boolean | null;
     message: string;
   },
-  formData: FormData
+  formData: FormData,
 ) {
   const resetPasswordFormSchema = z.object({
     reset_passcode: z.string().uuid({ message: "Invalid reset passcode!" }),
@@ -994,7 +1019,7 @@ export async function resetPassword(
     };
 
     const resetPasswordFormParsed = resetPasswordFormSchema.safeParse(
-      resetPasswordFormData
+      resetPasswordFormData,
     );
 
     if (!resetPasswordFormParsed.success) {
@@ -1046,7 +1071,7 @@ export async function resetPassword(
 }
 export async function updateAnnouncementPublishDate(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const updateAnnouncementPublishDateFormSchema = z.object({
     announcement_id: z.number(),
@@ -1064,12 +1089,12 @@ export async function updateAnnouncementPublishDate(
 
     const updateAnnouncementPublishDateFormParsed =
       updateAnnouncementPublishDateFormSchema.safeParse(
-        updateAnnouncementPublishDateFormData
+        updateAnnouncementPublishDateFormData,
       );
 
     if (!updateAnnouncementPublishDateFormParsed.success) {
       throw new ActionError(
-        updateAnnouncementPublishDateFormParsed.error.issues[0].message
+        updateAnnouncementPublishDateFormParsed.error.issues[0].message,
       );
     }
 
@@ -1119,7 +1144,7 @@ export async function updateAnnouncementPublishDate(
 
 export async function updateAnnouncementEndPublishingDate(
   state: { success: boolean | null; message: string },
-  formData: FormData
+  formData: FormData,
 ) {
   const updateAnnouncementPublishDateFormSchema = z.object({
     announcement_id: z.number(),
@@ -1137,12 +1162,12 @@ export async function updateAnnouncementEndPublishingDate(
 
     const updateAnnouncementPublishDateFormParsed =
       updateAnnouncementPublishDateFormSchema.safeParse(
-        updateAnnouncementPublishDateFormData
+        updateAnnouncementPublishDateFormData,
       );
 
     if (!updateAnnouncementPublishDateFormParsed.success) {
       throw new ActionError(
-        updateAnnouncementPublishDateFormParsed.error.issues[0].message
+        updateAnnouncementPublishDateFormParsed.error.issues[0].message,
       );
     }
 
@@ -1175,7 +1200,7 @@ export async function updateAnnouncementEndPublishingDate(
       updateAnnouncementPublishDateFormData.ends_at <= announcement.publishes_at
     )
       throw new ActionError(
-        "announcement end publish date cannot be before announcement publish date!"
+        "announcement end publish date cannot be before announcement publish date!",
       );
 
     // update announcement publish date
@@ -1225,7 +1250,7 @@ function generateEmailHTML(user: User & { PrimaryEmail: Email }) {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Email Verification</title>
-      <style> 
+      <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         h1 { color: #4a4a4a; }
@@ -1274,6 +1299,6 @@ function generatePasswordResetHTML(user: User, passphrase: string) {
       </div>
     </body>
   </html>
-      
+
       `;
 }

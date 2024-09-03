@@ -33,14 +33,14 @@ export default function CreatePostPage({
     }
   }, [formState]);
   return (
-    <>
-      <form
-        action={(form: FormData) => {
-          form.append("org_id", params.org_id);
-          formAction(form);
-        }}
-        className="rounded-md w-full max-w-4xl mx-auto flex flex-col flex-1 relative p-4 sm:p-8"
-      >
+    <form
+      action={(form: FormData) => {
+        form.append("org_id", params.org_id);
+        formAction(form);
+      }}
+      className="rounded-md w-full flex flex-1 gap-4 relative p-4 sm:p-8"
+    >
+      <div className="flex flex-col flex-1">
         <div className="relative">
           <input
             type="text"
@@ -69,10 +69,32 @@ export default function CreatePostPage({
           maxLength={2000}
           className="w-full px-4 py-2 sm:px-12 sm:py-4 bg-gradient-to-b from-slate-700 to-slate-800 outline-none resize-none text-lg sm:text-2xl font-medium flex flex-1 rounded-b-md"
         />
+      </div>
 
+      <div className="bg-gray-600 w-1/4 p-4 rounded-md relative flex flex-col gap-4">
+        <div>
+          <h3 className="text-lg font-semibold">Publish At:</h3>
+          <input
+            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 outline-none invalid:border-red-800"
+            aria-label="Date and time"
+            type="datetime-local"
+            name="publishes_at"
+            required
+          />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold">Ends Publishing At:</h3>
+          <input
+            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 outline-none invalid:border-red-800"
+            aria-label="Date and time"
+            type="datetime-local"
+            name="ends_at"
+            required
+          />
+        </div>
         <button
           disabled={pending || formState.error === false}
-          className="bg-green-700 hover:bg-green-800 mt-4 p-2 sm:p-3 rounded-md self-end transition-colors duration-300 focus:outline-green-800 disabled:bg-gray-600"
+          className="absolute bottom-4 right-4 left-4 bg-green-700 hover:bg-green-800 mt-4 p-2 sm:p-3 rounded-md self-end transition-colors duration-300 focus:outline-green-800 disabled:bg-gray-600"
           type="submit"
           onClick={(event: FormEvent) => {
             if (pending) {
@@ -82,7 +104,7 @@ export default function CreatePostPage({
         >
           Create Post
         </button>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }
