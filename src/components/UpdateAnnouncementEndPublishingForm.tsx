@@ -65,10 +65,10 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
           type="datetime-local"
           name="ends_at"
           required
-          readOnly={!edit}
-          hidden={!edit}
+          readOnly={!editMode}
+          hidden={!editMode}
         />
-        <span hidden={edit}>
+        <span hidden={editMode}>
           {ends_at
             ? ends_at.toLocaleDateString("en-UK", {
                 day: "numeric",

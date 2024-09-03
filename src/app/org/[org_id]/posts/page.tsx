@@ -8,15 +8,35 @@ const getOrgAnnouncements = async (org_id: string) => {
   const announcements = await prisma.announcement.findMany({
     orderBy: { announcement_id: "desc" },
     where: {
-      editor: {
-        org_id: org_id,
-      },
+      org_id: org_id,
     },
     include: {
       editor: true,
     },
   });
-  return announcements;
+  const currentDate = new Date();
+
+  const publishedAnnouncements = announcements.filter(
+    (a) =>
+      a.publishes_at &&
+      a.publishes_at < currentDate &&
+      (!a.ends_at || a.ends_at < currentDate)
+  );
+  const publishingAnnouncements = announcements.filter(
+    (a) =>
+      a.publishes_at &&
+      a.publishes_at < currentDate &&
+      (!a.ends_at || a.ends_at > currentDate)
+  );
+  const plannedAnnouncements = announcements.filter(
+    (a) => a.publishes_at && a.publishes_at > currentDate
+  );
+
+  return {
+    published: publishedAnnouncements,
+    publishing: publishingAnnouncements,
+    planned: plannedAnnouncements,
+  };
 };
 
 export default async function OrgPostsPage({
@@ -24,15 +44,25 @@ export default async function OrgPostsPage({
 }: {
   params: { org_id: string };
 }) {
-  const announcements = await getOrgAnnouncements(params.org_id);
+  const { published, publishing, planned } = await getOrgAnnouncements(
+    params.org_id
+  );
   const isEditor = await checkOrgPrivilage(params.org_id);
   return (
-    <div className="flex flex-col flex-1 gap-1 w-full px-4 md:px-24 items-center">
-      {announcements.length === 0 ? (
+    <div className="flex flex-col flex-1 gap-4 w-full px-4 md:px-24">
+      <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
+        <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
+          <span>Announcements</span>
+          <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
+            {publishing.length}
+          </span>
+        </li>
+      </ul>
+      {publishing.length === 0 ? (
         <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
       ) : (
         <div className="w-full">
-          {announcements.map((announcement) => (
+          {publishing.map((announcement) => (
             <AnnouncementCard
               key={announcement.announcement_id}
               announcement={announcement}
@@ -40,6 +70,53 @@ export default async function OrgPostsPage({
             />
           ))}
         </div>
+      )}
+
+      {isEditor && (
+        <>
+          <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
+            <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
+              <span>Planned</span>
+              <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
+                {planned.length}
+              </span>
+            </li>
+          </ul>
+          {planned.length === 0 ? (
+            <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
+          ) : (
+            <div className="w-full">
+              {planned.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.announcement_id}
+                  announcement={announcement}
+                  isEditor={isEditor}
+                />
+              ))}
+            </div>
+          )}
+          <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
+            <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
+              <span>Archived</span>
+              <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
+                {published.length}
+              </span>
+            </li>
+          </ul>
+          {published.length === 0 ? (
+            <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
+          ) : (
+            <div className="w-full">
+              {published.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.announcement_id}
+                  announcement={announcement}
+                  isEditor={isEditor}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
       {isEditor && (
         <Link
@@ -70,6 +147,12 @@ const AnnouncementCard = ({
       <div className="flex flex-col gap-2">
         <h3 className="text-xl md:text-2xl font-semibold">
           {announcement.title}
+        </h3>
+        <h3 className="text-lg md:text-xl">
+          {announcement.publishes_at.toLocaleDateString("en-UK", {
+            minute: "numeric",
+            hour: "numeric",
+          })}
         </h3>
         <Link
           href={`/u/${announcement.editor.user_id}`}

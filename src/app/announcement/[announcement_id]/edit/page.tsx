@@ -44,7 +44,7 @@ export default async function EditAnnouncementPage({
             className="hover:underline hover:text-gray-200"
             title={announcement.org_id}
           >
-            {announcement.org.name || announcement.org_id}
+            {announcement.org_id}
           </Link>
           <span className="text-white font-bold">/</span>
           <Link
@@ -52,7 +52,7 @@ export default async function EditAnnouncementPage({
             className="hover:underline hover:text-gray-200"
             title={announcement.editor.user_id}
           >
-            {announcement.editor.name || announcement.editor.user_id}
+            {announcement.editor.user_id}
           </Link>
         </div>
         <div className="flex flex-col gap-2 md:gap-4 text-base md:text-xl">
