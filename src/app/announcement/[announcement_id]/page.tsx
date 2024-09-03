@@ -1,6 +1,7 @@
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, PencilIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 const getAnnouncement = async (announcement_id: number) => {
@@ -17,9 +18,9 @@ const getAnnouncement = async (announcement_id: number) => {
               user_id: true,
             },
           },
-          org: true,
         },
       },
+      org: true,
     },
   });
   return announcement;
@@ -32,6 +33,7 @@ export default async function PostPage({
 }) {
   const announcement_id = Number(params.announcement_id);
   const announcement = await getAnnouncement(announcement_id);
+  const isEdior = await checkOrgPrivilage(announcement.org_id);
 
   return (
     <div className="relative flex flex-col flex-1 gap-6 rounded-lg m-4 md:m-12 p-6 md:p-10 bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
@@ -42,9 +44,17 @@ export default async function PostPage({
           title="Go back home"
           className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 transition-colors duration-200"
         >
-          <ArrowLeftIcon className="w-6 h-6 text-white" />
+          <ArrowLeftIcon className="w-6 h-6" />
         </Link>
         <CopyToClipboardButton />
+        {isEdior && (
+          <Link
+            className="p-2 rounded-md bg-gray-800 text-gray-400 hover:text-white focus:ring-2 focus:ring-gray-500"
+            href={`/announcement/${announcement.announcement_id}/edit`}
+          >
+            <PencilIcon className="w-6 h-6" />
+          </Link>
+        )}
       </div>
 
       {/* Announcement Title */}
@@ -52,30 +62,42 @@ export default async function PostPage({
         <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
           {announcement.title}
         </h1>
+        <div className="flex flex-wrap text-xl gap-2 md:gap-4">
+          {announcement.updated_at &&
+            announcement.updated_at.toLocaleDateString("en-UK", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            })}
+        </div>
         <div className="flex flex-wrap gap-2 md:gap-4 text-gray-400">
           <Link
-            href={`/org/${announcement.editor.org_id}/posts`}
+            href={`/org/${announcement.org_id}/posts`}
             className="hover:underline hover:text-gray-200"
+            title={announcement.org_id}
           >
-            {announcement.editor.org.nameEn}
+            {announcement.org.nameEn}
           </Link>
           <span className="text-white font-bold">/</span>
           <Link
             href={`/u/${announcement.editor.user_id}`}
             className="hover:underline hover:text-gray-200"
+            title={announcement.editor.user_id}
           >
-            {announcement.editor.user.name} {announcement.editor.user.lastname}
+            {announcement.editor.user.name}{" "}
+            {announcement.editor.user.middlename &&
+              announcement.editor.user.middlename + " "}
+            {announcement.editor.user.lastname}
           </Link>
         </div>
       </div>
 
       {/* Announcement Body */}
-      <textarea
-        readOnly
-        className="flex-1 rounded-lg p-4 md:p-6 text-lg md:text-2xl bg-transparent outline-none cursor-default resize-none text-white leading-relaxed"
-      >
+      <pre className="rounded-lg p-4 md:p-6 text-md md:text-2xl bg-transparent cursor-default text-wrap">
         {announcement.body}
-      </textarea>
+      </pre>
     </div>
   );
 }

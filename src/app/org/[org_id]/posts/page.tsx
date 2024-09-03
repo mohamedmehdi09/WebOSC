@@ -1,6 +1,6 @@
 import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
-import { EyeIcon } from "@heroicons/react/20/solid";
+import { EyeIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { Announcement, Editor } from "@prisma/client";
 import Link from "next/link";
 
@@ -13,7 +13,7 @@ const getOrgAnnouncements = async (org_id: string) => {
       },
     },
     include: {
-      editor: { include: { user: { select: { name: true, lastname: true } } } },
+      editor: true,
     },
   });
   return announcements;
@@ -35,8 +35,8 @@ export default async function OrgPostsPage({
           {announcements.map((announcement) => (
             <AnnouncementCard
               key={announcement.announcement_id}
-              org_id={params.org_id}
               announcement={announcement}
+              isEditor={isEditor}
             />
           ))}
         </div>
@@ -55,35 +55,48 @@ export default async function OrgPostsPage({
 
 const AnnouncementCard = ({
   announcement,
-  org_id,
+  isEditor,
 }: {
   announcement: Announcement & {
-    editor: Editor & { user: { name: string; lastname: string } };
+    editor: Editor;
   };
-  org_id: string;
+  isEditor: boolean;
 }) => {
   return (
     <div
       key={announcement.announcement_id}
       className="bg-gray-700 rounded p-4 md:p-5 shadow-lg w-full mb-4 flex justify-between items-start md:items-center"
     >
-      <div className="flex-1 mb-2 md:mb-0">
-        <h3 className="text-xl md:text-2xl font-semibold text-white">
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xl md:text-2xl font-semibold">
           {announcement.title}
         </h3>
-        <p className="text-gray-400 mt-1">
-          <span className="text-gray-300">By</span>
-          <span className="text-gray-400 hover:underline ml-1">
-            @{announcement.editor.user_id}
-          </span>
-        </p>
+        <Link
+          href={`/u/${announcement.editor.user_id}`}
+          className="text-gray-400 hover:underline"
+        >
+          @{announcement.editor.user_id}
+        </Link>
       </div>
-      <Link
-        href={`/announcement/${announcement.announcement_id}`}
-        className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
-      >
-        <EyeIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
-      </Link>
+
+      <div className="flex gap-4 justify-center items-center h-full">
+        {isEditor && (
+          <Link
+            href={`/announcement/${announcement.announcement_id}/edit`}
+            className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
+            title="Edit Announcement"
+          >
+            <PencilIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
+          </Link>
+        )}
+
+        <Link
+          href={`/announcement/${announcement.announcement_id}`}
+          className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
+        >
+          <EyeIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
+        </Link>
+      </div>
     </div>
   );
 };

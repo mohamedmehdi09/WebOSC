@@ -11,8 +11,8 @@ model Organization {
   org_id        String         @id
   nameEn        String
   nameAr        String
-  parent_org    Organization?  @relation("orgs", fields: [parent_org_id], references: [org_id])
   parent_org_id String?
+  parent_org    Organization?  @relation("orgs", fields: [parent_org_id], references: [org_id])
   sub_orgs      Organization[] @relation("orgs")
   editors       Editor[]
   announcements Announcement[]
@@ -25,9 +25,9 @@ model User {
   lastname       String
   isMale         Boolean?
   email          String          @unique
-  PrimaryEmail   Email           @relation(fields: [email], references: [email])
   password       String
   super          Boolean         @default(false)
+  PrimaryEmail   Email           @relation(fields: [email], references: [email])
   editors        Editor[]
   passwordResets PasswordReset[]
 }
@@ -50,10 +50,10 @@ model PasswordReset {
 
 model Editor {
   editor_id     String         @id @default(uuid())
-  user          User           @relation(fields: [user_id], references: [user_id])
   user_id       String
-  org           Organization   @relation(fields: [org_id], references: [org_id])
   org_id        String
+  org           Organization   @relation(fields: [org_id], references: [org_id])
+  user          User           @relation(fields: [user_id], references: [user_id])
   announcements Announcement[]
   status        EditorStatus   @default(active)
 
@@ -62,12 +62,16 @@ model Editor {
 
 model Announcement {
   announcement_id Int          @id @default(autoincrement())
+  editor_id       String
+  org_id          String
   title           String
   body            String
+  created_at      DateTime?    @default(now())
+  updated_at      DateTime?    @updatedAt
+  publishes_at    DateTime?
+  ends_at         DateTime?
   editor          Editor       @relation(fields: [editor_id], references: [editor_id])
-  editor_id       String
   org             Organization @relation(fields: [org_id], references: [org_id])
-  org_id          String
 }
 
 enum EditorStatus {

@@ -18,6 +18,8 @@
     "next": "^14.2.7",
     "nodemailer": "^6.9.14",
     "react": "^18.3.1",
+    "react-date-picker": "^11.0.0",
+    "react-datetime-picker": "^6.0.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "zod": "^3.23.8"

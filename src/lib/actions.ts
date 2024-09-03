@@ -916,7 +916,9 @@ export async function sendPasswordResetEmail(
       return {
         success: true,
         message:
-        "If your email address " + email + " is known to us, we'll send a password recovery link in a few minutes!"
+          "If your email address " +
+          email +
+          " is known to us, we'll send a password recovery link in a few minutes!",
       };
 
     // set all previous password resets to expired
@@ -960,7 +962,9 @@ export async function sendPasswordResetEmail(
 
     state.success = true;
     state.message =
-      "If your email address " + email + " is known to us, we'll send a password recovery link in a few minutes!";
+      "If your email address " +
+      email +
+      " is known to us, we'll send a password recovery link in a few minutes!";
   } catch (error) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;
@@ -1034,6 +1038,159 @@ export async function resetPassword(
     state.success = true;
     state.message = "Password reset successful!";
   } catch (error: any) {
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Unexpected error. Please try again later!";
+  }
+  return state;
+}
+export async function updateAnnouncementPublishDate(
+  state: { success: boolean | null; message: string },
+  formData: FormData
+) {
+  const updateAnnouncementPublishDateFormSchema = z.object({
+    announcement_id: z.number(),
+    publishes_at: z.date(),
+  });
+  try {
+    // authenticate user
+    const user = authenticateUser();
+
+    // validate form
+    const updateAnnouncementPublishDateFormData = {
+      announcement_id: Number(formData.get("announcement_id") as string),
+      publishes_at: new Date(formData.get("publishes_at") as string),
+    };
+
+    const updateAnnouncementPublishDateFormParsed =
+      updateAnnouncementPublishDateFormSchema.safeParse(
+        updateAnnouncementPublishDateFormData
+      );
+
+    if (!updateAnnouncementPublishDateFormParsed.success) {
+      throw new ActionError(
+        updateAnnouncementPublishDateFormParsed.error.issues[0].message
+      );
+    }
+
+    // check if announcement exists
+    const announcement = await prisma.announcement.findFirst({
+      where: {
+        announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
+      },
+    });
+
+    if (!announcement) throw new ActionError("announcement not found");
+
+    // check if user is editor in announcement org
+
+    const editor = prisma.editor.findFirst({
+      where: { org_id: announcement.org_id, user_id: user.user_id },
+    });
+    if (!editor)
+      throw new ActionError("you are not allowed to preform this action!");
+
+    // check if publish date is in the past
+    if (
+      announcement.publishes_at &&
+      updateAnnouncementPublishDateFormData.publishes_at < new Date()
+    )
+      throw new ActionError("announcement publish date cannot be in the past!");
+
+    // update announcement publish date
+    const updatedAnnouncement = await prisma.announcement.update({
+      where: {
+        announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
+      },
+      data: {
+        publishes_at: updateAnnouncementPublishDateFormData.publishes_at,
+      },
+    });
+
+    state.success = true;
+    state.message = "announcement publish date updated successfully!";
+  } catch (error) {
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Unexpected error. Please try again later!";
+  }
+  return state;
+}
+
+export async function updateAnnouncementEndPublishingDate(
+  state: { success: boolean | null; message: string },
+  formData: FormData
+) {
+  const updateAnnouncementPublishDateFormSchema = z.object({
+    announcement_id: z.number(),
+    ends_at: z.date(),
+  });
+  try {
+    // authenticate user
+    const user = authenticateUser();
+
+    // validate form
+    const updateAnnouncementPublishDateFormData = {
+      announcement_id: Number(formData.get("announcement_id") as string),
+      ends_at: new Date(formData.get("ends_at") as string),
+    };
+
+    const updateAnnouncementPublishDateFormParsed =
+      updateAnnouncementPublishDateFormSchema.safeParse(
+        updateAnnouncementPublishDateFormData
+      );
+
+    if (!updateAnnouncementPublishDateFormParsed.success) {
+      throw new ActionError(
+        updateAnnouncementPublishDateFormParsed.error.issues[0].message
+      );
+    }
+
+    // check if announcement exists
+    const announcement = await prisma.announcement.findFirst({
+      where: {
+        announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
+      },
+    });
+
+    if (!announcement) throw new ActionError("announcement not found");
+
+    // check if user is editor in announcement org
+
+    const editor = prisma.editor.findFirst({
+      where: { org_id: announcement.org_id, user_id: user.user_id },
+    });
+    if (!editor)
+      throw new ActionError("you are not allowed to preform this action!");
+
+    // check if publish date is in the past
+    if (
+      announcement.ends_at &&
+      updateAnnouncementPublishDateFormData.ends_at < new Date()
+    )
+      throw new ActionError("announcement publish date cannot be in the past!");
+
+    if (
+      announcement.publishes_at &&
+      updateAnnouncementPublishDateFormData.ends_at <= announcement.publishes_at
+    )
+      throw new ActionError(
+        "announcement end publish date cannot be before announcement publish date!"
+      );
+
+    // update announcement publish date
+    const updatedAnnouncement = await prisma.announcement.update({
+      where: {
+        announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
+      },
+      data: {
+        ends_at: updateAnnouncementPublishDateFormData.ends_at,
+      },
+    });
+
+    state.success = true;
+    state.message = "announcement end publish date updated successfully!";
+  } catch (error) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;
     else state.message = "Unexpected error. Please try again later!";
