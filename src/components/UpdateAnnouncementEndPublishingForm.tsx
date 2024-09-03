@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { updateAnnouncementEndPublishingDate } from "@/lib/actions";
 import toast from "react-hot-toast";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function UpdateAnnouncementEndsPublishingDateForm({
   ends_at,
@@ -18,36 +18,45 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
     {
       success: null,
       message: "",
-    },
+    }
   );
 
-  const [edit, setEdit] = useState(false);
-
+  const [editMode, setEditMode] = useState(false);
   const { pending } = useFormStatus();
 
   useEffect(() => {
     if (formState.success === true) {
       toast.success(formState.message);
-      setEdit(false);
+      setEditMode(false);
       setTimeout(() => window.location.reload(), 1000);
+    } else if (formState.success === false) {
+      toast.error(formState.message);
     }
-    if (formState.success === false) toast.error(formState.message);
   }, [formState]);
+
+  const handleEditClick = () => {
+    setEditMode(true);
+  };
+
+  const handleCancelClick = () => {
+    setEditMode(false);
+  };
 
   return (
     <form
-      action={(form: FormData) => {
-        form.append("announcement_id", announcement_id.toString());
-        console.log(form);
-        formAction(form);
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        formData.append("announcement_id", announcement_id.toString());
+        formAction(formData);
       }}
-      className="flex flex-col gap-2  w-full md:w-1/2"
+      className="w-full max-w-lg p-4 bg-gray-800 rounded-lg shadow-md"
     >
       <h3 className="text-lg font-semibold">Ends Publishing At:</h3>
       <div className="flex gap-2 flex-1 items-center">
         <input
           defaultValue={new Date(
-            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000,
+            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000
           )
             .toISOString()
             .slice(0, 16)}
@@ -72,32 +81,37 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
         </span>
         <button
           type="button"
-          onClick={() => setEdit(!edit)}
-          hidden={edit}
-          className="p-1 rounded-md bg-gray-800 text-gray-400 hover:text-white focus:ring-2 focus:ring-gray-500"
+          onClick={editMode ? handleCancelClick : handleEditClick}
+          className="p-2 rounded-md text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          aria-label={editMode ? "Cancel" : "Edit"}
         >
-          <PencilIcon className="w-6 h-6" />
+          {editMode ? (
+            <XMarkIcon className="w-5 h-5" />
+          ) : (
+            <PencilIcon className="w-5 h-5" />
+          )}
         </button>
       </div>
 
-      <div className="flex flex-row gap-2">
-        <button
-          disabled={pending}
-          type="submit"
-          hidden={!edit}
-          className="px-4 md:px-6 py-1 border border-green-300 rounded-md bg-green-600 disabled:text-gray-400 disabled:border-gray-800"
-        >
-          update
-        </button>
-        <button
-          type="button"
-          onClick={() => setEdit(false)}
-          hidden={!edit}
-          className="px-4 md:px-6 py-1 border border-red-300 rounded-md bg-red-600"
-        >
-          Cancel
-        </button>
-      </div>
+      {editMode && (
+        <div className="flex justify-end gap-2">
+          <button
+            type="submit"
+            disabled={pending}
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500 disabled:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <CheckIcon className="w-5 h-5" />
+            <span>Update</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleCancelClick}
+            className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </form>
   );
 }
