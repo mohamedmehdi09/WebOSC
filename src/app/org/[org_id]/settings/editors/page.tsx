@@ -1,12 +1,10 @@
 import AddEditorModal from "@/components/AddEditorModal";
-import RemoveEditor from "@/components/RemoveEditor";
 import { prisma } from "@/lib/prisma";
 import { TokenPayload } from "@/lib/types";
-import { UserCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { decode } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import ReactivateEditor from "@/components/ReactivateEditor";
+import SettingsEditorList from "@/components/SettingsEditorList";
 
 const getOrgEditors = async (org_id: string) => {
   const editors = await prisma.editor.findMany({
@@ -83,72 +81,17 @@ export default async function OrgSettingsEditorsPage({
         </TabList>
         <TabPanels>
           <TabPanel className="flex flex-col gap-2 bg-gray-800 px-1 rounded-lg">
-            <div className="flex gap-2 md:gap-4 pb-1 border-b border-gray-700">
-              <MagnifyingGlassIcon className="w-5 md:w-6" />
-              <input
-                type="text"
-                placeholder="Find Editors..."
-                className="bg-inherit focus:outline-none text-white py-2 rounded-md w-full"
-              />
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              {activeEditors.map((editor) => (
-                <div
-                  key={editor.editor_id}
-                  className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
-                >
-                  <div className="flex items-center text-green-400">
-                    <UserCircleIcon className="w-8" />
-                    <span className="ml-4 text-xs md:text-base font-semibold md:font-bold capitalize">
-                      {editor.user.name} {editor.user?.middlename}{" "}
-                      {editor.user.lastname}
-                    </span>
-                  </div>
-                  <div className="mt-2 md:mt-0">
-                    {editor.user_id == currentUser.user_id ? (
-                      <div className="bg-green-700 px-3 md:px-4 py-1 md:py-2 rounded-md w-full">
-                        You
-                      </div>
-                    ) : (
-                      <RemoveEditor editor_id={editor.editor_id} />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SettingsEditorList
+              editors={activeEditors}
+              currentUser={currentUser}
+            />
           </TabPanel>
           <TabPanel className="flex flex-col gap-2 bg-gray-800 px-2 rounded-lg">
             {suspendedEditors.length > 0 ? (
-              <>
-                <div className="flex gap-2 md:gap-4 pb-1 border-b border-gray-700">
-                  <MagnifyingGlassIcon className="w-5 md:w-6" />
-                  <input
-                    type="text"
-                    placeholder="Find Editors..."
-                    className="bg-inherit focus:outline-none text-white py-2 rounded-md w-full"
-                  />
-                </div>
-                <div className="flex flex-col gap-2 pt-2">
-                  {suspendedEditors.map((editor) => (
-                    <div
-                      key={editor.editor_id}
-                      className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
-                    >
-                      <div className="flex items-center">
-                        <UserCircleIcon className="w-6 md:w-8 text-green-400" />
-                        <span className="ml-4 text-green-400 font-bold capitalize">
-                          {editor.user.name} {editor.user?.middlename}{" "}
-                          {editor.user.lastname}
-                        </span>
-                      </div>
-                      <div className="mt-2 md:mt-0">
-                        {/*  <RemoveEditor editor_id={editor.editor_id} /> */}
-                        <ReactivateEditor editor_id={editor.editor_id} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <SettingsEditorList
+                editors={suspendedEditors}
+                currentUser={currentUser}
+              />
             ) : (
               "No Suspended Editors!"
             )}

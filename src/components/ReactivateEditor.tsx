@@ -34,7 +34,7 @@ export default function ReactivateEditor({ editor_id }: { editor_id: string }) {
             event.preventDefault();
           }
         }}
-        className="bg-green-700 hover:bg-green-800 disabled:bg-slate-700 px-4 py-2 rounded-md w-full"
+        className="bg-green-700 hover:bg-green-800 disabled:bg-slate-700 px-3 md:px-4 py-1 md:py-2 rounded-md w-full"
         type="submit"
       >
         Reactivate
