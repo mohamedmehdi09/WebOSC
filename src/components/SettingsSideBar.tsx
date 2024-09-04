@@ -12,13 +12,13 @@ export default function SettingsSideBar({ org_id }: { org_id: string }) {
       <SidebarLink
         href={`/org/${org_id}/settings`}
         isActive={path === `/org/${org_id}/settings`}
-        icon={<CogIcon className="w-6 h-6 text-white" />}
+        icon={<CogIcon className="w-5 md:w-6 text-white" />}
         label="General"
       />
       <SidebarLink
         href={`/org/${org_id}/settings/editors`}
         isActive={path === `/org/${org_id}/settings/editors`}
-        icon={<UserGroupIcon className="w-6 h-6 text-white" />}
+        icon={<UserGroupIcon className="w-5 md:w-6" />}
         label="Editors"
       />
     </div>
@@ -39,16 +39,12 @@ function SidebarLink({
   return (
     <Link
       href={href}
-      className={`w-full flex items-center gap-3 p-3 rounded-md transition-colors duration-200 ${
-        isActive
-          ? "bg-green-600 text-white"
-          : "bg-transparent hover:bg-green-600/25 text-gray-300"
+      className={`w-full flex items-center gap-2 p-2 md:p-3 rounded-md transition-colors duration-200 ${
+        isActive ? "bg-green-600" : "bg-transparent hover:bg-green-600/25"
       }`}
     >
       {icon}
-      <span className="text-base md:text-base lg:text-base text-white">
-        {label}
-      </span>
+      <span className="md:text-lg">{label}</span>
     </Link>
   );
 }

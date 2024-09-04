@@ -28,7 +28,7 @@ const getOrgEditors = async (org_id: string) => {
 
   const activeEditors = editors.filter((editor) => editor.status === "active");
   const suspendedEditors = editors.filter(
-    (editor) => editor.status === "suspended",
+    (editor) => editor.status === "suspended"
   );
   return [activeEditors, suspendedEditors];
 };
@@ -62,13 +62,13 @@ export default async function OrgSettingsEditorsPage({
   const currentUser = decode(token) as TokenPayload;
   return (
     <>
-      <TabGroup className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4 border border-gray-700">
+      <TabGroup className="bg-gray-800 p-4 md:p-6 w-full flex flex-col gap-4 border border-gray-700 text-sm md:text-base">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-semibold">Manage Access</h1>
+          <h1 className="text-lg md:text-2xl font-semibold">Manage Access</h1>
           <AddEditorModal org_id={params.org_id} users={users} />
         </div>
         <TabList className="flex gap-2 text-white border-b border-gray-700">
-          <Tab className="pb-2 px-2 border-b-2 border-transparent data-[selected]:border-blue-500 outline-none">
+          <Tab className="pb-2 px-1 md:px-2 border-b-2 border-transparent data-[selected]:border-blue-500 outline-none">
             Editors
             <span className="ml-2 bg-slate-700 px-2 py-1 rounded-full">
               {activeEditors.length}
@@ -82,7 +82,7 @@ export default async function OrgSettingsEditorsPage({
           </Tab>
         </TabList>
         <TabPanels>
-          <TabPanel className="flex flex-col gap-2 bg-gray-800 px-2 rounded-lg">
+          <TabPanel className="flex flex-col gap-2 bg-gray-800 px-1 rounded-lg">
             <div className="flex gap-2 md:gap-4 pb-1 border-b border-gray-700">
               <MagnifyingGlassIcon className="w-5 md:w-6" />
               <input
@@ -97,16 +97,16 @@ export default async function OrgSettingsEditorsPage({
                   key={editor.editor_id}
                   className="flex justify-between items-center bg-gray-700 p-4 rounded-lg"
                 >
-                  <div className="flex items-center">
-                    <UserCircleIcon className="w-6 md:w-8 text-green-400" />
-                    <span className="ml-4 text-green-400 font-bold capitalize">
+                  <div className="flex items-center text-green-400">
+                    <UserCircleIcon className="w-8" />
+                    <span className="ml-4 text-xs md:text-base font-semibold md:font-bold capitalize">
                       {editor.user.name} {editor.user?.middlename}{" "}
                       {editor.user.lastname}
                     </span>
                   </div>
                   <div className="mt-2 md:mt-0">
                     {editor.user_id == currentUser.user_id ? (
-                      <div className="bg-green-700 px-4 py-2 rounded-md w-full">
+                      <div className="bg-green-700 px-3 md:px-4 py-1 md:py-2 rounded-md w-full">
                         You
                       </div>
                     ) : (

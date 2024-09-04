@@ -4,7 +4,6 @@ import { FormEvent, useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { UserPlusIcon } from "@heroicons/react/24/outline";
-import { User } from "@prisma/client";
 import { addEditorToOrg } from "@/lib/actions";
 import SelectUserCombobox from "./SelectUserCombobox";
 import toast from "react-hot-toast";
@@ -46,9 +45,9 @@ export default function AddEditorModal({
     <>
       <button
         onClick={open}
-        className="rounded-md bg-green-700 py-2 px-4 text-sm font-medium hover:bg-green-800 flex gap-2 items-center"
+        className="rounded-md bg-green-700 py-1 md:py-2 px-2 md:px-4 text-sm md:text-lg font-medium hover:bg-green-800 flex gap-2 items-center"
       >
-        <UserPlusIcon className="w-6" />
+        <UserPlusIcon className="w-5 md:w-6" />
         Add
       </button>
 

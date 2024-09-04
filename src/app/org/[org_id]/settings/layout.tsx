@@ -17,7 +17,7 @@ export default async function OrgSettingsLayout({
   return (
     <div className="flex flex-1 flex-col md:flex-row gap-4 md:gap-8 rounded-md bg-[rgb(17,24,39)] p-4 pt-0 md:p-8 md:pt-0">
       <SettingsSideBar org_id={params.org_id} />
-      <div className="flex flex-1 bg-[rgb(31,41,55)] shadow-lg rounded-md p-4 md:p-6">
+      <div className="flex flex-1 h-fit bg-[rgb(31,41,55)] shadow-lg rounded-md">
         {children}
       </div>
     </div>

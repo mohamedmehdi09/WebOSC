@@ -43,7 +43,7 @@ export default async function PostPage({
   return (
     <div className="relative flex flex-col flex-1 gap-6 rounded-lg m-4 md:m-12 p-6 md:p-10 bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
       {/* Top-right action buttons */}
-      <div className="absolute top-4 right-4 flex items-center space-x-3">
+      <div className="md:absolute w-full justify-end top-4 right-4 flex items-center space-x-3">
         <Link
           href="/"
           title="Go back home"
