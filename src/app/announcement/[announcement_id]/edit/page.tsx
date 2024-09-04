@@ -1,8 +1,10 @@
 import UpdateAnnouncementEndsPublishingDateForm from "@/components/UpdateAnnouncementEndPublishingForm";
 import UpdateAnnouncementPublishDateForm from "@/components/UpdateAnnouncementPublishDateForm";
+import UpdateAnnouncementTitleForm from "@/components/UpdateAnnouncementTitleForm";
 import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { title } from "process";
 
 const getAnnouncement = async (announcement_id: number) => {
   return await prisma.announcement.findUniqueOrThrow({
@@ -33,11 +35,11 @@ export default async function EditAnnouncementPage({
   return (
     <div className="flex flex-col md:flex-row flex-1 gap-6 px-4 md:px-24 py-8">
       <div className="flex flex-col flex-1 gap-4 px-6 py-4 rounded-lg  bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
-        {/* Announcement Header */}
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl md:text-5xl font-bold text-white">
-            {announcement.title}
-          </h1>
+          <UpdateAnnouncementTitleForm
+            title={announcement.title}
+            announcement_id={announcement_id}
+          />
 
           <div className="flex flex-wrap items-center gap-2 md:gap-4 text-gray-400">
             <Link
@@ -47,7 +49,7 @@ export default async function EditAnnouncementPage({
             >
               {announcement.org_id}
             </Link>
-            <span className="text-white font-bold">/</span>
+            <span className="font-bold">/</span>
             <Link
               href={`/u/${announcement.editor.user_id}`}
               className="hover:underline hover:text-gray-200"
@@ -57,9 +59,7 @@ export default async function EditAnnouncementPage({
             </Link>
           </div>
         </div>
-
-        {/* Announcement Body */}
-        <div className="flex-1 rounded-lg p-4 md:p-6 text-lg md:text-xl text-white whitespace-pre-wrap break-words">
+        <div className="flex-1 rounded-lg p-4 md:p-6 text-lg md:text-xl whitespace-pre-wrap break-words">
           {announcement.body}
         </div>
       </div>
