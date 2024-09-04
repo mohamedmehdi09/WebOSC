@@ -18,7 +18,7 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
     {
       success: null,
       message: "",
-    },
+    }
   );
 
   const [editMode, setEditMode] = useState(false);
@@ -50,13 +50,13 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
         formData.append("announcement_id", announcement_id.toString());
         formAction(formData);
       }}
-      className="w-full max-w-lg p-4 bg-gray-800 rounded-lg shadow-md"
+      className="w-full max-w-lg"
     >
       <h3 className="text-lg font-semibold">Ends Publishing At:</h3>
       <div className="flex gap-2 flex-1 items-center">
         <input
           defaultValue={new Date(
-            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000,
+            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000
           )
             .toISOString()
             .slice(0, 16)}
@@ -68,21 +68,24 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
           readOnly={!editMode}
           hidden={!editMode}
         />
-        <span hidden={editMode}>
-          {ends_at
-            ? ends_at.toLocaleDateString("en-UK", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-              })
-            : "not spacified"}
+        <span
+          className="w-full p-3 border border-gray-600 rounded-md bg-gray-900"
+          hidden={editMode}
+        >
+          {ends_at.toLocaleDateString("en-UK", {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+          })}
         </span>
         <button
           type="button"
           onClick={editMode ? handleCancelClick : handleEditClick}
-          className="p-2 rounded-md text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          className={`p-2 rounded-md  hover:font-bold text-gray-400 hover:text-white transition-colors duration-200 ${
+            editMode ? "bg-red-600/60 hover:bg-red-600 " : "bg-gray-600"
+          }`}
           aria-label={editMode ? "Cancel" : "Edit"}
         >
           {editMode ? (
@@ -91,27 +94,16 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
             <PencilIcon className="w-5 h-5" />
           )}
         </button>
-      </div>
-
-      {editMode && (
-        <div className="flex justify-end gap-2">
+        {editMode && (
           <button
             type="submit"
-            disabled={pending}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500 disabled:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+            disabled={pending || formState.success === true}
+            className="flex items-center p-2 rounded-md bg-green-600/60 hover:bg-green-600 text-gray-400 hover:text-white disabled:bg-gray-800 focus:outline-none transition-colors duration-200"
           >
             <CheckIcon className="w-5 h-5" />
-            <span>Update</span>
           </button>
-          <button
-            type="button"
-            onClick={handleCancelClick}
-            className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </form>
   );
 }
