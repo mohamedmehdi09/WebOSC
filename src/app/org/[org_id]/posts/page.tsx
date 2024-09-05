@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { EyeIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { Announcement, Editor } from "@prisma/client";
 import Link from "next/link";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 
 const getOrgAnnouncements = async (org_id: string) => {
   const announcements = await prisma.announcement.findMany({
@@ -20,16 +22,16 @@ const getOrgAnnouncements = async (org_id: string) => {
     (a) =>
       a.publishes_at &&
       a.publishes_at < currentDate &&
-      (!a.ends_at || a.ends_at < currentDate),
+      (!a.ends_at || a.ends_at < currentDate)
   );
   const publishingAnnouncements = announcements.filter(
     (a) =>
       a.publishes_at &&
       a.publishes_at < currentDate &&
-      (!a.ends_at || a.ends_at > currentDate),
+      (!a.ends_at || a.ends_at > currentDate)
   );
   const plannedAnnouncements = announcements.filter(
-    (a) => a.publishes_at && a.publishes_at > currentDate,
+    (a) => a.publishes_at && a.publishes_at > currentDate
   );
 
   return {
@@ -45,88 +47,104 @@ export default async function OrgPostsPage({
   params: { org_id: string };
 }) {
   const { published, publishing, planned } = await getOrgAnnouncements(
-    params.org_id,
+    params.org_id
   );
   const isEditor = await checkOrgPrivilage(params.org_id);
   return (
-    <div className="flex flex-col flex-1 gap-4 w-full px-4 md:px-24">
-      <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
-        <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
-          <span>Announcements</span>
-          <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
-            {publishing.length}
-          </span>
-        </li>
-      </ul>
-      {publishing.length === 0 ? (
-        <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
-      ) : (
-        <div className="w-full">
-          {publishing.map((announcement) => (
-            <AnnouncementCard
-              key={announcement.announcement_id}
-              announcement={announcement}
-              isEditor={isEditor}
-            />
-          ))}
-        </div>
-      )}
-
-      {isEditor && (
-        <>
-          <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
-            <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
-              <span>Planned</span>
-              <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
-                {planned.length}
-              </span>
-            </li>
-          </ul>
-          {planned.length === 0 ? (
-            <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
-          ) : (
-            <div className="w-full">
-              {planned.map((announcement) => (
-                <AnnouncementCard
-                  key={announcement.announcement_id}
-                  announcement={announcement}
-                  isEditor={isEditor}
-                />
-              ))}
-            </div>
+    <>
+      <TabGroup className="flex flex-col flex-1 gap-4 w-full px-4 lg:px-24 relative">
+        <TabList className="flex items-center gap-2 border-b border-gray-700">
+          <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold p-1 lg:p-2 outline-none">
+            <span>Announcements</span>
+            <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
+              {publishing.length}
+            </span>
+          </Tab>
+          {isEditor && (
+            <>
+              <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold  p-1 lg:p-2 outline-none">
+                <span>Planned</span>
+                <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
+                  {planned.length}
+                </span>
+              </Tab>
+              <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold  p-1 lg:p-2 outline-none">
+                <span>Archived</span>
+                <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
+                  {published.length}
+                </span>
+              </Tab>
+            </>
           )}
-          <ul className="flex flex-wrap items-center gap-4 text-white border-b border-gray-700">
-            <li className="border-b-2 border-blue-500 flex items-center gap-2 text-lg font-semibold p-2">
-              <span>Archived</span>
-              <span className="bg-gray-600 text-white px-2 py-1 rounded-full text-sm">
-                {published.length}
-              </span>
-            </li>
-          </ul>
-          {published.length === 0 ? (
-            <p className="text-gray-500 pb-4 pt-3">No announcements created!</p>
-          ) : (
-            <div className="w-full">
-              {published.map((announcement) => (
-                <AnnouncementCard
-                  key={announcement.announcement_id}
-                  announcement={announcement}
-                  isEditor={isEditor}
-                />
-              ))}
-            </div>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            {publishing.length === 0 ? (
+              <p className="text-gray-500 pb-4 pt-3">
+                No announcements for now!
+              </p>
+            ) : (
+              <div className="w-full">
+                {publishing.map((announcement) => (
+                  <AnnouncementCard
+                    key={announcement.announcement_id}
+                    announcement={announcement}
+                    isEditor={isEditor}
+                  />
+                ))}
+              </div>
+            )}
+          </TabPanel>
+          {isEditor && (
+            <>
+              <TabPanel>
+                {planned.length === 0 ? (
+                  <p className="text-gray-500 pb-4 pt-3">
+                    No announcements planned!
+                  </p>
+                ) : (
+                  <div className="w-full">
+                    {planned.map((announcement) => (
+                      <AnnouncementCard
+                        key={announcement.announcement_id}
+                        announcement={announcement}
+                        isEditor={isEditor}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabPanel>
+              <TabPanel>
+                {published.length === 0 ? (
+                  <p className="text-gray-500 pb-4 pt-3">
+                    No announcements archived!
+                  </p>
+                ) : (
+                  <div className="w-full">
+                    {published.map((announcement) => (
+                      <AnnouncementCard
+                        key={announcement.announcement_id}
+                        announcement={announcement}
+                        isEditor={isEditor}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabPanel>
+            </>
           )}
-        </>
-      )}
-      {isEditor && (
-        <Link
-          href={`/org/${params.org_id}/posts/create`}
-          className="bg-green-600 text-white rounded p-3 md:p-4 mb-4 text-center hover:bg-blue-700 transition"
-        >
-          Add Announcement
-        </Link>
-      )}
-    </div>
+        </TabPanels>
+        {isEditor && (
+          <Link
+            href={`/org/${params.org_id}/posts/create`}
+            className="bg-green-600 text-white rounded px-3 lg:py-1 py-2 text-center hover:bg-green-700 transition lg:absolute top-0 right-24 flex justify-center items-center gap-2"
+          >
+            <PlusCircleIcon className="w-6 h-6" />
+            Add Announcement
+          </Link>
+        )}
+      </TabGroup>
+    </>
   );
 }
 
@@ -142,14 +160,14 @@ const AnnouncementCard = ({
   return (
     <div
       key={announcement.announcement_id}
-      className="bg-gray-700 rounded p-4 md:p-5 shadow-lg w-full mb-4 flex justify-between items-start md:items-center"
+      className="bg-gray-700 rounded p-4 lg:p-5 shadow-lg w-full mb-4 flex justify-between items-start lg:items-center"
     >
       <div className="flex flex-col gap-2">
-        <h3 className="text-xl md:text-2xl font-semibold">
+        <h1 className="text-xl lg:text-3xl font-semibold lg:font-bold">
           {announcement.title}
-        </h3>
-        <h3 className="text-lg md:text-xl">
-          {announcement.publishes_at.toLocaleDateString("en-UK", {
+        </h1>
+        <h3 className="text-md lg:text-xl">
+          {announcement.publishes_at.toLocaleDateString("es-ES", {
             minute: "numeric",
             hour: "numeric",
           })}
@@ -162,14 +180,14 @@ const AnnouncementCard = ({
         </Link>
       </div>
 
-      <div className="flex gap-4 justify-center items-center h-full">
+      <div className="flex flex-col lg:flex-row gap-4 justify-center items-center h-full">
         {isEditor && (
           <Link
             href={`/announcement/${announcement.announcement_id}/edit`}
             className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
             title="Edit Announcement"
           >
-            <PencilIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
+            <PencilIcon className="w-4 lg:w-6 text-gray-400 group-hover:text-white" />
           </Link>
         )}
 
@@ -177,7 +195,7 @@ const AnnouncementCard = ({
           href={`/announcement/${announcement.announcement_id}`}
           className="p-2 bg-gray-800 rounded-md flex-shrink-0 group"
         >
-          <EyeIcon className="w-6 h-6 text-gray-400 group-hover:text-white" />
+          <EyeIcon className="w-4 lg:w-6 text-gray-400 group-hover:text-white" />
         </Link>
       </div>
     </div>

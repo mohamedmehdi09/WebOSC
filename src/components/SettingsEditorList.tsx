@@ -26,8 +26,8 @@ export default function SettingsEditorList({
   const [filteredEditors, setFilteredEditors] = useState(editors);
   return (
     <>
-      <div className="flex gap-2 md:gap-4 pb-1 border-b border-gray-700">
-        <MagnifyingGlassIcon className="w-5 md:w-6" />
+      <div className="flex gap-2 lg:gap-4 pb-1 border-b border-gray-700">
+        <MagnifyingGlassIcon className="w-5 lg:w-6" />
         <input
           type="text"
           onChange={(e) => {
@@ -61,14 +61,14 @@ export default function SettingsEditorList({
           >
             <div className="flex items-center text-green-400">
               <UserCircleIcon className="w-8" />
-              <span className="ml-4 text-xs md:text-base font-semibold md:font-bold capitalize">
+              <span className="ml-4 text-xs lg:text-base font-semibold lg:font-bold capitalize">
                 {editor.user.name} {editor.user?.middlename}{" "}
                 {editor.user.lastname}
               </span>
             </div>
-            <div className="mt-2 md:mt-0">
+            <div className="mt-2 lg:mt-0">
               {editor.user_id == currentUser?.user_id ? (
-                <div className="bg-green-700 px-3 md:px-4 py-1 md:py-2 rounded-md w-full">
+                <div className="bg-green-700 px-3 lg:px-4 py-1 lg:py-2 rounded-md w-full">
                   You
                 </div>
               ) : editor.status == "active" ? (

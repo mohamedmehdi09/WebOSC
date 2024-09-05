@@ -41,7 +41,7 @@ const CreateOrgComponent = async () => {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-black text-white">
       <form
         action={CreateOrg}
-        className="bg-slate-800 p-6 sm:p-8 md:p-10 rounded-md w-full max-w-md flex flex-col items-center gap-4 border border-gray-300"
+        className="bg-slate-800 p-6 sm:p-8 lg:p-10 rounded-md w-full max-w-md flex flex-col items-center gap-4 border border-gray-300"
       >
         <h1 className="text-xl sm:text-2xl font-bold mb-4 text-center">
           Create Organization

@@ -42,9 +42,9 @@ export default async function RootPage() {
   const editors = await getEditorOrgs();
 
   return (
-    <div className="flex flex-col md:flex-row w-full min-h-screen bg-black text-white">
+    <div className="flex flex-col lg:flex-row w-full min-h-screen bg-black text-white">
       {/* Sidebar navigation */}
-      <nav className="md:w-1/5 w-full md:min-h-screen flex flex-col gap-3 items-center md:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black relative">
+      <nav className="lg:w-1/5 w-full lg:min-h-screen flex flex-col gap-3 items-center lg:justify-start border-r border-gray-800 text-center font-semibold p-4 bg-black relative">
         <Link
           href="/org"
           className="bg-blue-700 hover:bg-blue-600 rounded-md px-4 py-2 w-full text-center transition-colors truncate"
@@ -65,7 +65,7 @@ export default async function RootPage() {
           <>
             {editors.length > 0 && (
               <div className="font-normal flex flex-col w-full">
-                <ul className="flex w-full border-b border-gray-700 md:text-xl mb-4 font-normal">
+                <ul className="flex w-full border-b border-gray-700 lg:text-xl mb-4 font-normal">
                   <li className="pb-2 truncate">My Organizations</li>
                 </ul>
                 {editors.map((editor) => (
@@ -82,7 +82,7 @@ export default async function RootPage() {
             )}
             {[].length > 0 && (
               <div className="font-normal flex flex-col gap-1 w-full">
-                <ul className="flex w-full border-b border-gray-700 md:text-xl mb-4 font-normal">
+                <ul className="flex w-full border-b border-gray-700 lg:text-xl mb-4 font-normal">
                   <li className="pb-2">My Subscriptions</li>
                 </ul>
               </div>
@@ -92,8 +92,8 @@ export default async function RootPage() {
       </nav>
 
       {/* Main content */}
-      <div className="flex-1 pl-4 pr-4 md:p-8">
-        <ul className="flex w-full border-b border-gray-700 font-bold text-lg md:text-2xl mb-4">
+      <div className="flex-1 pl-4 pr-4 lg:p-8">
+        <ul className="flex w-full border-b border-gray-700 font-bold text-lg lg:text-2xl mb-4">
           <li className="pb-2 border-b-2 border-blue-500 px-4">Posts</li>
         </ul>
         {announcements.length === 0 ? (
@@ -124,12 +124,12 @@ const AnnouncementCard = ({
       href={`/announcement/${announcement.announcement_id}`}
       className="bg-gray-800 rounded-md p-4 shadow-lg mb-4 flex flex-col gap-4 hover:bg-gray-700 transition-colors"
     >
-      <h3 className="text-lg md:text-2xl font-bold flex items-center gap-2">
-        <BellIcon className="w-5 md:w-6 text-yellow-400" />
+      <h3 className="text-lg lg:text-2xl font-bold flex items-center gap-2">
+        <BellIcon className="w-5 lg:w-6 text-yellow-400" />
         <span>{announcement.title}</span>
       </h3>
       <h3 className="text-lg font-medium flex items-center gap-2">
-        <CalendarIcon className="w-5 md:w-6 text-yellow-400" />
+        <CalendarIcon className="w-5 lg:w-6 text-yellow-400" />
         <span>
           {announcement.publishes_at.toLocaleDateString("en-UK", {
             day: "numeric",
@@ -141,10 +141,10 @@ const AnnouncementCard = ({
         </span>
       </h3>
       <div className="text-gray-400">
-        <div className="font-semibold text-sm md:text-base">
+        <div className="font-semibold text-sm lg:text-base">
           {announcement.org_id}
         </div>
-        <span className="text-xs md:text-sm">
+        <span className="text-xs lg:text-sm">
           @{announcement.editor.user_id}
         </span>
       </div>

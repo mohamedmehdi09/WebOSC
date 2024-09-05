@@ -56,7 +56,7 @@ export default function UpdateAnnouncementTitleForm({
         onChange={(e) => {
           setCurrentValue(e.target.value);
         }}
-        className={`w-full text-3xl md:text-5xl font-bold bg-transparent outline-none flex-wrap ${editMode && "border-b-2 border-gray-400"}`}
+        className={`w-full text-3xl lg:text-5xl font-bold bg-transparent outline-none flex-wrap ${editMode && "border-b-2 border-gray-400"}`}
         placeholder="Title..."
         type="text"
         name="title"

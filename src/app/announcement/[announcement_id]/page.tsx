@@ -41,9 +41,9 @@ export default async function PostPage({
     return <>announcement archived</>;
 
   return (
-    <div className="relative flex flex-col flex-1 gap-6 rounded-lg m-4 md:m-12 p-6 md:p-10 bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
+    <div className="relative flex flex-col flex-1 gap-6 rounded-lg m-4 lg:m-12 p-6 lg:p-10 bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
       {/* Top-right action buttons */}
-      <div className="md:absolute w-full justify-end top-4 right-4 flex items-center space-x-3">
+      <div className="lg:absolute w-full justify-end top-4 right-4 flex items-center space-x-3">
         <Link
           href="/"
           title="Go back home"
@@ -64,10 +64,10 @@ export default async function PostPage({
 
       {/* Announcement Title */}
       <div className="flex flex-col gap-3">
-        <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight">
+        <h1 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
           {announcement.title}
         </h1>
-        <div className="flex flex-wrap text-xl gap-2 md:gap-4">
+        <div className="flex flex-wrap text-xl gap-2 lg:gap-4">
           {announcement.publishes_at.toLocaleDateString("en-UK", {
             day: "numeric",
             month: "long",
@@ -76,7 +76,7 @@ export default async function PostPage({
             minute: "numeric",
           })}
         </div>
-        <div className="flex flex-wrap gap-2 md:gap-4 text-gray-400">
+        <div className="flex flex-wrap gap-2 lg:gap-4 text-gray-400">
           <Link
             href={`/org/${announcement.org_id}/posts`}
             className="hover:underline hover:text-gray-200"
@@ -99,7 +99,7 @@ export default async function PostPage({
       </div>
 
       {/* Announcement Body */}
-      <pre className="rounded-lg p-4 md:p-6 text-md md:text-2xl bg-transparent cursor-default text-wrap">
+      <pre className="rounded-lg p-4 lg:p-6 text-md lg:text-2xl bg-transparent cursor-default text-wrap">
         {announcement.body}
       </pre>
     </div>

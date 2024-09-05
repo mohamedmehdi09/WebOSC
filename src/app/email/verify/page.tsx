@@ -23,7 +23,7 @@ export default function EmailVerificationPage({
       toast.success(formState.message);
       setTimeout(
         () => window.location.replace(searchParams.redirect || "/"),
-        1000,
+        1000
       );
     } else if (formState.success === false) {
       toast.error(formState.message);
@@ -34,7 +34,7 @@ export default function EmailVerificationPage({
     <>
       <form
         action={formAction}
-        className="flex flex-col items-center gap-6 bg-gray-800 p-6 md:p-8 rounded-lg w-full max-w-md border border-gray-600 shadow-lg"
+        className="flex flex-col items-center gap-6 bg-gray-800 p-6 lg:p-8 rounded-lg w-full max-w-md border border-gray-600 shadow-lg"
       >
         <h1 className="text-2xl sm:text-3xl font-bold text-center text-white">
           Verify your email

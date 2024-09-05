@@ -33,7 +33,7 @@ export default async function EditAnnouncementPage({
     );
 
   return (
-    <div className="flex flex-col md:flex-row flex-1 gap-6 px-4 md:px-24 py-8">
+    <div className="flex flex-col lg:flex-row flex-1 gap-6 px-4 lg:px-24 py-8">
       <div className="flex flex-col flex-1 gap-4 px-6 py-4 rounded-lg  bg-gradient-to-b from-slate-700 to-slate-800 shadow-lg">
         <div className="flex flex-col gap-4">
           <UpdateAnnouncementTitleForm
@@ -41,7 +41,7 @@ export default async function EditAnnouncementPage({
             announcement_id={announcement_id}
           />
 
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-gray-400">
+          <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-gray-400">
             <Link
               href={`/org/${announcement.org_id}/posts`}
               className="hover:underline hover:text-gray-200"
@@ -59,11 +59,11 @@ export default async function EditAnnouncementPage({
             </Link>
           </div>
         </div>
-        <div className="flex-1 rounded-lg p-4 md:p-6 text-lg md:text-xl whitespace-pre-wrap break-words">
+        <div className="flex-1 rounded-lg p-4 lg:p-6 text-lg lg:text-xl whitespace-pre-wrap break-words">
           {announcement.body}
         </div>
       </div>
-      <div className="md:w-1/3 h-fit flex flex-col gap-2 md:gap-4 p-4 rounded-md bg-gray-700 md:text-xl">
+      <div className="lg:w-1/3 h-fit flex flex-col gap-2 lg:gap-4 p-4 rounded-md bg-gray-700 lg:text-xl">
         <div className="flex flex-col gap-1 max-w-lg">
           <span className="text-lg font-semibold">Created At:</span>
           <span className="w-full p-3 rounded-md bg-gray-900">

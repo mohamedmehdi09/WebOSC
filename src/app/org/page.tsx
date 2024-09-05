@@ -15,8 +15,8 @@ export const dynamic = "force-dynamic";
 export default async function OrgsPage() {
   const orgs = await getOrgs();
   return (
-    <div className="flex flex-col items-center justify-center gap-6 p-4 md:p-8 min-h-screen bg-black text-white">
-      <h1 className="text-3xl md:text-4xl font-bold text-center">
+    <div className="flex flex-col items-center justify-center gap-6 p-4 lg:p-8 min-h-screen bg-black text-white">
+      <h1 className="text-3xl lg:text-4xl font-bold text-center">
         Manage Organizations
       </h1>
       {orgs.length === 0 ? (

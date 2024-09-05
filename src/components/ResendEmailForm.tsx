@@ -26,7 +26,7 @@ export default function ResendEmailForm() {
   }, [formState]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6 md:w-1/3 w-full">
+    <form action={formAction} className="flex flex-col gap-6 lg:w-1/3 w-full">
       <button
         disabled={pending || disableButton}
         type="submit"

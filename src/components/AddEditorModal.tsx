@@ -45,9 +45,9 @@ export default function AddEditorModal({
     <>
       <button
         onClick={open}
-        className="rounded-md bg-green-700 py-1 md:py-2 px-2 md:px-4 text-sm md:text-lg font-medium hover:bg-green-800 flex gap-2 items-center"
+        className="rounded-md bg-green-700 py-1 lg:py-2 px-2 lg:px-4 text-sm lg:text-lg font-medium hover:bg-green-800 flex gap-2 items-center"
       >
-        <UserPlusIcon className="w-5 md:w-6" />
+        <UserPlusIcon className="w-5 lg:w-6" />
         Add
       </button>
 
