@@ -1149,7 +1149,9 @@ export async function updateAnnouncementPublishDate(
     // validate form
     const updateAnnouncementPublishDateFormData = {
       announcement_id: Number(formData.get("announcement_id") as string),
-      publishes_at: new Date(formData.get("publishes_at") as string),
+      publishes_at: (formData.get("publishes_at") as string)
+        ? new Date((formData.get("publishes_at") as string) + "Z")
+        : null,
     };
 
     const updateAnnouncementPublishDateFormParsed =
@@ -1183,7 +1185,7 @@ export async function updateAnnouncementPublishDate(
     // check if publish date is in the past
     if (
       announcement.publishes_at &&
-      updateAnnouncementPublishDateFormData.publishes_at < new Date()
+      updateAnnouncementPublishDateFormParsed.data.publishes_at < new Date()
     )
       throw new ActionError(
         "The announcement publish date cannot be in the past!"
@@ -1195,7 +1197,7 @@ export async function updateAnnouncementPublishDate(
         announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
       },
       data: {
-        publishes_at: updateAnnouncementPublishDateFormData.publishes_at,
+        publishes_at: updateAnnouncementPublishDateFormParsed.data.publishes_at,
       },
     });
 
@@ -1225,17 +1227,19 @@ export async function updateAnnouncementEndPublishingDate(
     // validate form
     const updateAnnouncementPublishDateFormData = {
       announcement_id: Number(formData.get("announcement_id") as string),
-      ends_at: new Date(formData.get("ends_at") as string),
+      ends_at: (formData.get("ends_at") as string)
+        ? new Date((formData.get("ends_at") as string) + "Z")
+        : null,
     };
 
-    const updateAnnouncementPublishDateFormParsed =
+    const updateAnnouncementEndPublishDateFormParsed =
       updateAnnouncementPublishDateFormSchema.safeParse(
         updateAnnouncementPublishDateFormData
       );
 
-    if (!updateAnnouncementPublishDateFormParsed.success) {
+    if (!updateAnnouncementEndPublishDateFormParsed.success) {
       throw new ActionError(
-        updateAnnouncementPublishDateFormParsed.error.issues[0].message
+        updateAnnouncementEndPublishDateFormParsed.error.issues[0].message
       );
     }
 
@@ -1259,7 +1263,7 @@ export async function updateAnnouncementEndPublishingDate(
     // check if publish date is in the past
     if (
       announcement.ends_at &&
-      updateAnnouncementPublishDateFormData.ends_at < new Date()
+      updateAnnouncementEndPublishDateFormParsed.data.ends_at < new Date()
     )
       throw new ActionError(
         "The announcement publish date cannot be in the past!"
@@ -1267,7 +1271,8 @@ export async function updateAnnouncementEndPublishingDate(
 
     if (
       announcement.publishes_at &&
-      updateAnnouncementPublishDateFormData.ends_at <= announcement.publishes_at
+      updateAnnouncementEndPublishDateFormParsed.data.ends_at <=
+        announcement.publishes_at
     )
       throw new ActionError(
         "The end publish date cannot be before the announcement publish date!"
@@ -1279,7 +1284,7 @@ export async function updateAnnouncementEndPublishingDate(
         announcement_id: updateAnnouncementPublishDateFormData.announcement_id,
       },
       data: {
-        ends_at: updateAnnouncementPublishDateFormData.ends_at,
+        ends_at: updateAnnouncementEndPublishDateFormParsed.data.ends_at,
       },
     });
 
