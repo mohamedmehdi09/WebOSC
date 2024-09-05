@@ -5,6 +5,7 @@ import { Announcement, Editor } from "@prisma/client";
 import Link from "next/link";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import TimeDisplayComponent from "@/components/TimeDisplayComponent";
 
 const getOrgAnnouncements = async (org_id: string) => {
   const announcements = await prisma.announcement.findMany({
@@ -167,14 +168,7 @@ const AnnouncementCard = ({
           {announcement.title}
         </h1>
         <h3 className="text-md lg:text-xl">
-          {announcement.publishes_at.toLocaleDateString("en-UK", {
-            weekday: "long",
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-          })}
+          <TimeDisplayComponent date={announcement.publishes_at} />
         </h3>
         <Link
           href={`/u/${announcement.editor.user_id}`}

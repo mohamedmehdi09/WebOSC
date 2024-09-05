@@ -7,6 +7,7 @@ import { GlobeEuropeAfricaIcon } from "@heroicons/react/24/solid";
 import LogOutForm from "@/components/LogoutForm";
 import { TokenPayload } from "@/lib/types";
 import { CalendarIcon, BellIcon } from "@heroicons/react/24/outline";
+import TimeDisplayComponent from "@/components/TimeDisplayComponent";
 
 // Fetch announcements from the database
 
@@ -130,16 +131,7 @@ const AnnouncementCard = ({
       </h3>
       <h3 className="text-lg font-medium flex items-center gap-2">
         <CalendarIcon className="w-5 lg:w-6 text-yellow-400" />
-        <span>
-          {announcement.publishes_at.toLocaleDateString("en-UK", {
-            weekday: "long",
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-          })}
-        </span>
+        <TimeDisplayComponent date={announcement.publishes_at} />
       </h3>
       <div className="text-gray-400">
         <div className="font-semibold text-sm lg:text-base">

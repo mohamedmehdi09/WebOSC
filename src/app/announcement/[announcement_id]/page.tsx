@@ -1,4 +1,5 @@
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import TimeDisplayComponent from "@/components/TimeDisplayComponent";
 import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { ArrowLeftIcon, PencilIcon } from "@heroicons/react/24/solid";
@@ -67,15 +68,8 @@ export default async function PostPage({
         <h1 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
           {announcement.title}
         </h1>
-        <div className="flex flex-wrap text-xl gap-2 lg:gap-4">
-          {announcement.publishes_at.toLocaleDateString("en-UK", {
-            weekday: "long",
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-          })}
+        <div className="flex flex-wrap text-xl">
+          <TimeDisplayComponent date={announcement.publishes_at} />
         </div>
         <div className="flex flex-wrap gap-2 lg:gap-4 text-gray-400">
           <Link

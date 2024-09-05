@@ -1,3 +1,4 @@
+import TimeDisplayComponent from "@/components/TimeDisplayComponent";
 import UpdateAnnouncementEndsPublishingDateForm from "@/components/UpdateAnnouncementEndPublishingForm";
 import UpdateAnnouncementPublishDateForm from "@/components/UpdateAnnouncementPublishDateForm";
 import UpdateAnnouncementTitleForm from "@/components/UpdateAnnouncementTitleForm";
@@ -67,25 +68,13 @@ export default async function EditAnnouncementPage({
         <div className="flex flex-col gap-1 max-w-lg">
           <span className="text-lg font-semibold">Created At:</span>
           <span className="w-full p-3 rounded-md bg-gray-900">
-            {announcement.created_at.toLocaleDateString("en-UK", {
-              day: "numeric",
-              month: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "numeric",
-            })}
+            <TimeDisplayComponent date={announcement.created_at} />
           </span>
         </div>
         <div className="flex flex-col gap-1 max-w-lg">
           <span className="text-lg font-semibold">Updated At:</span>
           <span className="w-full p-3 rounded-md bg-gray-900">
-            {announcement.updated_at.toLocaleDateString("en-UK", {
-              day: "numeric",
-              month: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "numeric",
-            })}
+            <TimeDisplayComponent date={announcement.updated_at} />
           </span>
         </div>
 
