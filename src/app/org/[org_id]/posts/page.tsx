@@ -168,7 +168,6 @@ const AnnouncementCard = ({
         </h1>
         <h3 className="text-md lg:text-xl">
           {announcement.publishes_at.toLocaleDateString("en-UK", {
-            timeZone: "+01:00",
             weekday: "long",
             day: "numeric",
             month: "numeric",

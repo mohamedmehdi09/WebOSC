@@ -132,7 +132,6 @@ const AnnouncementCard = ({
         <CalendarIcon className="w-5 lg:w-6 text-yellow-400" />
         <span>
           {announcement.publishes_at.toLocaleDateString("en-UK", {
-            timeZone: "+01:00",
             weekday: "long",
             day: "numeric",
             month: "numeric",

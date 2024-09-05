@@ -69,7 +69,6 @@ export default async function PostPage({
         </h1>
         <div className="flex flex-wrap text-xl gap-2 lg:gap-4">
           {announcement.publishes_at.toLocaleDateString("en-UK", {
-            timeZone: "+01:00",
             weekday: "long",
             day: "numeric",
             month: "numeric",
