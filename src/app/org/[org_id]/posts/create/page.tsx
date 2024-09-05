@@ -28,7 +28,7 @@ export default function CreatePostPage({
       setTimeout(
         () =>
           window.location.replace(`/announcement/${formState.announcement_id}`),
-        1000,
+        1000
       );
     }
   }, [formState]);
