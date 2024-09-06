@@ -4,12 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { sign, verify } from "jsonwebtoken";
 import { z } from "zod";
-import { ActionError, TokenPayload } from "@/lib/types";
+import { ActionError, FormState, TokenPayload } from "@/lib/types";
 
-export async function createAnnouncement(
-  state: { success: boolean | null; message: string; redirect: string | null },
-  formData: FormData,
-) {
+export async function createAnnouncement(state: FormState, formData: FormData) {
   const createAnnouncementFormSchema = z.object({
     org_id: z.string().min(4, { message: "Organization ID is required!" }),
     title: z.string().min(1, { message: "Title is required!" }).max(40, {

@@ -13,6 +13,12 @@ export type FrontendUser = {
   isMale: boolean | null;
 };
 
+export type FormState = {
+  success: boolean | null;
+  message: string | null;
+  redirect: string | null;
+};
+
 export class ActionError extends Error {
   constructor(message: string) {
     super(message);

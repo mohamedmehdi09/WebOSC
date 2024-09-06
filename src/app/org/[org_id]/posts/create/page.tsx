@@ -1,10 +1,16 @@
 "use client";
 
-import { addAnnouncement } from "@/lib/actions";
 import { createAnnouncement } from "@/lib/actions/announcementActions";
 import { useState, useEffect, FormEvent } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { FormState } from "@/lib/types";
+import { useFormState } from "react-dom";
 import toast from "react-hot-toast";
+
+const initFormState: FormState = {
+  success: null,
+  redirect: null,
+  message: null,
+};
 
 export default function CreatePostPage({
   params,
@@ -12,11 +18,7 @@ export default function CreatePostPage({
   params: { org_id: string };
 }) {
   const [createAnnouncementFormState, createAnnouncementFormAction] =
-    useFormState(createAnnouncement, {
-      success: null,
-      redirect: null,
-      message: "",
-    });
+    useFormState(createAnnouncement, initFormState);
 
   const [titleCount, setTitleCount] = useState<number>(0);
   const [toastID, setToastID] = useState<string | undefined>(undefined);
