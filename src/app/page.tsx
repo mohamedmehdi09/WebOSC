@@ -4,7 +4,7 @@ import { Announcement, Editor, Organization, User } from "@prisma/client";
 import { cookies } from "next/headers";
 import { decode } from "jsonwebtoken";
 import { GlobeEuropeAfricaIcon } from "@heroicons/react/24/solid";
-import LogOutForm from "@/components/LogoutForm";
+import LogoutForm from "@/components/forms/LogoutForm";
 import { TokenPayload } from "@/lib/types";
 import { CalendarIcon, BellIcon } from "@heroicons/react/24/outline";
 import TimeDisplayComponent from "@/components/TimeDisplayComponent";
@@ -53,7 +53,7 @@ export default async function RootPage() {
           Browse Organizations
         </Link>
         {cookies().get("token") ? (
-          <LogOutForm />
+          <LogoutForm />
         ) : (
           <Link
             href="/login"

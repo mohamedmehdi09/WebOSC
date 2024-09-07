@@ -1,7 +1,7 @@
 import TimeDisplayComponent from "@/components/TimeDisplayComponent";
 import UpdateAnnouncementEndsPublishingDateForm from "@/components/UpdateAnnouncementEndPublishingForm";
 import UpdateAnnouncementPublishDateForm from "@/components/UpdateAnnouncementPublishDateForm";
-import UpdateAnnouncementTitleForm from "@/components/UpdateAnnouncementTitleForm";
+import UpdateAnnouncementTitleForm from "@/components/forms/UpdateAnnouncementTitleForm";
 import { checkOrgPrivilage } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";

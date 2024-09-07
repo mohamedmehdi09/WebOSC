@@ -5,45 +5,40 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sign, verify } from "jsonwebtoken";
 import { z } from "zod";
-import { ActionError, TokenPayload } from "./types";
+import { ActionError, FormState, TokenPayload } from "./types";
 import { mailer } from "./mailer";
 import { hash, randomUUID } from "crypto";
 import { Email, User } from "@prisma/client";
 
 const secret = process.env.JWT_SECRET;
 
-export async function login(
-  state: { error: boolean | null; message: string },
-  formData: FormData
-) {
-  // This is a zod schema for validating the form data
-  const loginShema = z.object({
+export async function login(state: FormState, formData: FormData) {
+  const loginSchema = z.object({
     email: z.string().email({ message: "Invalid email!" }),
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters!" }),
-    remember: z.boolean().default(false),
+    remember: z.boolean().nullable(),
   });
 
-  // We get the form data from the form submission
-  const loginData = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    remember: (formData.get("remember") as string) === "true",
-  };
-
   try {
-    // We parse the form data using the zod schema
-    const loginParsed = loginShema.safeParse(loginData);
+    // valideate form
+    const loginFormData = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+      remember: (formData.get("remember") as string) === "true",
+    };
 
-    // If the form data is invalid, we throw an error
-    if (!loginParsed.success) {
-      throw Error(loginParsed.error.issues[0].message);
-    }
+    const loginFormParsed = loginSchema.safeParse(loginFormData);
 
-    // We query the user from the database using the email
+    if (!loginFormParsed.success)
+      throw new ActionError(loginFormParsed.error.issues[0].message);
+
+    const validatedFormData = loginFormParsed.data;
+
+    // find user
     const user = await prisma.user.findFirst({
-      where: { email: loginParsed.data.email },
+      where: { email: validatedFormData.email },
       include: {
         PrimaryEmail: true,
       },
@@ -51,17 +46,14 @@ export async function login(
 
     const passwordHash =
       process.env.NODE_ENV == "development"
-        ? loginParsed.data.password
-        : hash("sha512", loginParsed.data.password);
+        ? validatedFormData.password
+        : hash("sha512", validatedFormData.password);
 
-    // If the user doesn't exist or the password is incorrect, we throw an error
-    if (!user || user?.password !== passwordHash)
-      throw Error("email or password is incorrect!");
+    if (!user || user.password !== passwordHash)
+      throw new ActionError("Email or password is incorrect!");
 
-    // If the secret key is not set, we throw an error
-    if (!secret) throw Error("Unexpected error!");
+    if (!secret) throw new ActionError("Unexpected error, please try again!");
 
-    // We sign the user's data using the secret key
     const token = sign(
       {
         user_id: user.user_id,
@@ -70,12 +62,10 @@ export async function login(
       },
       secret,
       {
-        // if remember is true, we set the token to expire in 7 days, else it expires in 1 day
-        expiresIn: loginParsed.data.remember ? "7d" : "1d",
+        expiresIn: validatedFormData.remember ? "7d" : "1d",
       }
     );
 
-    // We set the token as a cookie
     cookies().set({
       name: "token",
       value: token,
@@ -83,24 +73,20 @@ export async function login(
       httpOnly: false,
     });
 
-    // If the login is successful, we set the state to indicate that
-    state.error = false;
-    state.message = "Welcome!";
+    state = { success: true, message: `Welcome, ${user.name}!`, redirect: "/" };
   } catch (error: any) {
-    // If there's an error, we set the state to indicate that
-    state.error = true;
-    state.message = error.message;
+    state.success = false;
+    state.message =
+      error instanceof ActionError
+        ? error.message
+        : "Something went wrong. Please try again later!";
   }
-  // Finally, we return the state
+
   return state;
 }
 
-export async function signup(
-  state: { error: boolean | null; message: string },
-  formData: FormData
-) {
-  // We define a schema for validating the signup form data
-  const signupShema = z.object({
+export async function signup(state: FormState, formData: FormData) {
+  const signupSchema = z.object({
     name: z.string().min(3, "Name too short!"),
     middlename: z.string().nullable(),
     lastname: z.string().min(3, "Lastname too short!"),
@@ -112,7 +98,6 @@ export async function signup(
       .min(8, { message: "Password must be at least 8 characters!" }),
   });
 
-  // We get the signup form data
   const signupData = {
     name: formData.get("name") as string,
     middlename: formData.get("middlename") as string,
@@ -124,47 +109,46 @@ export async function signup(
   };
 
   try {
-    // We validate the signup form data using the schema
-    const signupParsed = signupShema.safeParse(signupData);
-    if (!signupParsed.success)
-      // If the validation fails, we throw an error
-      throw signupParsed.error;
+    const signupFormParsed = signupSchema.safeParse(signupData);
 
-    // We check if the email or username already exists
+    if (!signupFormParsed.success)
+      throw new ActionError(signupFormParsed.error.issues[0].message);
+
+    const validatedFormData = signupFormParsed.data;
+
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email: signupData.email }, { user_id: signupData.username }],
+        OR: [
+          { email: validatedFormData.email },
+          { user_id: validatedFormData.username },
+        ],
       },
     });
 
     if (existingUser) {
-      // If the email or username already exists, we throw an error
-      if (existingUser.email === signupData.email)
-        throw Error("Email is already in use!");
-      else if (existingUser.user_id === signupData.username)
-        throw Error("Username is already in use!");
+      throw existingUser.email === validatedFormData.email
+        ? new ActionError("Email is already in use!")
+        : new ActionError("Username is already in use!");
     }
 
-    const countUsers = await prisma.user.count();
+    const count = await prisma.user.count();
+    const hashedPassword =
+      process.env.NODE_ENV === "development"
+        ? validatedFormData.password
+        : hash("sha512", validatedFormData.password);
 
-    const passwordHash =
-      process.env.NODE_ENV == "development"
-        ? signupData.password
-        : hash("sha512", signupData.password);
-
-    // We create a new user in the database along with the associated email
     const user = await prisma.user.create({
       data: {
-        user_id: signupData.username,
-        middlename: signupData.middlename,
-        name: signupData.name,
-        lastname: signupData.lastname,
-        isMale: signupData.isMale,
-        password: passwordHash,
-        super: countUsers === 0,
+        user_id: validatedFormData.username,
+        middlename: validatedFormData.middlename,
+        name: validatedFormData.name,
+        lastname: validatedFormData.lastname,
+        isMale: validatedFormData.isMale,
+        password: hashedPassword,
+        super: count === 0,
         PrimaryEmail: {
           create: {
-            email: signupData.email,
+            email: validatedFormData.email,
           },
         },
       },
@@ -173,8 +157,6 @@ export async function signup(
       },
     });
 
-    // Send Verification email
-    // email only sent if in production
     if (process.env.NODE_ENV !== "development") {
       mailer.sendMail({
         from: "OSCA",
@@ -196,17 +178,15 @@ export async function signup(
     // If the secret key is not set, we throw an error
     if (!secret) throw Error("Unexpected Error!");
 
-    // We sign the user's data using the secret key
     const token = sign(
       {
         user_id: user.user_id,
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      process.env.JWT_SECRET as string
     );
 
-    // We set the token as a cookie
     cookies().set({
       name: "token",
       value: token,
@@ -214,28 +194,21 @@ export async function signup(
       httpOnly: false,
     });
 
-    // If the signup is successful, we set the state to indicate that
-    state.error = false;
+    state.success = true;
     state.message = "User has been created successfully!";
+    state.redirect = "/email/verify";
   } catch (error: any) {
-    // If there's an error, we set the state to indicate that
-    state.error = true;
-    state.message = error?.issues?.[0]?.message || error.message;
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    else state.message = "Something went wrong. Please try again later!";
   }
 
-  // Finally, we return the state
   return state;
 }
 
-export async function logout(
-  state: {
-    error: boolean | null;
-    message: string;
-  },
-  formData: FormData
-) {
+export async function logout(state: FormState) {
   cookies().delete("token");
-  state.error = false;
+  state.success = true;
   state.message = "Successfully logged out!";
   return state;
 }
@@ -758,7 +731,7 @@ export async function verifyEmail(
     state.message = "Email verified!";
   } catch (error) {
     state.success = false;
-    if (error instanceof Error) state.message = error.message;
+    if (error instanceof ActionError) state.message = error.message;
     else state.message = "Something went wrong. Please try again later!";
   }
   return state;

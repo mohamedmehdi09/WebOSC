@@ -5,7 +5,7 @@ import {
 } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import CreateSubOrgForm from "@/components/CreateSubOrgForm";
+import CreateSubOrgForm from "@/components/forms/CreateSubOrgForm";
 
 async function getUsers() {
   const users = await prisma.user.findMany({
