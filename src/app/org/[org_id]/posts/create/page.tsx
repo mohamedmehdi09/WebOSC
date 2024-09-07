@@ -3,10 +3,8 @@ import { checkOrgPrivilage, checkEmailValidation } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 
 export default async function CreateAnnouncementPage({
-  children,
   params,
 }: {
-  children: React.ReactNode;
   params: { org_id: string };
 }) {
   if (!(await checkOrgPrivilage(params.org_id))) return "Not Allowed!";
