@@ -22,12 +22,14 @@ export async function login(
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters!" }),
+    remember: z.boolean().default(false),
   });
 
   // We get the form data from the form submission
   const loginData = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
+    remember: (formData.get("remember") as string) === "true",
   };
 
   try {
@@ -41,7 +43,7 @@ export async function login(
 
     // We query the user from the database using the email
     const user = await prisma.user.findFirst({
-      where: { email: loginData.email },
+      where: { email: loginParsed.data.email },
       include: {
         PrimaryEmail: true,
       },
@@ -49,12 +51,12 @@ export async function login(
 
     const passwordHash =
       process.env.NODE_ENV == "development"
-        ? loginData.password
-        : hash("sha512", loginData.password);
+        ? loginParsed.data.password
+        : hash("sha512", loginParsed.data.password);
 
     // If the user doesn't exist or the password is incorrect, we throw an error
     if (!user || user?.password !== passwordHash)
-      throw Error("Username or password is incorrect!");
+      throw Error("email or password is incorrect!");
 
     // If the secret key is not set, we throw an error
     if (!secret) throw Error("Unexpected error!");
@@ -66,7 +68,11 @@ export async function login(
         super: user.super,
         emailVerified: user.PrimaryEmail.emailVerified,
       },
-      secret
+      secret,
+      {
+        // if remember is true, we set the token to expire in 7 days, else it expires in 1 day
+        expiresIn: loginParsed.data.remember ? "7d" : "1d",
+      }
     );
 
     // We set the token as a cookie

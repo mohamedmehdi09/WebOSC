@@ -75,6 +75,15 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
+        <div className="w-full flex items-center gap-4">
+          <input
+            className="w-4 h-4"
+            type="checkbox"
+            name="remember"
+            id="remember"
+          />
+          remember me
+        </div>
         <button
           disabled={pending || formState.error === false}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
