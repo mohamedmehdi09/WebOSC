@@ -1,6 +1,6 @@
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import TimeDisplayComponent from "@/components/TimeDisplayComponent";
-import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkOrgPrivilage, checkSuperUser } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { ArrowLeftIcon, PencilIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
@@ -35,10 +35,12 @@ export default async function PostPage({
   const announcement_id = Number(params.announcement_id);
   const announcement = await getAnnouncement(announcement_id);
   const isEdior = await checkOrgPrivilage(announcement.org_id);
+  const sudo = checkSuperUser();
 
-  if (announcement.publishes_at > new Date() && !isEdior) throw Error();
+  if (announcement.publishes_at > new Date() && !isEdior && !sudo)
+    throw Error();
 
-  if (announcement.ends_at < new Date() && !isEdior)
+  if (announcement.ends_at < new Date() && !isEdior && !sudo)
     return <>announcement archived</>;
 
   return (

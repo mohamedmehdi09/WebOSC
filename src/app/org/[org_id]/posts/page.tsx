@@ -1,4 +1,4 @@
-import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkOrgPrivilage, checkSuperUser } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import { EyeIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { Announcement, Editor } from "@prisma/client";
@@ -51,6 +51,7 @@ export default async function OrgPostsPage({
     params.org_id
   );
   const isEditor = await checkOrgPrivilage(params.org_id);
+  const sudo = checkSuperUser();
   return (
     <>
       <TabGroup className="flex flex-col flex-1 gap-4 w-full px-4 lg:px-24 relative">
@@ -61,7 +62,7 @@ export default async function OrgPostsPage({
               {publishing.length}
             </span>
           </Tab>
-          {isEditor && (
+          {(isEditor || sudo) && (
             <>
               <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold  p-1 lg:p-2 outline-none">
                 <span>Planned</span>
@@ -96,7 +97,7 @@ export default async function OrgPostsPage({
               </div>
             )}
           </TabPanel>
-          {isEditor && (
+          {(isEditor || sudo) && (
             <>
               <TabPanel>
                 {planned.length === 0 ? (

@@ -65,7 +65,7 @@ export default async function RootPage() {
         {cookies().get("token") && (
           <>
             {editors.length > 0 && (
-              <div className="font-normal flex flex-col w-full">
+              <div className="font-normal flex flex-col gap-2 w-full">
                 <ul className="flex w-full border-b border-gray-700 lg:text-xl mb-4 font-normal">
                   <li className="pb-2 truncate">My Organizations</li>
                 </ul>

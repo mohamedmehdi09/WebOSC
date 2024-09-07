@@ -1,6 +1,6 @@
 import SettingsSideBar from "@/components/SettingsSideBar";
 import { ReactNode } from "react";
-import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkOrgPrivilage, checkSuperUser } from "@/lib/authorization";
 import { checkEmailValidation } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 
@@ -11,7 +11,8 @@ export default async function OrgSettingsLayout({
   children: ReactNode;
   params: { org_id: string };
 }) {
-  if (!(await checkOrgPrivilage(params.org_id))) return "Not allowed!";
+  if (!(await checkOrgPrivilage(params.org_id)) && !checkSuperUser())
+    return "Not allowed!";
   if (!checkEmailValidation()) return redirect("/email/verify");
 
   return (
