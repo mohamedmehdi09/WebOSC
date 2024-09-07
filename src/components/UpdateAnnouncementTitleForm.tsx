@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { updateAnnoucementTitle } from "@/lib/actions";
+import { FormState } from "@/lib/types";
+import { useFormState } from "react-dom";
+import { updateAnnoucementTitle } from "@/lib/actions/announcementActions";
 import toast from "react-hot-toast";
 import { PencilIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+
+const initFormState: FormState = {
+  success: null,
+  redirect: null,
+  message: null,
+};
 
 export default function UpdateAnnouncementTitleForm({
   title,
@@ -13,24 +20,27 @@ export default function UpdateAnnouncementTitleForm({
   title: string;
   announcement_id: number;
 }) {
-  const [formState, formAction] = useFormState(updateAnnoucementTitle, {
-    success: null,
-    message: "",
-  });
+  const [updateAnnouncementTitleFormState, updateAnnouncementTitleformAction] =
+    useFormState(updateAnnoucementTitle, initFormState);
 
   const [editMode, setEditMode] = useState(false);
   const [currentValue, setCurrentValue] = useState(title);
-  const { pending } = useFormStatus();
+  const [toastID, setToastID] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (formState.success === true) {
-      toast.success(formState.message);
-      setEditMode(false);
-      setTimeout(() => window.location.reload(), 1000);
-    } else if (formState.success === false) {
-      toast.error(formState.message);
+    if (updateAnnouncementTitleFormState.success == null) return;
+    if (!updateAnnouncementTitleFormState.success) {
+      toast.error(updateAnnouncementTitleFormState.message, { id: toastID });
+      setToastID(undefined);
+    } else {
+      toast.success(updateAnnouncementTitleFormState.message, {
+        id: toastID,
+      });
+      setToastID(undefined);
+      const redirect = updateAnnouncementTitleFormState.redirect;
+      if (redirect) setTimeout(() => window.location.replace(redirect), 1000);
     }
-  }, [formState]);
+  }, [updateAnnouncementTitleFormState]);
 
   const handleEditClick = () => {
     setEditMode(true);
@@ -43,11 +53,11 @@ export default function UpdateAnnouncementTitleForm({
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        formData.append("announcement_id", announcement_id.toString());
-        formAction(formData);
+      action={(form: FormData) => {
+        form.append("announcement_id", announcement_id.toString());
+        const toastID = toast.loading("Updating Announcement Title...");
+        setToastID(toastID);
+        updateAnnouncementTitleformAction(form);
       }}
       className="flex items-center justify-between"
     >
@@ -84,7 +94,10 @@ export default function UpdateAnnouncementTitleForm({
         {editMode && (
           <button
             type="submit"
-            disabled={pending || formState.success === true}
+            disabled={
+              toastID !== undefined ||
+              updateAnnouncementTitleFormState.success == true
+            }
             className="flex items-center p-2 rounded-md bg-green-600/60 hover:bg-green-600 text-gray-400 hover:text-white disabled:bg-gray-800 focus:outline-none transition-colors duration-200"
           >
             <CheckIcon className="w-5 h-5" />

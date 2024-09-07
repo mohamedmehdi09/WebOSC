@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
-import { sign, verify } from "jsonwebtoken";
+import { verify } from "jsonwebtoken";
 import { z } from "zod";
 import { ActionError, FormState, TokenPayload } from "@/lib/types";
 
@@ -32,30 +32,11 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
     // authenticate user
     const user = authenticateUser();
 
-    // check if org exists
-    const checkOrg = await prisma.organization.findFirst({
-      where: {
-        org_id: createAnnouncementFormData.org_id,
-      },
-    });
-
-    if (!checkOrg) throw new ActionError("Organization Not Found!");
-
-    // authorize user
-    const checkEditorPrivilages = await prisma.editor.findFirst({
-      where: {
-        user_id: user.user_id,
-        org_id: createAnnouncementFormData.org_id,
-      },
-    });
-
-    if (!checkEditorPrivilages)
-      throw new ActionError("You are not an Editor in this organization!");
-
-    if (checkEditorPrivilages.status !== "active")
-      throw new ActionError(
-        "You are no longer an Editor in this organization!",
-      );
+    // authenticate editor
+    const editor = await authenticateEditor(
+      user,
+      createAnnouncementFormData.org_id,
+    );
 
     // validate form
     const parsedCreateAnnouncementFormData =
@@ -67,15 +48,14 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
       );
     }
 
+    const validatedFormData = parsedCreateAnnouncementFormData.data;
+
     // make sure publish date is in the future
-    if (new Date() > parsedCreateAnnouncementFormData.data.publishes_at)
+    if (new Date() > validatedFormData.publishes_at)
       throw new ActionError("publish date cannot be in the past");
 
     // make sure ends date is not before publish date
-    if (
-      parsedCreateAnnouncementFormData.data.publishes_at >
-      parsedCreateAnnouncementFormData.data.ends_at
-    )
+    if (validatedFormData.publishes_at > validatedFormData.ends_at)
       throw new ActionError(
         "ends publishing date must be after publishing date",
       );
@@ -83,12 +63,12 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
     // create the announcement
     const announcement = await prisma.announcement.create({
       data: {
-        title: parsedCreateAnnouncementFormData.data.title,
-        body: parsedCreateAnnouncementFormData.data.body,
-        editor_id: checkEditorPrivilages.editor_id,
-        org_id: parsedCreateAnnouncementFormData.data.org_id,
-        publishes_at: parsedCreateAnnouncementFormData.data.publishes_at,
-        ends_at: parsedCreateAnnouncementFormData.data.ends_at,
+        title: validatedFormData.title,
+        body: validatedFormData.body,
+        editor_id: editor.editor_id,
+        org_id: validatedFormData.org_id,
+        publishes_at: validatedFormData.publishes_at,
+        ends_at: validatedFormData.ends_at,
       },
     });
 
@@ -105,6 +85,73 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
   return state;
 }
 
+export async function updateAnnoucementTitle(
+  state: FormState,
+  formData: FormData,
+) {
+  const updateAnnoucementTitleFormSchema = z.object({
+    announcement_id: z.number(),
+    title: z.string().min(5, { message: "Title is required!" }).max(40, {
+      message: "Title must be less than 40 characters!",
+    }),
+  });
+  try {
+    // authenticate user
+    const user = authenticateUser();
+
+    // validate form
+    const updateAnnoucementTitleFormData = {
+      announcement_id: Number(formData.get("announcement_id") as string),
+      title: formData.get("title") as string,
+    };
+
+    const parsedUpdateAnnoucementTitleForm =
+      updateAnnoucementTitleFormSchema.safeParse(
+        updateAnnoucementTitleFormData,
+      );
+
+    if (!parsedUpdateAnnoucementTitleForm.success)
+      throw new ActionError(
+        parsedUpdateAnnoucementTitleForm.error.issues[0].message,
+      );
+
+    const validatedFormData = parsedUpdateAnnoucementTitleForm.data;
+
+    // check if announcement exists
+    const announcement = await prisma.announcement.findFirst({
+      where: {
+        announcement_id: validatedFormData.announcement_id,
+      },
+    });
+
+    if (!announcement) throw new ActionError("Announcement does not exist!");
+
+    // check if user is editor in announcement org
+    const editor = prisma.editor.findFirst({
+      where: { org_id: announcement.org_id, user_id: user.user_id },
+    });
+    if (!editor)
+      throw new ActionError("You are not allowed to preform this action!");
+
+    // update announcement
+    const updatedAnnouncement = await prisma.announcement.update({
+      where: { announcement_id: announcement.announcement_id },
+      data: { title: validatedFormData.title },
+    });
+
+    state = {
+      success: true,
+      message: "Announcement title updated successfully!",
+      redirect: `/announcement/${updatedAnnouncement.announcement_id}`,
+    };
+  } catch (error) {
+    state.success = false;
+    if (error instanceof ActionError) state.message = error.message;
+    state.message = "Unexpected error. Please try again later!";
+  }
+  return state;
+}
+
 const secret = process.env.JWT_SECRET;
 
 function authenticateUser() {
@@ -114,14 +161,38 @@ function authenticateUser() {
 
   if (!secret) throw new ActionError("Internal error. Please try again later!");
 
-  let user;
   try {
-    user = verify(token, secret) as TokenPayload;
+    const user = verify(token, secret) as TokenPayload;
+    return user;
   } catch (error) {
     cookies().delete("token");
-    console.log("Unverified token");
     throw new ActionError("Token invalid or expired. Please log in again!");
   }
+}
 
-  return user;
+async function authenticateEditor(user: TokenPayload, org_id: string) {
+  // check if org exists
+  const checkOrg = await prisma.organization.findFirst({
+    where: {
+      org_id: org_id,
+    },
+  });
+
+  if (!checkOrg) throw new ActionError("Organization Not Found!");
+
+  // authorize user
+  const checkEditorPrivilages = await prisma.editor.findFirst({
+    where: {
+      user_id: user.user_id,
+      org_id: org_id,
+    },
+  });
+
+  if (!checkEditorPrivilages)
+    throw new ActionError("You are not an Editor in this organization!");
+
+  if (checkEditorPrivilages.status !== "active")
+    throw new ActionError("You are no longer an Editor in this organization!");
+
+  return checkEditorPrivilages;
 }
