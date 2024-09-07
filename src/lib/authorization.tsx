@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verify } from "jsonwebtoken";
 import { User } from "@prisma/client";
 import { TokenPayload } from "./types";
+import { redirect } from "next/navigation";
 
 const secret = process.env.JWT_SECRET;
 
@@ -10,7 +11,12 @@ export async function checkOrgPrivilage(org_id: string) {
   const token = cookies().get("token")?.value;
   if (!token) return false;
   if (!secret) return false;
-  const user = verify(token, secret) as TokenPayload;
+  let user;
+  try {
+    user = verify(token, secret) as TokenPayload;
+  } catch {
+    redirect("/expired");
+  }
   if (!user) return false;
 
   const editor = await prisma.editor.count({
@@ -23,7 +29,13 @@ export function checkSuperUser() {
   const token = cookies().get("token")?.value;
   if (!token) return false;
   if (!secret) return false;
-  const user = verify(token, secret) as TokenPayload;
+
+  let user;
+  try {
+    user = verify(token, secret) as TokenPayload;
+  } catch {
+    redirect("/expired");
+  }
   if (!user) return false;
 
   return user.super;
