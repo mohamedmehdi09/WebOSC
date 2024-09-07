@@ -227,6 +227,62 @@ export async function signup(
   return state;
 }
 
+export async function logout(
+  state: {
+    error: boolean | null;
+    message: string;
+  },
+  formData: FormData
+) {
+  cookies().delete("token");
+  state.error = false;
+  state.message = "Successfully logged out!";
+  return state;
+}
+
+export async function authenticateUser() {
+  const token = cookies().get("token")?.value;
+
+  if (!token) throw new ActionError("You are not Logged In!");
+
+  if (!secret) throw new ActionError("Internal error. Please try again later!");
+
+  try {
+    const user = verify(token, secret) as TokenPayload;
+    return user;
+  } catch (error) {
+    cookies().delete("token");
+    throw new ActionError("Token invalid or expired. Please log in again!");
+  }
+}
+
+export async function authenticateEditor(user: TokenPayload, org_id: string) {
+  // check if org exists
+  const checkOrg = await prisma.organization.findFirst({
+    where: {
+      org_id: org_id,
+    },
+  });
+
+  if (!checkOrg) throw new ActionError("Organization Not Found!");
+
+  // authorize user
+  const checkEditorPrivilages = await prisma.editor.findFirst({
+    where: {
+      user_id: user.user_id,
+      org_id: org_id,
+    },
+  });
+
+  if (!checkEditorPrivilages)
+    throw new ActionError("You are not an Editor in this organization!");
+
+  if (checkEditorPrivilages.status !== "active")
+    throw new ActionError("You are no longer an Editor in this organization!");
+
+  return checkEditorPrivilages;
+}
+
 export async function CreateOrg(formData: FormData) {
   try {
     // TODO: Protect this Form from unautherized access YOU IDIOT
@@ -277,7 +333,7 @@ export async function addEditorToOrg(
       throw new ActionError(parsAddEditorForm.error.issues[0].message);
 
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // check if org exists
 
@@ -392,7 +448,7 @@ export async function addAnnouncement(
     };
 
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // check if org exists
 
@@ -479,7 +535,7 @@ export async function suspendEditor(
   });
   try {
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // validate form
     const suspendEditorFormData = {
@@ -551,7 +607,7 @@ export async function activateEditor(
   });
   try {
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // validate form
     const activateEditorFormData = {
@@ -610,19 +666,6 @@ export async function activateEditor(
   return state;
 }
 
-export async function logout(
-  state: {
-    error: boolean | null;
-    message: string;
-  },
-  formData: FormData
-) {
-  cookies().delete("token");
-  state.error = false;
-  state.message = "Successfully logged out!";
-  return state;
-}
-
 // done
 export async function verifyEmail(
   state: { success: boolean | null; message: string },
@@ -635,7 +678,7 @@ export async function verifyEmail(
   });
   try {
     // First, we authenticate the user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // check if user exists
 
@@ -819,7 +862,7 @@ export async function changeEmail(
   state: { success: boolean | null; message: string },
   formData: FormData
 ) {
-  const user = authenticateUser();
+  const user = await authenticateUser();
 
   // Next, we check if the user's email is already verified
   if (user.emailVerified) {
@@ -1088,7 +1131,7 @@ export async function updateAnnoucementTitle(
   });
   try {
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // validate form
     const updateAnnoucementTitleFormData = {
@@ -1150,7 +1193,7 @@ export async function updateAnnouncementPublishDate(
   });
   try {
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // validate form
     const updateAnnouncementPublishDateFormData = {
@@ -1228,7 +1271,7 @@ export async function updateAnnouncementEndPublishingDate(
   });
   try {
     // authenticate user
-    const user = authenticateUser();
+    const user = await authenticateUser();
 
     // validate form
     const updateAnnouncementPublishDateFormData = {
@@ -1303,25 +1346,6 @@ export async function updateAnnouncementEndPublishingDate(
     else state.message = "Unexpected error. Please try again later!";
   }
   return state;
-}
-
-function authenticateUser() {
-  const token = cookies().get("token")?.value;
-
-  if (!token) throw new ActionError("You are not Logged In!");
-
-  if (!secret) throw new ActionError("Internal error. Please try again later!");
-
-  let user;
-  try {
-    user = verify(token, secret) as TokenPayload;
-  } catch (error) {
-    cookies().delete("token");
-    console.log("Unverified token");
-    throw new ActionError("Token invalid or expired. Please log in again!");
-  }
-
-  return user;
 }
 
 function generateEmailHTML(user: User & { PrimaryEmail: Email }) {
