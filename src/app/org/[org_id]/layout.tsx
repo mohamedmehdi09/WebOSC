@@ -1,5 +1,5 @@
 import OrgNavBar from "@/components/OrgNavBar";
-import { checkOrgPrivilage } from "@/lib/authorization";
+import { checkOrgPrivilage, checkSuperUser } from "@/lib/authorization";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -30,10 +30,10 @@ export default async function OrgLayout({
         </Link>
       </div>
     );
-  const isAuthed = await checkOrgPrivilage(params.org_id);
-  const segmentsList = isAuthed
-    ? ["posts", "editors", "settings"]
-    : ["posts", "editors"];
+  const isEditor = await checkOrgPrivilage(params.org_id);
+  const sudo = checkSuperUser();
+  const segmentsList =
+    isEditor || sudo ? ["posts", "editors", "settings"] : ["posts", "editors"];
   return (
     <>
       <OrgNavBar org_id={params.org_id} segmentsList={segmentsList} />

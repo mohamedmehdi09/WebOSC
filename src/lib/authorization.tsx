@@ -45,7 +45,12 @@ export function checkEmailValidation() {
   const token = cookies().get("token")?.value;
   if (!token) return false;
   if (!secret) return false;
-  const user = verify(token, secret) as TokenPayload;
+  let user;
+  try {
+    user = verify(token, secret) as TokenPayload;
+  } catch {
+    redirect("/expired");
+  }
   if (!user) return false;
 
   return user.emailVerified;
