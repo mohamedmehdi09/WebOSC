@@ -2,29 +2,36 @@
 
 import { resetPassword } from "@/lib/actions";
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormState } from "react-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import toast from "react-hot-toast";
+import { FormState } from "@/lib/types";
+
+const initFormState: FormState = {
+  success: null,
+  redirect: null,
+  message: null,
+};
 
 export default function ResetPasswordForm({ passcode }: { passcode: string }) {
-  const [formState, formAction] = useFormState(resetPassword, {
-    success: null,
-    message: "",
-  });
-  const { pending } = useFormStatus();
+  const [formState, formAction] = useFormState(resetPassword, initFormState);
 
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [toastID, setToastID] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (formState.success == null) return;
     if (formState.success) {
-      toast.success(formState.message);
-      setTimeout(() => window.location.replace("/login"), 1000);
+      toast.success(formState.message, { id: toastID });
+      setToastID(undefined);
+      const redirect = formState.redirect;
+      if (redirect) setTimeout(() => window.location.replace(redirect), 1000);
     } else {
-      toast.error(formState.message);
+      toast.error(formState.message, { id: toastID });
+      setToastID(undefined);
     }
   }, [formState]);
 
@@ -43,6 +50,8 @@ export default function ResetPasswordForm({ passcode }: { passcode: string }) {
       <form
         action={(form: FormData) => {
           form.append("reset_passcode", passcode);
+          const toastID = toast.loading("Resetting Password...");
+          setToastID(toastID);
           formAction(form);
         }}
         className="bg-gray-800 p-8 rounded-lg w-full max-w-lg shadow-lg flex flex-col items-center gap-6 border border-gray-600"
@@ -108,11 +117,15 @@ export default function ResetPasswordForm({ passcode }: { passcode: string }) {
         </div>
 
         <button
-          disabled={pending || passwordError !== null}
+          disabled={
+            toastID !== undefined ||
+            passwordError !== null ||
+            formState.success == true
+          }
           className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
           type="submit"
         >
-          {pending ? "Processing..." : "Reset Password"}
+          {toastID !== undefined ? "Processing..." : "Reset Password"}
         </button>
       </form>
     </div>

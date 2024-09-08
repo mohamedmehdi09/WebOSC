@@ -938,12 +938,11 @@ export async function changeEmail(
 }
 
 export async function sendPasswordResetEmail(
-  state: { success: boolean | null; message: string },
+  state: FormState,
   formData: FormData
 ) {
+  const email = formData.get("email") as string;
   try {
-    const email = formData.get("email") as string;
-
     const parsedEmail = z
       .string()
       .email({ message: "Invalid email!" })
@@ -954,7 +953,7 @@ export async function sendPasswordResetEmail(
 
     // make sure email exists
     const checkUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: parsedEmail.data },
       include: { passwordResets: true },
     });
 
@@ -966,6 +965,7 @@ export async function sendPasswordResetEmail(
           "If your email address " +
           email +
           " is known to us, we'll send a password recovery link in a few minutes!",
+        redirect: null,
       };
 
     // set all previous password resets to expired
@@ -1020,13 +1020,7 @@ export async function sendPasswordResetEmail(
   return state;
 }
 
-export async function resetPassword(
-  state: {
-    success: boolean | null;
-    message: string;
-  },
-  formData: FormData
-) {
+export async function resetPassword(state: FormState, formData: FormData) {
   const resetPasswordFormSchema = z.object({
     reset_passcode: z.string().uuid({ message: "Invalid reset passcode!" }),
     password: z
@@ -1048,9 +1042,11 @@ export async function resetPassword(
       throw new ActionError(resetPasswordFormParsed.error.issues[0].message);
     }
 
+    const validatedFormData = resetPasswordFormParsed.data;
+
     // check if passcode is valid
     const checkPasscode = await prisma.passwordReset.findFirst({
-      where: { reset_passcode: resetPasswordFormData.reset_passcode },
+      where: { reset_passcode: validatedFormData.reset_passcode },
     });
 
     if (!checkPasscode) throw new ActionError("Invalid reset passcode!");
@@ -1063,8 +1059,8 @@ export async function resetPassword(
     // update password
     const passwordHash =
       process.env.NODE_ENV == "development"
-        ? resetPasswordFormData.password
-        : hash("sha512", resetPasswordFormData.password);
+        ? validatedFormData.password
+        : hash("sha512", validatedFormData.password);
 
     const updatedUser = await prisma.user.update({
       where: { user_id: checkPasscode.user_id },
@@ -1084,6 +1080,7 @@ export async function resetPassword(
 
     state.success = true;
     state.message = "Password reset successful!";
+    state.redirect = "/login";
   } catch (error: any) {
     state.success = false;
     if (error instanceof ActionError) state.message = error.message;
