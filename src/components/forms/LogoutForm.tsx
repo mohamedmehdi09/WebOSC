@@ -14,7 +14,7 @@ const initFormState: FormState = {
 export default function LogoutForm() {
   const [logoutFormState, logoutFormAction] = useFormState(
     logout,
-    initFormState
+    initFormState,
   );
   const [toastID, setToastID] = useState<string | undefined>(undefined);
 

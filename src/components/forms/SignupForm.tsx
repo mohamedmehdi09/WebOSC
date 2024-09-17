@@ -17,7 +17,7 @@ const initFormState: FormState = {
 export default function SignupForm() {
   const [signupFormState, signupFormAction] = useFormState(
     signup,
-    initFormState
+    initFormState,
   );
 
   const [showPassword, setShowPassword] = useState(false);

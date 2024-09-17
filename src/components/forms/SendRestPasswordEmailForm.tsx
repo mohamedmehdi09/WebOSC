@@ -15,7 +15,7 @@ const initFormState: FormState = {
 export default function SendPasswordResetEmailForm() {
   const [formState, formAction] = useFormState(
     sendPasswordResetEmail,
-    initFormState
+    initFormState,
   );
 
   const [toastID, setToastID] = useState<string | undefined>(undefined);

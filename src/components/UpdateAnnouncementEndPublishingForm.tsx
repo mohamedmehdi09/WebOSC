@@ -18,7 +18,7 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
     {
       success: null,
       message: "",
-    }
+    },
   );
 
   const [editMode, setEditMode] = useState(false);
@@ -56,7 +56,7 @@ export default function UpdateAnnouncementEndsPublishingDateForm({
       <div className="flex gap-2 flex-1 items-center">
         <input
           defaultValue={new Date(
-            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000
+            ends_at.getTime() - ends_at.getTimezoneOffset() * 60 * 1000,
           )
             .toISOString()
             .slice(0, 16)}

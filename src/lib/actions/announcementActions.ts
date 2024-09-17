@@ -35,7 +35,7 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
     // authenticate editor
     const editor = await authenticateEditor(
       user,
-      createAnnouncementFormData.org_id
+      createAnnouncementFormData.org_id,
     );
 
     // validate form
@@ -44,7 +44,7 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
 
     if (!parsedCreateAnnouncementFormData.success) {
       throw new ActionError(
-        parsedCreateAnnouncementFormData.error.issues[0].message
+        parsedCreateAnnouncementFormData.error.issues[0].message,
       );
     }
 
@@ -57,7 +57,7 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
     // make sure ends date is not before publish date
     if (validatedFormData.publishes_at > validatedFormData.ends_at)
       throw new ActionError(
-        "ends publishing date must be after publishing date"
+        "ends publishing date must be after publishing date",
       );
 
     // create the announcement
@@ -87,7 +87,7 @@ export async function createAnnouncement(state: FormState, formData: FormData) {
 
 export async function updateAnnoucementTitle(
   state: FormState,
-  formData: FormData
+  formData: FormData,
 ) {
   const updateAnnoucementTitleFormSchema = z.object({
     announcement_id: z.number(),
@@ -107,12 +107,12 @@ export async function updateAnnoucementTitle(
 
     const parsedUpdateAnnoucementTitleForm =
       updateAnnoucementTitleFormSchema.safeParse(
-        updateAnnoucementTitleFormData
+        updateAnnoucementTitleFormData,
       );
 
     if (!parsedUpdateAnnoucementTitleForm.success)
       throw new ActionError(
-        parsedUpdateAnnoucementTitleForm.error.issues[0].message
+        parsedUpdateAnnoucementTitleForm.error.issues[0].message,
       );
 
     const validatedFormData = parsedUpdateAnnoucementTitleForm.data;

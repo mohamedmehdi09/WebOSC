@@ -24,7 +24,7 @@ export default function CreateSubOrgForm({
 }) {
   const [CreateSubOrgFormState, CreateSubOrgFormAction] = useFormState(
     createSubOrg,
-    initFormState
+    initFormState,
   );
 
   const [toastID, setToastID] = useState<string | undefined>(undefined);

@@ -33,21 +33,21 @@ export default async function Page({
   if (!user) {
     return renderError(
       "Invalid Passcode",
-      "The passcode you entered is invalid. Please check and try again!"
+      "The passcode you entered is invalid. Please check and try again!",
     );
   }
 
   if (user.status === "completed") {
     return renderError(
       "Passcode Already Used",
-      "This passcode has already been used. Please request a new one!"
+      "This passcode has already been used. Please request a new one!",
     );
   }
 
   if (user.status === "expired") {
     return renderError(
       "Passcode Expired",
-      "This passcode has expired. Please request a new one!"
+      "This passcode has expired. Please request a new one!",
     );
   }
 

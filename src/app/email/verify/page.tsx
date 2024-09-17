@@ -23,7 +23,7 @@ export default function EmailVerificationPage({
       toast.success(formState.message);
       setTimeout(
         () => window.location.replace(searchParams.redirect || "/"),
-        1000
+        1000,
       );
     } else if (formState.success === false) {
       toast.error(formState.message);

@@ -45,8 +45,8 @@ export default function SettingsEditorList({
                     .includes(e.target.value.toLowerCase()) ||
                   editor.user_id
                     .toLowerCase()
-                    .includes(e.target.value.toLowerCase())
-              )
+                    .includes(e.target.value.toLowerCase()),
+              ),
             );
           }}
           placeholder="Filter Editors..."
