@@ -32,6 +32,7 @@ export default function LoginForm() {
       if (redirect) setTimeout(() => window.location.replace(redirect), 1000);
     }
   }, [loginFormState]);
+
   return (
     <form
       action={(form: FormData) => {
@@ -39,7 +40,7 @@ export default function LoginForm() {
         setToastID(toastID);
         loginFormAction(form);
       }}
-      className="flex flex-col items-center gap-6 bg-gray-800 p-8 rounded-lg w-full max-w-md border border-gray-600"
+      className="flex flex-col items-center gap-6 bg-gray-800 p-8 rounded-lg w-full max-w-md border border-gray-600 shadow-md md:shadow-lg"
     >
       <h1 className="text-3xl font-bold text-white">Login</h1>
       <div className="w-full flex flex-col gap-2">
@@ -53,8 +54,8 @@ export default function LoginForm() {
           placeholder="Email..."
           required
           autoFocus
-          pattern="^[a-zA-Z0-9._+-]+\@[a-zA-Z0-9.-]+\.[a-z]{2,}$"
-          className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 invalid:border-red-800"
+          pattern="^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+.[a-z]{2,}$"
+          className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 focus:ring-2 focus:ring-blue-500 invalid:border-red-800 transition-all duration-200"
         />
       </div>
       <div className="w-full flex flex-col gap-2">
@@ -69,12 +70,12 @@ export default function LoginForm() {
             placeholder="Password..."
             required
             minLength={8}
-            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 invalid:border-red-800"
+            className="w-full p-3 border border-gray-600 rounded-md bg-gray-900 text-white outline-none placeholder-gray-400 focus:ring-2 focus:ring-blue-500 invalid:border-red-800 transition-all duration-200"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
@@ -85,18 +86,35 @@ export default function LoginForm() {
           </button>
         </div>
       </div>
-      <div className="w-full flex items-center gap-4">
+      <div className="w-full flex items-center gap-3">
         <input
-          className="w-4 h-4"
           type="checkbox"
           name="remember"
           id="remember"
+          className="hidden peer"
         />
-        remember me
+        <label
+          htmlFor="remember"
+          className="w-5 h-5 flex items-center justify-center border border-gray-600 rounded-md bg-gray-900 text-white peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-colors duration-300 cursor-pointer"
+        >
+          <svg
+            className="w-4 h-4 text-transparent peer-checked:text-white transition duration-300"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+          >
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+        </label>
+        <span className="text-white select-none cursor-pointer">
+          Remember me
+        </span>
       </div>
       <button
         disabled={toastID !== undefined || loginFormState.success === true}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300 disabled:bg-gray-600"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300 ease-in-out shadow-lg transform hover:-translate-y-0.5 disabled:bg-gray-600"
         type="submit"
       >
         Login

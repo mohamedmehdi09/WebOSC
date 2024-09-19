@@ -37,7 +37,7 @@ export default async function OrgLayout({
   return (
     <>
       <OrgNavBar org_id={params.org_id} segmentsList={segmentsList} />
-      <main className="text-white bg-gray-900 flex flex-1 justify-center pt-6">
+      <main className="text-white bg-gray-900 pt-6 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
     </>

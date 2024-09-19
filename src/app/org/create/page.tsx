@@ -109,7 +109,7 @@ const CreateOrgComponent = async () => {
         <SelectUserCombobox users={users} />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors duration-200"
+          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors duration-200 mt-3"
         >
           Submit
         </button>

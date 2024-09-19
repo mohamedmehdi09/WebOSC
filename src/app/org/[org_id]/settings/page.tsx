@@ -12,42 +12,48 @@ export default async function OrgSettingsPage({
 }) {
   const subOrgs = await getSubOrgs(params.org_id);
   return (
-    <div className="p-4 w-full">
-      <ul className="flex items-center gap-2 border-b border-gray-700 w-full">
-        <li className="border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold p-1 lg:p-2">
+    <div className="p-6 lg:p-8 w-full max-w-7xl mx-auto">
+      {/* Page Heading */}
+      <ul className="flex items-center gap-2 border-b border-gray-700 w-full mb-6">
+        <li className="border-b border-blue-500 text-lg lg:text-2xl font-semibold p-2 text-center">
           <span>Manage Sub Organizations</span>
         </li>
       </ul>
+
+      {/* Content */}
       {subOrgs.length === 0 ? (
-        <div className="flex justify-center items-center text-gray-500">
-          <div>No Sub Organizations</div>
+        <div className="flex justify-center items-center text-gray-500 h-20">
+          <div>No Sub Organizations Found</div>
         </div>
       ) : (
-        <div className="flex flex-col flex-1 gap-4 p-4">
+        <div className="flex flex-col gap-6">
           {subOrgs.map((subOrg) => (
             <div
               key={subOrg.org_id}
-              className="flex justify-between items-center bg-gray-700 p-4 rounded-md"
+              className="flex justify-between items-center bg-gray-800 p-4 rounded-md shadow-lg transition-all hover:bg-gray-700"
             >
-              <div className="flex items-center text-green-400">
-                {/* <UserCircleIcon className="w-6 lg:w-8 " /> */}
+              <div className="flex items-center">
                 <div className="ml-4">
-                  <div className="font-semibold lg:font-extrabold lg:text-lg">
+                  <div className="text-lg lg:text-xl font-bold text-green-400">
                     {subOrg.nameEn}
                   </div>
-                  <div className="text-sm">{subOrg.org_id}</div>
+                  <div className="text-sm text-gray-400">{subOrg.org_id}</div>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-      <Link
-        href={`/org/${params.org_id}/create-sub-org`}
-        className="p-4 bg-green-600 hover:bg-green-800 rounded-md text-center m-4"
-      >
-        Create Sub Org
-      </Link>
+
+      {/* Create Sub Org Button */}
+      <div className="mt-4 flex justify-center">
+        <Link
+          href={`/org/${params.org_id}/create-sub-org`}
+          className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md shadow-md text-center transition-transform transform hover:scale-105"
+        >
+          Create Sub Organization
+        </Link>
+      </div>
     </div>
   );
 }
