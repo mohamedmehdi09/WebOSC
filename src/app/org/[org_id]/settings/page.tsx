@@ -12,7 +12,7 @@ export default async function OrgSettingsPage({
 }) {
   const subOrgs = await getSubOrgs(params.org_id);
   return (
-    <div className="p-6 lg:p-8 w-full max-w-7xl mx-auto">
+    <div className="p-6 lg:p-8 w-full max-w-7xl mx-auto border border-gray-700">
       {/* Page Heading */}
       <ul className="flex items-center gap-2 border-b border-gray-700 w-full mb-6">
         <li className="border-b border-blue-500 text-lg lg:text-2xl font-semibold p-2 text-center">
@@ -26,11 +26,11 @@ export default async function OrgSettingsPage({
           <div>No Sub Organizations Found</div>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 capitalize mb-5">
           {subOrgs.map((subOrg) => (
             <div
               key={subOrg.org_id}
-              className="flex justify-between items-center bg-gray-800 p-4 rounded-md shadow-lg transition-all hover:bg-gray-700"
+              className="flex justify-between items-center bg-gray-700 p-4 rounded-md shadow-lg transition-all hover:bg-gray-600"
             >
               <div className="flex items-center">
                 <div className="ml-4">

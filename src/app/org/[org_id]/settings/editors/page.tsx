@@ -26,7 +26,7 @@ const getOrgEditors = async (org_id: string) => {
 
   const activeEditors = editors.filter((editor) => editor.status === "active");
   const suspendedEditors = editors.filter(
-    (editor) => editor.status === "suspended"
+    (editor) => editor.status === "suspended",
   );
   return [activeEditors, suspendedEditors];
 };
