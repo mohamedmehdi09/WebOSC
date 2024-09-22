@@ -54,98 +54,96 @@ export default async function OrgPostsPage({
   const sudo = checkSuperUser();
   return (
     <>
-      <TabGroup className="flex flex-col flex-1 gap-4 w-full px-4 lg:px-24 relative">
-        <TabList className="flex items-center gap-2 border-b border-gray-700">
-          <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold p-1 lg:p-2 outline-none">
-            <span>Announcements</span>
-            <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
-              {publishing.length}
-            </span>
-          </Tab>
-          {(isEditor || sudo) && (
-            <>
-              <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold  p-1 lg:p-2 outline-none">
-                <span>Planned</span>
-                <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
-                  {planned.length}
-                </span>
-              </Tab>
-              <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 lg:gap-2 text-sm lg:text-lg font-semibold data-[selected]:font-bold  p-1 lg:p-2 outline-none">
-                <span>Archived</span>
-                <span className="bg-gray-600 px-2 py-1 rounded-full text-xs lg:text-sm">
-                  {published.length}
-                </span>
-              </Tab>
-            </>
+<TabGroup className="flex flex-col flex-1 gap-4 w-full px-4 sm:px-6 lg:px-24 relative">
+  <TabList className="flex items-center gap-2 border-b border-gray-700 overflow-x-auto">
+    <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 sm:gap-2 font-semibold data-[selected]:font-bold p-1 sm:p-2 outline-none">
+      <span>Announcements</span>
+      <span className="bg-gray-600 px-2 py-1 rounded-full text-xs">
+        {publishing.length}
+      </span>
+    </Tab>
+    {(isEditor || sudo) && (
+      <>
+        <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 sm:gap-2 font-semibold data-[selected]:font-bold p-1 sm:p-2 outline-none">
+          <span>Planned</span>
+          <span className="bg-gray-600 px-2 py-1 rounded-full text-xs">
+            {planned.length}
+          </span>
+        </Tab>
+        <Tab className="data-[selected]:border-b border-blue-500 flex items-center gap-1 sm:gap-2 font-semibold data-[selected]:font-bold p-1 sm:p-2 outline-none">
+          <span>Archived</span>
+          <span className="bg-gray-600 px-2 py-1 rounded-full text-xs">
+            {published.length}
+          </span>
+        </Tab>
+      </>
+    )}
+  </TabList>
+
+  <TabPanels>
+    <TabPanel>
+      {publishing.length === 0 ? (
+        <p className="text-gray-500 pb-4 pt-3">No announcements for now!</p>
+      ) : (
+        <div className="w-full">
+          {publishing.map((announcement) => (
+            <AnnouncementCard
+              key={announcement.announcement_id}
+              announcement={announcement}
+              isEditor={isEditor}
+            />
+          ))}
+        </div>
+      )}
+    </TabPanel>
+
+    {(isEditor || sudo) && (
+      <>
+        <TabPanel>
+          {planned.length === 0 ? (
+            <p className="text-gray-500 pb-4 pt-3">No announcements planned!</p>
+          ) : (
+            <div className="w-full">
+              {planned.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.announcement_id}
+                  announcement={announcement}
+                  isEditor={isEditor}
+                />
+              ))}
+            </div>
           )}
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            {publishing.length === 0 ? (
-              <p className="text-gray-500 pb-4 pt-3">
-                No announcements for now!
-              </p>
-            ) : (
-              <div className="w-full">
-                {publishing.map((announcement) => (
-                  <AnnouncementCard
-                    key={announcement.announcement_id}
-                    announcement={announcement}
-                    isEditor={isEditor}
-                  />
-                ))}
-              </div>
-            )}
-          </TabPanel>
-          {(isEditor || sudo) && (
-            <>
-              <TabPanel>
-                {planned.length === 0 ? (
-                  <p className="text-gray-500 pb-4 pt-3">
-                    No announcements planned!
-                  </p>
-                ) : (
-                  <div className="w-full">
-                    {planned.map((announcement) => (
-                      <AnnouncementCard
-                        key={announcement.announcement_id}
-                        announcement={announcement}
-                        isEditor={isEditor}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabPanel>
-              <TabPanel>
-                {published.length === 0 ? (
-                  <p className="text-gray-500 pb-4 pt-3">
-                    No announcements archived!
-                  </p>
-                ) : (
-                  <div className="w-full">
-                    {published.map((announcement) => (
-                      <AnnouncementCard
-                        key={announcement.announcement_id}
-                        announcement={announcement}
-                        isEditor={isEditor}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabPanel>
-            </>
+        </TabPanel>
+
+        <TabPanel>
+          {published.length === 0 ? (
+            <p className="text-gray-500 pb-4 pt-3">No announcements archived!</p>
+          ) : (
+            <div className="w-full">
+              {published.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.announcement_id}
+                  announcement={announcement}
+                  isEditor={isEditor}
+                />
+              ))}
+            </div>
           )}
-        </TabPanels>
-        {isEditor && (
-          <Link
-            href={`/org/${params.org_id}/posts/create`}
-            className="bg-green-600 text-white rounded px-3 lg:py-1 py-2 text-center hover:bg-green-700 transition lg:absolute top-0 right-24 flex justify-center items-center gap-2"
-          >
-            <PlusCircleIcon className="w-6 h-6" />
-            Add Announcement
-          </Link>
-        )}
-      </TabGroup>
+        </TabPanel>
+      </>
+    )}
+  </TabPanels>
+
+  {isEditor && (
+    <Link
+      href={`/org/${params.org_id}/posts/create`}
+      className="bg-green-600 text-white rounded px-3 py-2 lg:py-1 text-center hover:bg-green-700 transition sm:absolute sm:top-0 sm:right-6 lg:right-24 flex justify-center items-center gap-2"
+    >
+      <PlusCircleIcon className="w-6 h-6" />
+      Add Announcement
+    </Link>
+  )}
+</TabGroup>
     </>
   );
 }
