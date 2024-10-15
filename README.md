@@ -2,6 +2,10 @@
   <img src="https://github.com/user-attachments/assets/0801f74b-059f-4d8c-b87c-0403c244bf9a" width="100" /> 
 </div>
 
+## Introduction
+
+This project is a web application that allows users to create announcements, events, and more, while enabling others to view and engage with them
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
