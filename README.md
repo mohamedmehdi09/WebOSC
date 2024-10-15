@@ -1,24 +1,49 @@
-## Getting Started
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/0801f74b-059f-4d8c-b87c-0403c244bf9a" width="100" /> 
+</div>
 
-### Prerequisites:
+## Prerequisites
 
-1. PostgreSQL
-2. Node.js
+Before you begin, ensure you have the following installed:
 
-### Cloning:
+- **PostgreSQL**
+- **Node.js**
 
-```bash
-git clone https://github.com/OSCAnnaba/another-project.git
+## Cloning the Repository
+
+To get started, clone the repository by running the following command in your terminal:
+
+```
+git clone https://github.com/OSCAnnaba/webosc
 ```
 
-And change directory to `another-project` with the command: `cd another-project`
+## Installing Dependencies
 
-### Install Node Stuff:
+Follow these steps to set up the project:
 
-1. Execute `npm i` in terminal
-2. Create a `.env` file in the project root folder and copy the content of `.env.template` into it (Don't forget to replace `<username>` and `<password>` with your actual PostgreSQL username and password)
-3. Execute `npx prisma db push` in terminal
-4. Execute `npx prisma generate` in terminal
-5. Execute `npm run dev` in terminal
+1. Install the required Node.js dependencies by running:
+```
+npm install
+```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result!
+2. Create a `.env` file in the root directory of the project. Copy the contents of `.env.template` into the `.env` file, and replace `<username>` and `<password>` with your PostgreSQL username and password
+  
+3. Push the Prisma schema to your PostgreSQL database:
+```
+npx prisma db push
+```
+
+4. Generate the Prisma client
+```
+npx prisma generate
+```
+
+5. Start the development server:
+```
+npm run dev
+```
+
+## Accessing the Application
+
+Once the development server is running, open your browser and navigate to:
+[http://localhost:3000](http://localhost:3000)
