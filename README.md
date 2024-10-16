@@ -1,10 +1,16 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/0801f74b-059f-4d8c-b87c-0403c244bf9a" width="100" /> 
+  <a href="mailto:osca@univ-annaba.dz"><img src="https://github.com/user-attachments/assets/0801f74b-059f-4d8c-b87c-0403c244bf9a" width="100"/></a>
 </div>
 
 ## Introduction
 
 This project is a web application that allows users to create announcements, events, and more, while enabling others to view and engage with them
+
+<div align="center">
+  <kbd>
+    <img src="https://github.com/user-attachments/assets/9c82ff3d-6b5d-402f-90e4-88b1eb13905a" />
+  </kbd>
+</div>
 
 ## Prerequisites
 
