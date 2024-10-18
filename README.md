@@ -8,7 +8,7 @@ This project is a web application that allows users to create announcements, eve
 
 <div align="center">
   <kbd>
-    <img src="https://github.com/user-attachments/assets/9c82ff3d-6b5d-402f-90e4-88b1eb13905a" />
+    <img src="https://github.com/user-attachments/assets/e903314e-1692-4452-b4f6-96598837aa4c" />
   </kbd>
 </div>
 
