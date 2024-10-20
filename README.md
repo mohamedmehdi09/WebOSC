@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This project is a web application that allows users to create announcements, events, and more, while enabling others to view and engage with them
+This project is a web application that allows organizations to create announcements, events, and more, while enabling others to view and engage with them
 
 <div align="center">
   <kbd>
