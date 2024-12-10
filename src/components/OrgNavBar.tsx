@@ -1,9 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function OrgNavBar({
   org_id,
@@ -18,10 +17,12 @@ export default function OrgNavBar({
       <nav className="bg-black h-28 w-full border-b border-gray-500">
         <div className="text-gray-300 text-md h-1/2 flex px-5 py-2 items-end gap-2">
           <Link className="h-full p-1 hover:bg-gray-900 rounded-md" href={"/"}>
-            <img
+            <Image
+              height={100}
+              width={100}
               src="/logo-white.png"
               alt="osca"
-              className="h-full aspect-square"
+              className="h-8 w-8 aspect-square"
             />
           </Link>
           <div className="flex pb-1 gap-1">
